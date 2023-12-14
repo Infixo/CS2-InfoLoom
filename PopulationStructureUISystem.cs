@@ -139,6 +139,7 @@ public class PopulationStructureUISystem : UISystemBase
                     continue; // not local, go for the next
                 // get age
                 int ageInDays = day - citizen.m_BirthDay;
+                if (ageInDays > m_Totals[6]) m_Totals[6] = ageInDays; // oldest cim
                 ageInDays = ageInDays/10; // INFIXO: TODO
                 PopulationAtAgeInfo info = m_Results[ageInDays];
                 // process at-age info
@@ -360,6 +361,7 @@ public class PopulationStructureUISystem : UISystemBase
     // 3 - num commuters
     // 4 - num students (in locals) 4 <= 1
     // 5 - num workers (in locals) 5 <= 1
+    // 6 - oldest cim
 
     private NativeArray<PopulationAtAgeInfo> m_Results; // final results, will be filled via jobs and then written as output
 
@@ -430,8 +432,13 @@ public class PopulationStructureUISystem : UISystemBase
             binder.ArrayEnd();
         }));
 
+        // TEST
+        AddUpdateBinding(new GetterValueBinding<int>(kGroup, "oldest_citizen", () => {
+            return m_Totals[6];
+        }));
+
         // allocate memory for results
-        m_Totals = new NativeArray<int>(6, Allocator.Persistent);
+        m_Totals = new NativeArray<int>(7, Allocator.Persistent);
         m_Results = new NativeArray<PopulationAtAgeInfo>(20, Allocator.Persistent); // INFIXO: TODO
         Plugin.Log("ProductionStructureUISystem created.");
     }
@@ -528,12 +535,15 @@ public class PopulationStructureUISystem : UISystemBase
         //Population componentData = base.EntityManager.GetComponentData<Population>(m_CitySystem.City);
         //m_Population.Update(componentData.m_Population);
 
+        /* DEBUG
         Plugin.Log($"results: {m_Totals[0]} {m_Totals[1]} {m_Totals[2]} {m_Totals[3]} students {m_Totals[4]} workers {m_Totals[5]}");
         for (int i = 0; i < m_Results.Length; i++)
         {
             PopulationAtAgeInfo info = m_Results[i];
             Plugin.Log($"...[{i}]: {info.Age} {info.Total} students {info.School1} {info.School2} {info.School3} {info.School4} workers {info.Work} other {info.Other}");
         }
+        */
+
         m_uiTotals.Update();
         m_uiResults.Update();
 
