@@ -9,6 +9,7 @@ using HarmonyLib;
 using System.Collections.Generic;
 using System.Text;
 using Colossal.Logging;
+using HookUILib.Core;
 
 #if BEPINEX_V6
     using BepInEx.Unity.Mono;
@@ -65,5 +66,17 @@ public class Plugin : BaseUnityPlugin
         foreach (var patchedMethod in patchedMethods) {
             Logger.LogInfo($"Patched method: {patchedMethod.Module.Name}:{patchedMethod.Name}");
         }
+    }
+}
+
+public class PopStructUI : UIExtension
+{
+    public new readonly string extensionID = "infixo.demographics";
+    public new readonly string extensionContent;
+    public new readonly ExtensionType extensionType = ExtensionType.Panel;
+
+    public PopStructUI()
+    {
+        this.extensionContent = this.LoadEmbeddedResource("PopStruct.dist.bundle.js");
     }
 }

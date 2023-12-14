@@ -3,15 +3,15 @@ import {useDataUpdate, $Panel} from 'hookui-framework'
 
 const $Demographics = ({react}) => {
     // This sets up the oldestCim as local state
-    const [oldestCim, setCurrentCount] = react.useState(0)
+    const [oldestCim, setOldestCim] = react.useState(0)
 
     // useDataUpdate binds the result of the GetterValueBinding to oldestCim
-    useDataUpdate(react, 'populationInfo.oldest_citizen', setCurrentCount)
+    useDataUpdate(react, 'populationInfo.oldest_citizen', setOldestCim)
 
     return <$Panel react={react} title="Demographics">
         <div className="field_MBO">
-            <div className="label_DGc label_ZLb">Active vehicles</div>
-            <div>{currentCount}</div>
+            <div className="label_DGc label_ZLb">Oldest citizen</div>
+            <div>{oldestCim}</div>
         </div>
     </$Panel>
 }
