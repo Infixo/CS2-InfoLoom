@@ -34,7 +34,17 @@ const SimpleComponent = (props) => {
   );
 };
 
-export default SimpleComponent;
+
+const HorizontalLine = ({ length }) => {
+  const lineStyle = {
+    width: `${length}px`,
+    borderBottom: '5px solid white', // Adjust the border style as needed
+    margin: '1px 0', // Adjust the margin as needed
+  };
+
+  return <div style={lineStyle}></div>;
+};
+
 
 const $Demographics = ({react}) => {
     // This sets up the oldestCim as local state
@@ -53,9 +63,18 @@ const $Demographics = ({react}) => {
 	const [totals, setTotals] = react.useState(0)
 	useDataUpdate(react, 'populationInfo.structureTotals', setTotals)
 
+	const [details, setDetails] = react.useState(0)
+	useDataUpdate(react, 'populationInfo.structureDetails', setDetails)
+
 
 	// TEST
 	const numbers = Array.from({ length: 20 }, (_, index) => index + 1)
+
+	const lines = [];
+	for (let i = 0; i < numbers.length; i++) {
+		lines.push(<HorizontalLine key={i} length={numbers[i]*50} />);
+	}
+				//paragraphs.push( <HorizontalLine key={i} length={totals[i]/100} /> );
 
     return <$Panel react={react} title="Demographics">
 		<div>
@@ -67,17 +86,15 @@ const $Demographics = ({react}) => {
 			<AlignedParagraph left="Workers" right={totals[5]} />
 			<AlignedParagraph left="Oldest citizen" right={totals[6]} />
 		</div>
-		
-    <div>
-      <h2>List of Numbers</h2>
-      {(() => {
-        const paragraphs = [];
-        for (let i = 0; i < numbers.length; i++) {
-          paragraphs.push(<p key={i}>{numbers[i]}</p>);
-        }
-        return paragraphs;
-      })()}
-    </div>
+		<div>
+		{(() => {
+			const paragraphs = [];
+			for (let i = 0; i < details.length; i++) {
+				paragraphs.push( <p key={i}> {details[i]["age"]}  {details[i]["total"]} </p> );
+			}
+			return paragraphs;
+		})()}
+		</div>
 		
 	</$Panel>
 }
