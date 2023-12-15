@@ -2,7 +2,6 @@ import React from 'react'
 import {useDataUpdate, $Panel} from 'hookui-framework'
 
 const AlignedParagraph = ({ left, right }) => {
-	
   const containerStyle = {
     display: 'flex',
     justifyContent: 'space-between',
@@ -26,31 +25,19 @@ const AlignedParagraph = ({ left, right }) => {
   );
 };
 
-const SimpleComponent = (props) => {
-  return (
-    <div>
-      <p>The parameter is: {props.parameter}</p>
-    </div>
-  );
-};
-
-
 const HorizontalLine = ({ length }) => {
   const lineStyle = {
     width: `${length}px`,
     borderBottom: '5px solid white', // Adjust the border style as needed
     margin: '1px 0', // Adjust the margin as needed
   };
-
   return <div style={lineStyle}></div>;
 };
 
 
 const $Demographics = ({react}) => {
-    // This sets up the oldestCim as local state
+	
     const [oldestCim, setOldestCim] = react.useState(0)
-
-    // useDataUpdate binds the result of the GetterValueBinding to oldestCim
     useDataUpdate(react, 'populationInfo.oldest_citizen', setOldestCim)
 	
     // 0 - num citizens in the city 0 = 1+2+3
@@ -60,10 +47,10 @@ const $Demographics = ({react}) => {
     // 4 - num students (in locals) 4 <= 1
     // 5 - num workers (in locals) 5 <= 1
     // 6 - oldest cim
-	const [totals, setTotals] = react.useState(0)
+	const [totals, setTotals] = react.useState([])
 	useDataUpdate(react, 'populationInfo.structureTotals', setTotals)
 
-	const [details, setDetails] = react.useState(0)
+	const [details, setDetails] = react.useState([])
 	useDataUpdate(react, 'populationInfo.structureDetails', setDetails)
 
 
@@ -74,7 +61,7 @@ const $Demographics = ({react}) => {
 	for (let i = 0; i < numbers.length; i++) {
 		lines.push(<HorizontalLine key={i} length={numbers[i]*50} />);
 	}
-				//paragraphs.push( <HorizontalLine key={i} length={totals[i]/100} /> );
+	//paragraphs.push( <HorizontalLine key={i} length={totals[i]/100} /> );
 
     return <$Panel react={react} title="Demographics">
 		<div>
@@ -89,9 +76,9 @@ const $Demographics = ({react}) => {
 		<div>
 		{(() => {
 			const paragraphs = [];
-			for (let i = 0; i < details.length; i++) {
-				paragraphs.push( <p key={i}> {details[i]["age"]}  {details[i]["total"]} </p> );
-			}
+			details.forEach( info => {
+				paragraphs.push( <p style={{ fontSize: '75%' }} key={info["age"]}> {info["age"]}  {info["total"]}  {info["school1"]}  {info["school2"]}  {info["school3"]}  {info["school4"]}  {info["work"]}  {info["other"]}</p> );
+			});
 			return paragraphs;
 		})()}
 		</div>
@@ -106,3 +93,4 @@ window._$hookui.registerPanel({
     icon: "Media/Game/Icons/Population.svg",
     component: $Demographics
 })
+
