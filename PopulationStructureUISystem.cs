@@ -15,8 +15,15 @@ using UnityEngine.Scripting;
 using Game.UI;
 using Game;
 using Game.Prefabs;
+using System.Linq;
+using System.Globalization;
 //using Unity.Core;
 //using UnityEngine.Rendering;
+using System.Reflection;
+using System.Collections.Generic;
+using System;
+using PopStruct;
+using Unity.Entities.UniversalDelegates;
 
 namespace PopStruct;
 
@@ -108,6 +115,7 @@ public class PopulationStructureUISystem : UISystemBase
         // this job is based on AgingJob
         public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
         {
+            //PopulationStructureUISystem.LogChunk(chunk);
             NativeArray<Entity> entities = chunk.GetNativeArray(m_EntityType);
             NativeArray<Citizen> citizens = chunk.GetNativeArray(ref m_CitizenType);
             NativeArray<Student> students = chunk.GetNativeArray(ref m_StudentType);
@@ -125,7 +133,12 @@ public class PopulationStructureUISystem : UISystemBase
             {
                 Entity entity = entities[i];
                 //Plugin.Log($"{entity}");
-                Citizen citizen = citizens[i];
+
+                //List<ComponentType> list = PopulationStructureUISystem.ListEntityComponents();
+
+
+
+               Citizen citizen = citizens[i];
                 //Plugin.Log($"{citizen}");
                 // citizen data
                 bool isCommuter = ((citizen.m_State & CitizenFlags.Commuter) != CitizenFlags.None);
@@ -451,6 +464,8 @@ public class PopulationStructureUISystem : UISystemBase
         base.OnDestroy();
     }
 
+    static bool dumped = false;
+
     protected override void OnUpdate()
     {
         if (m_SimulationSystem.frameIndex % 128 != 77)
@@ -547,8 +562,31 @@ public class PopulationStructureUISystem : UISystemBase
         m_uiTotals.Update();
         m_uiResults.Update();
 
+        InspectComponentsInQuery(m_CitizenQuery);
+
+        /*
         //UpdateStatistics();
         //Plugin.Log("jobs",true);
+        if (!dumped)
+        {
+            Plugin.Log("Chunks with Citizen component");
+            Entities.WithAll<Citizen>().ForEach((ArchetypeChunk chunk) =>
+            {
+                Plugin.Log("CHUNK START");
+                // Iterate over the component types in the chunk
+                var componentTypes = chunk.Archetype.GetComponentTypes();
+
+                // Log the component types
+                foreach (var componentType in componentTypes)
+                {
+                    Plugin.Log($"Component Type in Chunk: {componentType.GetManagedType()}");
+                }
+
+                // Your processing logic here
+            }).Schedule();
+            dumped = true;
+        }
+        */
     }
 
     private void ResetResults()
@@ -615,5 +653,57 @@ public class PopulationStructureUISystem : UISystemBase
     [Preserve]
     public PopulationStructureUISystem()
     {
+    }
+
+    public static void LogChunk(in ArchetypeChunk chunk)
+    {
+        var componentTypes = chunk.Archetype.GetComponentTypes();
+        Plugin.Log($"chunk: {chunk.Count}, {string.Join(", ", componentTypes.Select(ct => ct.GetType().GetTypeInfo().FullName        ))}");
+    }
+
+    public string[] ListEntityComponents(Entity entity)
+    {
+        var componentTypes = new List<ComponentType>();
+
+        if (!EntityManager.Exists(entity))
+            throw new ArgumentException("Entity does not exist.");
+
+        //using (NativeArray<ComponentType> types = EntityManager.GetComponentTypes(entity, Allocator.Temp))
+        //{
+            //foreach (var type in types)
+            //{
+                //componentTypes.Add(type);
+            //}
+        //}
+
+        NativeArray<ComponentType> NativeArray = EntityManager.GetComponentTypes(entity, Allocator.Temp);
+        string[] ToReturn = NativeArray.Select(T => T.GetManagedType().Name).ToArray();
+        NativeArray.Dispose();
+        return ToReturn;
+
+        //return componentTypes;
+    }
+
+    public void InspectComponentsInQuery(EntityQuery query)
+    {
+        Dictionary<string, int> CompDict = new Dictionary<string, int>();
+        NativeArray<Entity> entities = m_CitizenQuery.ToEntityArray(Allocator.Temp);
+        for (int i = 0; i < entities.Length; i++)
+        {
+            Entity entity = entities[i];
+            string[] comps = ListEntityComponents(entity);
+            foreach (string comp in comps)
+            {
+                if (CompDict.ContainsKey(comp)) CompDict[comp]++;
+                else CompDict.Add(comp, 1);
+            }
+        }
+        entities.Dispose();
+        // show the dictionary
+        Plugin.Log("=== Components in selected chunks ===");
+        foreach (var pair in CompDict)
+        {
+            Plugin.Log($"{pair.Key} {pair.Value}");
+        }
     }
 }
