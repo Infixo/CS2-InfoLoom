@@ -2,7 +2,40 @@ import React from 'react'
 import {useDataUpdate} from 'hookui-framework'
 import $Panel from './panel'
 
+const NumberDisplay = ({ value }) => {
+  let color = 'black';
+
+  // Set color based on the value
+  if (value < -10) {
+    color = 'red';
+  } else if (value > 10) {
+    color = 'green';
+  }
+
+  const numberStyle = {
+    color: color,
+  };
+
+  return (
+    <p style={numberStyle}>
+      The number is: {value}
+    </p>
+  );
+};
+
 const AlignedParagraph = ({ left, right }) => {
+	
+  // Set color based on the value
+  //const { defaultColor } = useTheme();
+  let color; // = defaultColor;
+  if (left < -50) {
+    color = 'red';
+  } else if (left > 50) {
+    color = '#00CC00';
+  } else {
+    color = 'white'; // default
+  };
+  
   const containerStyle = {
     display: 'flex',
     justifyContent: 'space-between',
@@ -10,6 +43,7 @@ const AlignedParagraph = ({ left, right }) => {
 	marginBottom: '0.1em', // Add some spacing between the <p> tags
   };
   const leftTextStyle = {
+	color: color,  
     fontSize: '80%',
     width: '20%',
 	marginLeft: '10%', // Start 10% from the left edge
@@ -130,7 +164,7 @@ const $DemandFactors = ({react}) => {
         window.dispatchEvent(event);
     }
 
-    return <$Panel react={react} title="Demand Factors" onClose={onClose}>
+    return <$Panel react={react} title="Demand" onClose={onClose} initialSize={{ width: window.innerWidth*0.1, height: window.innerHeight*0.65 }} initialPosition = {{top:window.innerHeight*0.06, left: window.innerWidth*0.89 }}>
 		<DemandSection title="RESIDENTIAL LOW" value={residentialLowDemand} factors={residentialLowFactors} />
 		<DemandSection title="RESIDENTIAL MEDIUM" value={residentialMediumDemand} factors={residentialMediumFactors} />
 		<DemandSection title="RESIDENTIAL HIGH" value={residentialHighDemand} factors={residentialHighFactors} />
