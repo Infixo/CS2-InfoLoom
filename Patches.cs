@@ -1,7 +1,7 @@
 using Game;
 using HarmonyLib;
 
-namespace PopStruct;
+namespace InfoLoom;
 
 [HarmonyPatch]
 class Patches
@@ -10,6 +10,6 @@ class Patches
     [HarmonyPostfix]
     public static void Initialize_Postfix(UpdateSystem updateSystem)
     {
-        updateSystem.UpdateAt<PopStruct.PopulationStructureUISystem>(SystemUpdatePhase.UIUpdate);
+        updateSystem.UpdateAt<InfoLoom.PopulationStructureUISystem>(SystemUpdatePhase.UIUpdate);
     }
 }

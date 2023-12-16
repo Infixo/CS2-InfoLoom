@@ -22,10 +22,8 @@ using System.Globalization;
 using System.Reflection;
 using System.Collections.Generic;
 using System;
-using PopStruct;
-using Unity.Entities.UniversalDelegates;
 
-namespace PopStruct;
+namespace InfoLoom;
 
 // This System is based on PopulationInfoviewUISystem by CO
 [CompilerGenerated]

@@ -9,9 +9,9 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.1</TargetFramework>
-		<AssemblyName>PopStruct</AssemblyName>
-		<RootNamespace>PopStruct</RootNamespace>
-		<Description>City demographics (population, education and workforce structure).</Description>
+		<AssemblyName>InfoLoom</AssemblyName>
+		<RootNamespace>InfoLoom</RootNamespace>
+		<Description>Extra City information and demographics data (population, education and workforce structure).</Description>
 		<Version>0.1.0</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
