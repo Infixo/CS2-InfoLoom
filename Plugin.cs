@@ -68,39 +68,39 @@ public class Plugin : BaseUnityPlugin
         }
     }
 }
-
-public class PopStruct_Demographics : UIExtension
+/*
+public class InfoLoom_Demographics : UIExtension
 {
-    public new readonly string extensionID = "infixo.demographics";
+    public new readonly string extensionID = "infoloom.demographics";
     public new readonly string extensionContent;
     public new readonly ExtensionType extensionType = ExtensionType.Panel;
 
-    public PopStruct_Demographics()
+    public InfoLoom_Demographics()
     {
-        this.extensionContent = this.LoadEmbeddedResource("PopStruct.dist.demographics.js");
+        this.extensionContent = this.LoadEmbeddedResource("InfoLoom.dist.demographics.js");
     }
 }
 
-public class PopStruct_Workforce : UIExtension
+public class InfoLoom_Workforce : UIExtension
 {
-    public new readonly string extensionID = "infixo.workforce";
+    public new readonly string extensionID = "infoloom.workforce";
     public new readonly string extensionContent;
     public new readonly ExtensionType extensionType = ExtensionType.Panel;
 
-    public PopStruct_Workforce()
+    public InfoLoom_Workforce()
     {
-        this.extensionContent = this.LoadEmbeddedResource("PopStruct.dist.workforce.js");
+        this.extensionContent = this.LoadEmbeddedResource("InfoLoom.dist.workforce.js");
     }
 }
-
-public class PopStruct_DemandFactors : UIExtension
+*/
+public class InfoLoom_DemandFactors : UIExtension
 {
-    public new readonly string extensionID = "infixo.demandfactors";
+    public new readonly string extensionID = "infoloom.demandfactors";
     public new readonly string extensionContent;
     public new readonly ExtensionType extensionType = ExtensionType.Panel;
 
-    public PopStruct_DemandFactors()
+    public InfoLoom_DemandFactors()
     {
-        this.extensionContent = this.LoadEmbeddedResource("PopStruct.dist.demandfactors.js");
+        this.extensionContent = this.LoadEmbeddedResource("InfoLoom.dist.demandfactors.js");
     }
 }

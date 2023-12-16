@@ -88,7 +88,7 @@ const $Demographics = ({react}) => {
 
 // Registering the panel with HookUI so it shows up in the menu
 window._$hookui.registerPanel({
-    id: "infixo.demographics",
+    id: "infoloom.demographics",
     name: "Demographics",
     icon: "Media/Game/Icons/Population.svg",
     component: $Demographics

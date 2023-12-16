@@ -88,7 +88,7 @@ const $Workforce = ({react}) => {
 
 // Registering the panel with HookUI so it shows up in the menu
 window._$hookui.registerPanel({
-    id: "infixo.workforce",
+    id: "infoloom.workforce",
     name: "Workforce",
 	icon: "Media/Game/Icons/Workers.svg",
     component: $Workforce
