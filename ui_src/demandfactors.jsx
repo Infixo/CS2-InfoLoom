@@ -1,5 +1,6 @@
 import React from 'react'
-import {useDataUpdate, $Panel} from 'hookui-framework'
+import {useDataUpdate} from 'hookui-framework'
+import $Panel from './panel'
 
 const AlignedParagraph = ({ left, right }) => {
   const containerStyle = {
@@ -66,6 +67,7 @@ const DemandSection = ({ title, value, factors }) => {
 };
 
 
+
 const $DemandFactors = ({react}) => {
 	
     const [oldestCim, setOldestCim] = react.useState(0)
@@ -121,7 +123,14 @@ const $DemandFactors = ({react}) => {
 	}
 	//paragraphs.push( <HorizontalLine key={i} length={totals[i]/100} /> );
 
-    return <$Panel react={react} title="Demand Factors">
+	// ------------ ADDED IN EXTENDED TOOLTIP
+    const onClose = () => {
+        const data = { type: "toggle_visibility", id: 'infixo.demandfactors' };
+        const event  = new CustomEvent('hookui', { detail: data });
+        window.dispatchEvent(event);
+    }
+
+    return <$Panel react={react} title="Demand Factors" onClose={onClose}>
 		<DemandSection title="RESIDENTIAL LOW" value={residentialLowDemand} factors={residentialLowFactors} />
 		<DemandSection title="RESIDENTIAL MEDIUM" value={residentialMediumDemand} factors={residentialMediumFactors} />
 		<DemandSection title="RESIDENTIAL HIGH" value={residentialHighDemand} factors={residentialHighFactors} />
@@ -138,4 +147,3 @@ window._$hookui.registerPanel({
 	icon: "Media/Game/Icons/CityStatistics.svg",
     component: $DemandFactors
 })
-
