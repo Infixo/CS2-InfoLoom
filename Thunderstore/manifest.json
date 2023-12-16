@@ -1,6 +1,6 @@
 {
     "name": "Info_Loom",
-    "description": "Adds new UI screen with some extra information.",
+    "description": "Adds new UI screens with some extra information.",
     "version_number": "0.1.0",
     "dependencies": [
       "BepInEx-BepInExPack-5.4.2100",
