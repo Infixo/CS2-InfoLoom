@@ -21,6 +21,10 @@ copy-ui:
 build: clean restore build-ui
 	@dotnet build /p:BepInExVersion=$(BEPINEX_VERSION)
 
+dev-demand:
+	@npx esbuild ui_src/demandfactors.jsx --bundle --outfile=dist/demandfactors.js
+	copy dist\demandfactors.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infixo.demandfactors.js"
+
 package-win:
 	@-mkdir dist
 	@cmd /c copy /y "bin\Debug\netstandard2.1\0Harmony.dll" "dist\"

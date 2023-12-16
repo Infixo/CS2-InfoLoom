@@ -6,14 +6,16 @@ const AlignedParagraph = ({ left, right }) => {
     display: 'flex',
     justifyContent: 'space-between',
     textAlign: 'justify',
-	marginBottom: '0.25em', // Add some spacing between the <p> tags
+	marginBottom: '0.1em', // Add some spacing between the <p> tags
   };
   const leftTextStyle = {
-    width: '40%',
+    fontSize: '80%',
+    width: '20%',
 	marginLeft: '10%', // Start 10% from the left edge
   };
   const rightTextStyle = {
-    width: '40%',
+    fontSize: '80%',
+    width: '60%',
 	marginRight: '10%', // Start 10% from the right edge
     textAlign: 'right',
   };	
@@ -35,6 +37,35 @@ const HorizontalLine = ({ length }) => {
 };
 
 
+const DemandSection = ({ title, value, factors }) => {
+	// code
+	// render html
+	//return <div>
+	//<h4>{title}</h4>
+	//</div>
+	
+	// this is for 2 columns
+    //<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+
+  return (
+    <div style={{ display: 'grid', gridTemplateRows: 'auto auto', gap: '10px' }}>
+      <div>
+        <p>{title}: <strong>{Math.round(value*100)}</strong></p>
+      </div>
+      <div>
+        <ol>
+          {factors.map((item, index) => (
+            <li key={index}>       
+			<AlignedParagraph left={item["weight"]} right={item["factor"]} />
+			</li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  );
+};
+
+
 const $DemandFactors = ({react}) => {
 	
     const [oldestCim, setOldestCim] = react.useState(0)
@@ -53,6 +84,33 @@ const $DemandFactors = ({react}) => {
 	const [details, setDetails] = react.useState([])
 	useDataUpdate(react, 'populationInfo.structureDetails', setDetails)
 
+	// demand values are just single numbers
+	const [residentialLowDemand, setResidentialLowDemand] = react.useState(0)
+	useDataUpdate(react, 'cityInfo.residentialLowDemand', setResidentialLowDemand)
+	const [residentialMediumDemand, setResidentialMediumDemand] = react.useState(0)
+	useDataUpdate(react, 'cityInfo.residentialMediumDemand', setResidentialMediumDemand)
+	const [residentialHighDemand, setResidentialHighDemand] = react.useState(0)
+	useDataUpdate(react, 'cityInfo.residentialHighDemand', setResidentialHighDemand)
+	const [commercialDemand, setCommercialDemand] = react.useState(0)
+	useDataUpdate(react, 'cityInfo.commercialDemand', setCommercialDemand)
+	const [industrialDemand, setIndustrialDemand] = react.useState(0)
+	useDataUpdate(react, 'cityInfo.industrialDemand', setIndustrialDemand)
+	const [officeDemand, setOfficeDemand] = react.useState(0)
+	useDataUpdate(react, 'cityInfo.officeDemand', setOfficeDemand)
+	
+	// demand factors: an array of variable number of elements with properties: __Type, factor, weight
+	const [residentialLowFactors, setResidentialLowFactors] = react.useState([])
+	useDataUpdate(react, 'cityInfo.residentialLowFactors', setResidentialLowFactors)
+	const [residentialMediumFactors, setResidentialMediumFactors] = react.useState([])
+	useDataUpdate(react, 'cityInfo.residentialMediumFactors', setResidentialMediumFactors)
+	const [residentialHighFactors, setResidentialHighFactors] = react.useState([])
+	useDataUpdate(react, 'cityInfo.residentialHighFactors', setResidentialHighFactors)
+	const [commercialFactors, setCommercialFactors] = react.useState([])
+	useDataUpdate(react, 'cityInfo.commercialFactors', setCommercialFactors)
+	const [industrialFactors, setIndustrialFactors] = react.useState([])
+	useDataUpdate(react, 'cityInfo.industrialFactors', setIndustrialFactors)
+	const [officeFactors, setOfficeFactors] = react.useState([])
+	useDataUpdate(react, 'cityInfo.officeFactors', setOfficeFactors)
 
 	// TEST
 	const numbers = Array.from({ length: 20 }, (_, index) => index + 1)
@@ -64,25 +122,12 @@ const $DemandFactors = ({react}) => {
 	//paragraphs.push( <HorizontalLine key={i} length={totals[i]/100} /> );
 
     return <$Panel react={react} title="Demand Factors">
-		<div>
-			<AlignedParagraph left="All Citizens" right={totals[0]} />
-			<AlignedParagraph left="- Locals" right={totals[1]} />
-			<AlignedParagraph left="- Tourists" right={totals[2]} />
-			<AlignedParagraph left="- Commuters" right={totals[3]} />
-			<AlignedParagraph left="Students" right={totals[4]} />
-			<AlignedParagraph left="Workers" right={totals[5]} />
-			<AlignedParagraph left="Oldest citizen" right={totals[6]} />
-		</div>
-		<div>
-		{(() => {
-			const paragraphs = [];
-			details.forEach( info => {
-				paragraphs.push( <p style={{ fontSize: '75%' }} key={info["age"]}> {info["age"]}  {info["total"]}  {info["school1"]}  {info["school2"]}  {info["school3"]}  {info["school4"]}  {info["work"]}  {info["other"]}</p> );
-			});
-			return paragraphs;
-		})()}
-		</div>
-		
+		<DemandSection title="RESIDENTIAL LOW" value={residentialLowDemand} factors={residentialLowFactors} />
+		<DemandSection title="RESIDENTIAL MEDIUM" value={residentialMediumDemand} factors={residentialMediumFactors} />
+		<DemandSection title="RESIDENTIAL HIGH" value={residentialHighDemand} factors={residentialHighFactors} />
+		<DemandSection title="COMMERCIAL" value={commercialDemand} factors={commercialFactors} />
+		<DemandSection title="INDUSTRIAL" value={industrialDemand} factors={industrialFactors} />
+		<DemandSection title="OFFICE" value={officeDemand} factors={officeFactors} />
 	</$Panel>
 }
 

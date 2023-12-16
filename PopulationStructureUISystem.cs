@@ -562,7 +562,7 @@ public class PopulationStructureUISystem : UISystemBase
         m_uiTotals.Update();
         m_uiResults.Update();
 
-        InspectComponentsInQuery(m_CitizenQuery);
+        //InspectComponentsInQuery(m_CitizenQuery);
 
         /*
         //UpdateStatistics();
