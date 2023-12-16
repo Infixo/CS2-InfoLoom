@@ -32,7 +32,7 @@ Currently:
   - Initial build, includes Demand Factors.
 
 ### Support
-- Please report bugs and issues on [GitHub](https://github.com/Infixo/CS2-InfoLoom).
-- You may also leave comments on [Discord](https://discord.com/channels/1169011184557637825/1185664314401632306).
+- Please report bugs and issues on [GitHub] (https://github.com/Infixo/CS2-InfoLoom).
+- You may also leave comments on [Discord] (https://discord.com/channels/1169011184557637825/1185664314401632306).
 
 ## Disclaimers and Notes

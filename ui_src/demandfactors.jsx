@@ -2,32 +2,9 @@ import React from 'react'
 import {useDataUpdate} from 'hookui-framework'
 import $Panel from './panel'
 
-const NumberDisplay = ({ value }) => {
-  let color = 'black';
-
-  // Set color based on the value
-  if (value < -10) {
-    color = 'red';
-  } else if (value > 10) {
-    color = 'green';
-  }
-
-  const numberStyle = {
-    color: color,
-  };
-
-  return (
-    <p style={numberStyle}>
-      The number is: {value}
-    </p>
-  );
-};
-
 const AlignedParagraph = ({ left, right }) => {
-	
-  // Set color based on the value
-  //const { defaultColor } = useTheme();
-  let color; // = defaultColor;
+  // Set color based on value of left
+  let color;
   if (left < -50) {
     color = 'red';
   } else if (left > 50) {
@@ -35,7 +12,6 @@ const AlignedParagraph = ({ left, right }) => {
   } else {
     color = 'white'; // default
   };
-  
   const containerStyle = {
     display: 'flex',
     justifyContent: 'space-between',
@@ -62,26 +38,9 @@ const AlignedParagraph = ({ left, right }) => {
   );
 };
 
-const HorizontalLine = ({ length }) => {
-  const lineStyle = {
-    width: `${length}px`,
-    borderBottom: '5px solid white', // Adjust the border style as needed
-    margin: '1px 0', // Adjust the margin as needed
-  };
-  return <div style={lineStyle}></div>;
-};
-
-
 const DemandSection = ({ title, value, factors }) => {
-	// code
-	// render html
-	//return <div>
-	//<h4>{title}</h4>
-	//</div>
-	
-	// this is for 2 columns
-    //<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-
+  // this is for 2 columns
+  //<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
   return (
     <div style={{ display: 'grid', gridTemplateRows: 'auto auto', gap: '10px' }}>
       <div>
@@ -102,18 +61,18 @@ const DemandSection = ({ title, value, factors }) => {
 
 
 
-const $DemandFactors = ({react}) => {
-	
-    const [oldestCim, setOldestCim] = react.useState(0)
-    useDataUpdate(react, 'populationInfo.oldest_citizen', setOldestCim)
-	
-    // 0 - num citizens in the city 0 = 1+2+3
-    // 1 - num locals
-    // 2 - num tourists
-    // 3 - num commuters
-    // 4 - num students (in locals) 4 <= 1
-    // 5 - num workers (in locals) 5 <= 1
-    // 6 - oldest cim
+const $DemandFactors = ({ react }) => {
+
+	const [oldestCim, setOldestCim] = react.useState(0)
+	useDataUpdate(react, 'populationInfo.oldest_citizen', setOldestCim)
+
+	// 0 - num citizens in the city 0 = 1+2+3
+	// 1 - num locals
+	// 2 - num tourists
+	// 3 - num commuters
+	// 4 - num students (in locals) 4 <= 1
+	// 5 - num workers (in locals) 5 <= 1
+	// 6 - oldest cim
 	const [totals, setTotals] = react.useState([])
 	useDataUpdate(react, 'populationInfo.structureTotals', setTotals)
 
@@ -133,7 +92,7 @@ const $DemandFactors = ({react}) => {
 	useDataUpdate(react, 'cityInfo.industrialDemand', setIndustrialDemand)
 	const [officeDemand, setOfficeDemand] = react.useState(0)
 	useDataUpdate(react, 'cityInfo.officeDemand', setOfficeDemand)
-	
+
 	// demand factors: an array of variable number of elements with properties: __Type, factor, weight
 	const [residentialLowFactors, setResidentialLowFactors] = react.useState([])
 	useDataUpdate(react, 'cityInfo.residentialLowFactors', setResidentialLowFactors)
@@ -148,23 +107,13 @@ const $DemandFactors = ({react}) => {
 	const [officeFactors, setOfficeFactors] = react.useState([])
 	useDataUpdate(react, 'cityInfo.officeFactors', setOfficeFactors)
 
-	// TEST
-	const numbers = Array.from({ length: 20 }, (_, index) => index + 1)
+	const onClose = () => {
+		const data = { type: "toggle_visibility", id: 'infoloom.demandfactors' };
+		const event = new CustomEvent('hookui', { detail: data });
+		window.dispatchEvent(event);
+	};
 
-	const lines = [];
-	for (let i = 0; i < numbers.length; i++) {
-		lines.push(<HorizontalLine key={i} length={numbers[i]*50} />);
-	}
-	//paragraphs.push( <HorizontalLine key={i} length={totals[i]/100} /> );
-
-	// ------------ ADDED IN EXTENDED TOOLTIP
-    const onClose = () => {
-        const data = { type: "toggle_visibility", id: 'infoloom.demandfactors' };
-        const event  = new CustomEvent('hookui', { detail: data });
-        window.dispatchEvent(event);
-    }
-
-    return <$Panel react={react} title="Demand" onClose={onClose} initialSize={{ width: window.innerWidth*0.1, height: window.innerHeight*0.65 }} initialPosition = {{top:window.innerHeight*0.06, left: window.innerWidth*0.89 }}>
+	return <$Panel react={react} title="Demand" onClose={onClose} initialSize={{ width: window.innerWidth * 0.1, height: window.innerHeight * 0.65 }} initialPosition={{ top: window.innerHeight * 0.06, left: window.innerWidth * 0.89 }}>
 		<DemandSection title="RESIDENTIAL LOW" value={residentialLowDemand} factors={residentialLowFactors} />
 		<DemandSection title="RESIDENTIAL MEDIUM" value={residentialMediumDemand} factors={residentialMediumFactors} />
 		<DemandSection title="RESIDENTIAL HIGH" value={residentialHighDemand} factors={residentialHighFactors} />
@@ -172,12 +121,12 @@ const $DemandFactors = ({react}) => {
 		<DemandSection title="INDUSTRIAL" value={industrialDemand} factors={industrialFactors} />
 		<DemandSection title="OFFICE" value={officeDemand} factors={officeFactors} />
 	</$Panel>
-}
+};
 
 // Registering the panel with HookUI so it shows up in the menu
 window._$hookui.registerPanel({
-    id: "infoloom.demandfactors",
-    name: "Demand Factors",
+	id: "infoloom.demandfactors",
+	name: "Demand Factors",
 	icon: "Media/Game/Icons/CityStatistics.svg",
-    component: $DemandFactors
-})
+	component: $DemandFactors
+});
