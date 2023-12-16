@@ -9,8 +9,14 @@ restore:
 
 build-ui:
 	@npm install
-	@npx esbuild ui_src/structure.jsx --bundle --outfile=dist/bundle.js
-	copy dist/bundle.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infixo.demographics.js"
+	@npx esbuild ui_src/demographics.jsx --bundle --outfile=dist/demographics.js
+	@npx esbuild ui_src/workforce.jsx --bundle --outfile=dist/workforce.js
+	@npx esbuild ui_src/demandfactors.jsx --bundle --outfile=dist/demandfactors.js
+
+copy-ui:
+	copy dist\demographics.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infixo.demographics.js"
+	copy dist\workforce.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infixo.workforce.js"
+	copy dist\demandfactors.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infixo.demandfactors.js"
 
 build: clean restore build-ui
 	@dotnet build /p:BepInExVersion=$(BEPINEX_VERSION)

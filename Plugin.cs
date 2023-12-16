@@ -69,14 +69,38 @@ public class Plugin : BaseUnityPlugin
     }
 }
 
-public class PopStructUI : UIExtension
+public class PopStruct_Demographics : UIExtension
 {
     public new readonly string extensionID = "infixo.demographics";
     public new readonly string extensionContent;
     public new readonly ExtensionType extensionType = ExtensionType.Panel;
 
-    public PopStructUI()
+    public PopStruct_Demographics()
     {
-        this.extensionContent = this.LoadEmbeddedResource("PopStruct.dist.bundle.js");
+        this.extensionContent = this.LoadEmbeddedResource("PopStruct.dist.demographics.js");
+    }
+}
+
+public class PopStruct_Workforce : UIExtension
+{
+    public new readonly string extensionID = "infixo.workforce";
+    public new readonly string extensionContent;
+    public new readonly ExtensionType extensionType = ExtensionType.Panel;
+
+    public PopStruct_Workforce()
+    {
+        this.extensionContent = this.LoadEmbeddedResource("PopStruct.dist.workforce.js");
+    }
+}
+
+public class PopStruct_DemandFactors : UIExtension
+{
+    public new readonly string extensionID = "infixo.demandfactors";
+    public new readonly string extensionContent;
+    public new readonly ExtensionType extensionType = ExtensionType.Panel;
+
+    public PopStruct_DemandFactors()
+    {
+        this.extensionContent = this.LoadEmbeddedResource("PopStruct.dist.demandfactors.js");
     }
 }

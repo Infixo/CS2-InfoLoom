@@ -48,7 +48,9 @@
 		If you want to embed things directly into your mod, instead of shipping multiple files
 	-->
 	<ItemGroup>
-	  <EmbeddedResource Include="dist/bundle.js" />
+	  <EmbeddedResource Include="dist/demographics.js" />
+	  <EmbeddedResource Include="dist/workforce.js" />
+	  <EmbeddedResource Include="dist/demandfactors.js" />
 	</ItemGroup>
 
 	<!--
