@@ -17,6 +17,7 @@ static class GamePatches
     [HarmonyPostfix]
     public static void Initialize_Postfix(UpdateSystem updateSystem)
     {
+        updateSystem.UpdateAt<InfoLoom.BuildingDemandUISystem>(SystemUpdatePhase.UIUpdate);
         updateSystem.UpdateAt<InfoLoom.PopulationStructureUISystem>(SystemUpdatePhase.UIUpdate);
     }
 
