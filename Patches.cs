@@ -1,14 +1,17 @@
 using Colossal.UI.Binding;
 using Game;
+using Game.Economy;
+using Game.Prefabs;
 using Game.UI.InGame;
 using HarmonyLib;
 using Unity.Collections;
+using Unity.Entities;
 using Unity.Jobs;
 
 namespace InfoLoom;
 
 [HarmonyPatch]
-class Patches
+static class GamePatches
 {
     [HarmonyPatch(typeof(Game.Common.SystemOrder), "Initialize")]
     [HarmonyPostfix]
@@ -41,4 +44,25 @@ class Patches
         }
         return false; // don't execute the original
     }
+
+    [HarmonyPatch(typeof(Game.UI.InGame.ProductionUISystem), "GetData")]
+    [HarmonyPrefix]
+    static bool GetData(ref (int, int, int) __result, Game.UI.InGame.ProductionUISystem __instance, Entity entity,
+        // private members that are used in the routine, start with 3 underscores
+        PrefabSystem ___m_PrefabSystem,
+        NativeList<int> ___m_ProductionCache,
+        NativeList<int> ___m_CommercialConsumptionCache,
+        NativeList<int> ___m_IndustrialConsumptionCache)
+    {
+        int resourceIndex = EconomyUtils.GetResourceIndex(EconomyUtils.GetResource(___m_PrefabSystem.GetPrefab<ResourcePrefab>(entity).m_Resource));
+        //int num = ___m_ProductionCache[resourceIndex];
+        //int num2 = ___m_CommercialConsumptionCache[resourceIndex] + ___m_IndustrialConsumptionCache[resourceIndex];
+        //int num3 = math.min(num2, num);
+        //int num4 = math.min(num2, num3);
+        //int item = num - num3;
+        //int item2 = num2 - num4;
+        __result = (___m_ProductionCache[resourceIndex], ___m_CommercialConsumptionCache[resourceIndex], ___m_IndustrialConsumptionCache[resourceIndex]);
+        return false;
+    }
+
 }

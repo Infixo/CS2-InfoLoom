@@ -20,6 +20,8 @@ namespace InfoLoom;
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 public class Plugin : BaseUnityPlugin
 {
+    private const string HarmonyId = MyPluginInfo.PLUGIN_GUID + "_Cities2Harmony";
+
     internal static new ManualLogSource Logger; // BepInEx logging
     private static ILog s_Log; // CO logging
 
@@ -49,6 +51,9 @@ public class Plugin : BaseUnityPlugin
         return mb.DeclaringType + "." + mb.Name;
     }
 
+    // mod settings
+    public static ConfigEntry<bool> SeparateConsumption;
+
     private void Awake()
     {
         Logger = base.Logger;
@@ -58,7 +63,7 @@ public class Plugin : BaseUnityPlugin
 
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
 
-        var harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), MyPluginInfo.PLUGIN_GUID + "_Cities2Harmony");
+        var harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), HarmonyId);
         var patchedMethods = harmony.GetPatchedMethods().ToArray();
 
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} made patches! Patched methods: " + patchedMethods.Length);
@@ -66,6 +71,25 @@ public class Plugin : BaseUnityPlugin
         foreach (var patchedMethod in patchedMethods) {
             Logger.LogInfo($"Patched method: {patchedMethod.Module.Name}:{patchedMethod.Name}");
         }
+
+        // settings
+        SeparateConsumption = base.Config.Bind<bool>("Settings", "SeparateConsumption", false, "Enables showing commercial and industrial consumption instead of surplus/deficit in the Production UI");
+
+        // check if SeparateConsumption feature is enabled
+        if (!SeparateConsumption.Value)
+        {
+            MethodBase mb = typeof(Game.UI.InGame.ProductionUISystem).GetMethod("GetData", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (mb != null)
+            {
+                Plugin.Log($"REMOVING {mb.Name} patch from {HarmonyId}");
+                harmony.Unpatch(mb, HarmonyPatchType.Prefix, HarmonyId);
+            }
+            else
+                Plugin.Log("WARNING: Cannot remove GetData patch.");
+        }
+
+        //Plugin.Log("===== all patches =====");
+        //Patcher.ListAllPatches();
     }
 }
 /*
