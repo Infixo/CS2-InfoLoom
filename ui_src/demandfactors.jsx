@@ -46,7 +46,7 @@ const DemandSection2 = ({title, value, factors }) => {
 	  {/* title */}
 	  <div class="labels_L7Q row_S2v uppercase_RJI">
 	    <div class="left_Lgw row_S2v">{title}</div>
-		<div class="right_k30 row_S2v">{Math.round(value*100)}</div>
+		{ value >= 0 && ( <div class="right_k30 row_S2v">{Math.round(value*100)}</div> ) }
 	  </div>
 	  <div class="space_uKL" style={{height: '3rem'}}></div>
 	  {/* factors */}
@@ -135,13 +135,22 @@ const $DemandFactors = ({ react }) => {
 	const [officeFactors, setOfficeFactors] = react.useState([])
 	useDataUpdate(react, 'cityInfo.officeFactors', setOfficeFactors)
 
+	// building demand
+	const [buildingDemand, setbuildingDemand] = react.useState([])
+	useDataUpdate(react, 'cityInfo.ilBuildingDemand', setbuildingDemand)
+	
+	// convert buildingDemand array into "demand factors"
+	const titles = ['Residential Low','Residential Medium','Residential High','Commercial','Industrial','Storage','Office'];
+	const buildingDemandFactors = titles.map((factor, index) => ({ factor, weight: buildingDemand[index] }));
+
 	const onClose = () => {
 		const data = { type: "toggle_visibility", id: 'infoloom.demandfactors' };
 		const event = new CustomEvent('hookui', { detail: data });
 		window.dispatchEvent(event);
 	};
 
-	return <$Panel react={react} title="Demand" onClose={onClose} initialSize={{ width: window.innerWidth * 0.1, height: window.innerHeight * 0.65 }} initialPosition={{ top: window.innerHeight * 0.06, left: window.innerWidth * 0.89 }}>
+	return <$Panel react={react} title="Demand" onClose={onClose} initialSize={{ width: window.innerWidth * 0.1, height: window.innerHeight * 0.83 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.87 }}>
+		<DemandSection2 title="BUILDING DEMAND" value={-1} factors={buildingDemandFactors} />
 		<DemandSection2 title="RESIDENTIAL LOW" value={residentialLowDemand} factors={residentialLowFactors} />
 		<DemandSection2 title="RESIDENTIAL MEDIUM" value={residentialMediumDemand} factors={residentialMediumFactors} />
 		<DemandSection2 title="RESIDENTIAL HIGH" value={residentialHighDemand} factors={residentialHighFactors} />
