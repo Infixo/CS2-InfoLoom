@@ -13,14 +13,15 @@ Currently:
 - Additional section shows directly building demand for each zone type and STORAGE demand. Please note that the "main" demand factor is actually a building demand, however UI shows it as moving. In fact it doesn't move, it is just a visualization.
 - Also, industrial demand is a higher value from the two: industrial building demand and storage demand.
 
-![Demand factors](https://github.com/Infixo/CS2-InfoLoom/blob/main/docs/demandfactors.png)
+![Demand factors](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/demandfactors.png)
 
 ### Resources consumption
 - This feature is disabled by default because it changes the data shown on the vanilla UI. Enable it in the config file by setting SeparateConsumption to true.
 - Instead of showing surplus and deficit, the production UI will show commercial consumption and industrial consumption. It is imho much more informative than just surplus/deficit, because it also tells what causes said surplus or deficit.
 - Disclaimer. I don't yet how to change existing UI, so the titles "Surplus" and "Deficit" will still be there. Sorry.
 
-![Resources consumption](https://github.com/Infixo/CS2-InfoLoom/blob/main/docs/consumption.png)
+![Resources consumption](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/consumption.png)
+
 
 ## Technical
 
@@ -39,7 +40,7 @@ Currently:
 - Nothing atm.
 
 ### Changelog
-- v0.2.0 (2023-12-17)
+- v0.2.2 (2023-12-17)
   - Demand factors window is reformatted, to be more aligned with game's visual style.
   - New features: shows all factors, building demand and resources consumption.
 - v0.1.0 (2023-12-16)
