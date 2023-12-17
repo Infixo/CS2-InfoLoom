@@ -12,13 +12,15 @@ Currently:
 - Enables showing all demand factors, not only 5. Useful for industrial demand which is the only one that utilizes up yo 7 factors.
 - Additional section shows directly building demand for each zone type and STORAGE demand. Please note that the "main" demand factor is actually a building demand, however UI shows it as moving. In fact it doesn't move, it is just a visualization.
 - Also, industrial demand is a higher value from the two: industrial building demand and storage demand.
-[Demand factors](https://github.com/Infixo/CS2-InfoLoom/blob/main/docs/demandfactors.jpg)
+
+![Demand factors](https://github.com/Infixo/CS2-InfoLoom/blob/main/docs/demandfactors.jpg)
 
 ### Resources consumption
 - This feature is disabled by default because it changes the data shown on the vanilla UI. Enable it in the config file by setting SeparateConsumption to true.
 - Instead of showing surplus and deficit, the production UI will show commercial consumption and industrial consumption. It is imho much more informative than just surplus/deficit, because it also tells what causes said surplus or deficit.
 - Disclaimer. I don't yet how to change existing UI, so the titles "Surplus" and "Deficit" will still be there. Sorry.
-[Resources consumption](https://github.com/Infixo/CS2-InfoLoom/blob/main/docs/consumption.jpg)
+
+![Resources consumption](https://github.com/Infixo/CS2-InfoLoom/blob/main/docs/consumption.jpg)
 
 ## Technical
 
