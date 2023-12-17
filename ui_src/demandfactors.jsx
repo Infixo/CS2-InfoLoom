@@ -89,24 +89,6 @@ const DemandSection1 = ({ title, value, factors }) => {
 
 const $DemandFactors = ({ react }) => {
 
-	const [oldestCim, setOldestCim] = react.useState(0)
-	useDataUpdate(react, 'populationInfo.oldest_citizen', setOldestCim)
-	
-	//console.log("yey console, oldest cim is ", oldestCim);
-
-	// 0 - num citizens in the city 0 = 1+2+3
-	// 1 - num locals
-	// 2 - num tourists
-	// 3 - num commuters
-	// 4 - num students (in locals) 4 <= 1
-	// 5 - num workers (in locals) 5 <= 1
-	// 6 - oldest cim
-	const [totals, setTotals] = react.useState([])
-	useDataUpdate(react, 'populationInfo.structureTotals', setTotals)
-
-	const [details, setDetails] = react.useState([])
-	useDataUpdate(react, 'populationInfo.structureDetails', setDetails)
-
 	// demand values are just single numbers
 	const [residentialLowDemand, setResidentialLowDemand] = react.useState(0)
 	useDataUpdate(react, 'cityInfo.residentialLowDemand', setResidentialLowDemand)
@@ -149,7 +131,7 @@ const $DemandFactors = ({ react }) => {
 		window.dispatchEvent(event);
 	};
 
-	return <$Panel react={react} title="Demand" onClose={onClose} initialSize={{ width: window.innerWidth * 0.1, height: window.innerHeight * 0.83 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.87 }}>
+	return <$Panel react={react} title="Demand" onClose={onClose} initialSize={{ width: window.innerWidth * 0.1, height: window.innerHeight * 0.83 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
 		<DemandSection2 title="BUILDING DEMAND" value={-1} factors={buildingDemandFactors} />
 		<DemandSection2 title="RESIDENTIAL LOW" value={residentialLowDemand} factors={residentialLowFactors} />
 		<DemandSection2 title="RESIDENTIAL MEDIUM" value={residentialMediumDemand} factors={residentialMediumFactors} />

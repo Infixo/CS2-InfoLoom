@@ -1,7 +1,7 @@
 {
     "name": "Info_Loom",
     "description": "Adds new UI screens with some extra information.",
-    "version_number": "0.1.0",
+    "version_number": "0.2.0",
     "dependencies": [
       "BepInEx-BepInExPack-5.4.2100",
       "CaptainOfCoit-HookUI-0.3.5"
