@@ -38,7 +38,33 @@ const AlignedParagraph = ({ left, right }) => {
   );
 };
 
-const DemandSection = ({ title, value, factors }) => {
+
+  
+const DemandSection2 = ({title, value, factors }) => {
+  return (
+    <div class="infoview-panel-section_RXJ" style={{width: '95%', paddingTop: '3rem', paddingBottom: '3rem'}}>
+	  {/* title */}
+	  <div class="labels_L7Q row_S2v uppercase_RJI">
+	    <div class="left_Lgw row_S2v">{title}</div>
+		<div class="right_k30 row_S2v">{Math.round(value*100)}</div>
+	  </div>
+	  <div class="space_uKL" style={{height: '3rem'}}></div>
+	  {/* factors */}
+      {factors.map((item, index) => (
+		<div key={index} class="labels_L7Q row_S2v small_ExK" style={{marginTop: '1rem'}}>
+		  <div class="left_Lgw row_S2v">{item["factor"]}</div>
+		  <div class="right_k30 row_S2v">
+		  {item["weight"] < 0 ?
+		  <div class="negative_YWY">{item["weight"]}</div> :
+		  <div class="positive_zrK">{item["weight"]}</div>}
+		  </div>  
+		</div>
+      ))}
+	</div>
+  );  	
+};
+
+const DemandSection1 = ({ title, value, factors }) => {
   // this is for 2 columns
   //<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
   return (
@@ -65,6 +91,8 @@ const $DemandFactors = ({ react }) => {
 
 	const [oldestCim, setOldestCim] = react.useState(0)
 	useDataUpdate(react, 'populationInfo.oldest_citizen', setOldestCim)
+	
+	//console.log("yey console, oldest cim is ", oldestCim);
 
 	// 0 - num citizens in the city 0 = 1+2+3
 	// 1 - num locals
@@ -114,12 +142,12 @@ const $DemandFactors = ({ react }) => {
 	};
 
 	return <$Panel react={react} title="Demand" onClose={onClose} initialSize={{ width: window.innerWidth * 0.1, height: window.innerHeight * 0.65 }} initialPosition={{ top: window.innerHeight * 0.06, left: window.innerWidth * 0.89 }}>
-		<DemandSection title="RESIDENTIAL LOW" value={residentialLowDemand} factors={residentialLowFactors} />
-		<DemandSection title="RESIDENTIAL MEDIUM" value={residentialMediumDemand} factors={residentialMediumFactors} />
-		<DemandSection title="RESIDENTIAL HIGH" value={residentialHighDemand} factors={residentialHighFactors} />
-		<DemandSection title="COMMERCIAL" value={commercialDemand} factors={commercialFactors} />
-		<DemandSection title="INDUSTRIAL" value={industrialDemand} factors={industrialFactors} />
-		<DemandSection title="OFFICE" value={officeDemand} factors={officeFactors} />
+		<DemandSection2 title="RESIDENTIAL LOW" value={residentialLowDemand} factors={residentialLowFactors} />
+		<DemandSection2 title="RESIDENTIAL MEDIUM" value={residentialMediumDemand} factors={residentialMediumFactors} />
+		<DemandSection2 title="RESIDENTIAL HIGH" value={residentialHighDemand} factors={residentialHighFactors} />
+		<DemandSection2 title="COMMERCIAL" value={commercialDemand} factors={commercialFactors} />
+		<DemandSection2 title="INDUSTRIAL" value={industrialDemand} factors={industrialFactors} />
+		<DemandSection2 title="OFFICE" value={officeDemand} factors={officeFactors} />
 	</$Panel>
 };
 
