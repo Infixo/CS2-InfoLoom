@@ -11,15 +11,51 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine.Scripting;
 using Game;
-using Game.UI.InGame;
+using Game.UI;
+using Game.Simulation; // TODO: use UIUpdateState and Advance() eventully...
+using Game.UI.InGame; // EmploymentData TODO: remove when not used
 
 namespace InfoLoom;
 
 // This system is based on game's WorkplacesInfoviewUISystem
 
 [CompilerGenerated]
-public class WorkplacesInfoLoomUISystem : InfoviewUISystemBase
+public class WorkplacesInfoLoomUISystem : UISystemBase
 {
+    private struct WorkplacesAtLevelInfo
+    {
+        public int Level;
+        public int Total; // assertions: Total=Service+Commercial+Industry+Office, Total=Employee+Empty
+        public int Service; // jobs in city services
+        public int Commercial; // jobs in commercial zones
+        public int Industry; // jobs in industrial zones
+        public int Office; // jobs in office zones
+        public int Employee; // employees
+        public int Open; // open positions
+        public WorkplacesAtLevelInfo(int _level) { Level = _level; }
+    }
+    private static void WriteData(IJsonWriter writer, WorkplacesAtLevelInfo info)
+    {
+        writer.TypeBegin("workplacesAtLevelInfo");
+        writer.PropertyName("level");
+        writer.Write(info.Level);
+        writer.PropertyName("total");
+        writer.Write(info.Total);
+        writer.PropertyName("service");
+        writer.Write(info.Service);
+        writer.PropertyName("commercial");
+        writer.Write(info.Commercial);
+        writer.PropertyName("industry");
+        writer.Write(info.Industry);
+        writer.PropertyName("office");
+        writer.Write(info.Office);
+        writer.PropertyName("employee");
+        writer.Write(info.Employee);
+        writer.PropertyName("open");
+        writer.Write(info.Open);
+        writer.TypeEnd();
+    }
+
     private enum Result
     {
         Workplaces,
@@ -57,6 +93,8 @@ public class WorkplacesInfoLoomUISystem : InfoviewUISystemBase
         public NativeArray<int> m_IntResults;
 
         public NativeArray<EmploymentData> m_EmploymentDataResults;
+
+        public NativeArray<WorkplacesAtLevelInfo> m_WorkplaceResults;
 
         public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
         {
@@ -138,6 +176,8 @@ public class WorkplacesInfoLoomUISystem : InfoviewUISystemBase
 
     private const string kGroup = "workplaces";
 
+    private SimulationSystem m_SimulationSystem;
+
     private EntityQuery m_WorkplaceQuery;
 
     private EntityQuery m_WorkplaceModifiedQuery;
@@ -156,6 +196,7 @@ public class WorkplacesInfoLoomUISystem : InfoviewUISystemBase
 
     private TypeHandle __TypeHandle;
 
+    /* not used
     protected override bool Active
     {
         get
@@ -169,11 +210,13 @@ public class WorkplacesInfoLoomUISystem : InfoviewUISystemBase
     }
 
     protected override bool Modified => !m_WorkplaceModifiedQuery.IsEmptyIgnoreFilter;
+    */
 
     [Preserve]
     protected override void OnCreate()
     {
         base.OnCreate();
+        m_SimulationSystem = base.World.GetOrCreateSystemManaged<SimulationSystem>(); // TODO: use UIUpdateState eventually
         m_WorkplaceQuery = GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[3]
@@ -207,10 +250,11 @@ public class WorkplacesInfoLoomUISystem : InfoviewUISystemBase
         });
         m_IntResults = new NativeArray<int>(2, Allocator.Persistent);
         m_EmploymentDataResults = new NativeArray<EmploymentData>(2, Allocator.Persistent);
-        AddBinding(m_WorkplacesData = new GetterValueBinding<EmploymentData>("workplaces", "workplacesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[0], new ValueWriter<EmploymentData>()));
-        AddBinding(m_EmployeesData = new GetterValueBinding<EmploymentData>("workplaces", "employeesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[1], new ValueWriter<EmploymentData>()));
-        AddBinding(m_Workplaces = new GetterValueBinding<int>("workplaces", "workplaces", () => (m_IntResults.IsCreated && m_IntResults.Length == 2) ? m_IntResults[0] : 0));
-        AddBinding(m_Workers = new GetterValueBinding<int>("workplaces", "employees", () => (m_IntResults.IsCreated && m_IntResults.Length == 2) ? m_IntResults[1] : 0));
+        AddBinding(m_WorkplacesData = new GetterValueBinding<EmploymentData>(kGroup, "ilWorkplacesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[0], new ValueWriter<EmploymentData>()));
+        AddBinding(m_EmployeesData = new GetterValueBinding<EmploymentData>(kGroup, "ilEmployeesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[1], new ValueWriter<EmploymentData>()));
+        AddBinding(m_Workplaces = new GetterValueBinding<int>(kGroup, "ilWorkplaces", () => (m_IntResults.IsCreated && m_IntResults.Length == 2) ? m_IntResults[0] : 0));
+        AddBinding(m_Workers = new GetterValueBinding<int>(kGroup, "ilEmployees", () => (m_IntResults.IsCreated && m_IntResults.Length == 2) ? m_IntResults[1] : 0));
+        Plugin.Log("WorkplacesInfoLoomUISystem created.");
     }
 
     [Preserve]
@@ -221,8 +265,11 @@ public class WorkplacesInfoLoomUISystem : InfoviewUISystemBase
         base.OnDestroy();
     }
 
-    protected override void PerformUpdate()
+    protected override void OnUpdate() // original: PerformUpdate()
     {
+        if (m_SimulationSystem.frameIndex % 128 != 77)
+            return;
+
         ResetResults();
         __TypeHandle.__Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Prefabs_WorkplaceData_RO_ComponentLookup.Update(ref base.CheckedStateRef);
