@@ -1,5 +1,6 @@
 import React from 'react'
-import {useDataUpdate, $Panel} from 'hookui-framework'
+import {useDataUpdate} from 'hookui-framework'
+import $Panel from './panel'
 
 const AlignedParagraph = ({ left, right }) => {
   const containerStyle = {
@@ -34,11 +35,63 @@ const HorizontalLine = ({ length }) => {
   return <div style={lineStyle}></div>;
 };
 
+// Define styles outside the component
+const tableStyles = {
+  tableContainer: {
+    margin: '20px',
+  },
+  customTable: {
+    borderCollapse: 'collapse',
+    //width: '100%',
+  },
+  tableCell: {
+    border: '1px solid #ddd',
+    padding: '8px',
+    textAlign: 'center',
+	width: '10%',
+  },
+  tableHeader: {
+    backgroundColor: '#f2f2f2',
+  },
+};
+
+const TableExample = () => {
+	
+  const rows = Array.from({ length: 6 }, (_, rowIndex) => (
+    <tr key={rowIndex}>
+      {Array.from({ length: 7 }, (_, colIndex) => (
+        <td key={colIndex} style={tableStyles.tableCell}>
+          <div class="row_S2v">Row {rowIndex + 1}, Col {colIndex + 1}</div>
+        </td>
+      ))}
+    </tr>
+  ));
+  return (
+    <div style={tableStyles.tableContainer}>
+      <table style={tableStyles.customTable}>
+        {rows}
+      </table>
+    </div>
+  );
+};
+
+const WorkforceLevel = ({levelColor, levelName, values}) => {
+  console.log(levelColor, levelName, values);
+  return (
+		<div class="legend_fqG">
+		  <div class="color-legend_Bzi">
+		    <div class="symbol_aAH" style={{backgroundColor: levelColor }}></div>
+	        <div>{levelName}</div>
+		  </div>
+		  num1 num2 num3 num4
+		</div>  
+  );
+};
 
 const $Workforce = ({react}) => {
 	
-    const [oldestCim, setOldestCim] = react.useState(0)
-    useDataUpdate(react, 'populationInfo.oldest_citizen', setOldestCim)
+    //const [oldestCim, setOldestCim] = react.useState(0)
+    //useDataUpdate(react, 'populationInfo.oldest_citizen', setOldestCim)
 	
     // 0 - num citizens in the city 0 = 1+2+3
     // 1 - num locals
@@ -47,42 +100,38 @@ const $Workforce = ({react}) => {
     // 4 - num students (in locals) 4 <= 1
     // 5 - num workers (in locals) 5 <= 1
     // 6 - oldest cim
-	const [totals, setTotals] = react.useState([])
-	useDataUpdate(react, 'populationInfo.structureTotals', setTotals)
+	const [jobs, setJobs] = react.useState([]);
+	useDataUpdate(react, 'workplaces.ilWorkplaces', setJobs);
 
-	const [details, setDetails] = react.useState([])
-	useDataUpdate(react, 'populationInfo.structureDetails', setDetails)
+	//const [details, setDetails] = react.useState([])
+	//useDataUpdate(react, 'populationInfo.structureDetails', setDetails)
 
 
 	// TEST
-	const numbers = Array.from({ length: 20 }, (_, index) => index + 1)
+	//const numbers = Array.from({ length: 20 }, (_, index) => index + 1)
 
-	const lines = [];
-	for (let i = 0; i < numbers.length; i++) {
-		lines.push(<HorizontalLine key={i} length={numbers[i]*50} />);
-	}
+	//const lines = [];
+	//for (let i = 0; i < numbers.length; i++) {
+		//lines.push(<HorizontalLine key={i} length={numbers[i]*50} />);
+	//}
 	//paragraphs.push( <HorizontalLine key={i} length={totals[i]/100} /> );
+	
+	const onClose = () => {
+		const data = { type: "toggle_visibility", id: 'infoloom.workforce' };
+		const event = new CustomEvent('hookui', { detail: data });
+		window.dispatchEvent(event);
+	};
 
-    return <$Panel react={react} title="Workforce">
-		<div>
-			<AlignedParagraph left="All Citizens" right={totals[0]} />
-			<AlignedParagraph left="- Locals" right={totals[1]} />
-			<AlignedParagraph left="- Tourists" right={totals[2]} />
-			<AlignedParagraph left="- Commuters" right={totals[3]} />
-			<AlignedParagraph left="Students" right={totals[4]} />
-			<AlignedParagraph left="Workers" right={totals[5]} />
-			<AlignedParagraph left="Oldest citizen" right={totals[6]} />
-		</div>
-		<div>
-		{(() => {
-			const paragraphs = [];
-			details.forEach( info => {
-				paragraphs.push( <p style={{ fontSize: '75%' }} key={info["age"]}> {info["age"]}  {info["total"]}  {info["school1"]}  {info["school2"]}  {info["school3"]}  {info["school4"]}  {info["work"]}  {info["other"]}</p> );
-			});
-			return paragraphs;
-		})()}
-		</div>
-		
+    const headers = ['Residential Low','Residential Medium','Residential High','Commercial','Industrial','Storage','Office'];
+	
+	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.5 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
+	  <WorkforceLevel                      levelName='Education' values={headers} />
+	  <WorkforceLevel levelColor='#808080' levelName='Uneducated' values={jobs[0]} />
+	  <WorkforceLevel levelColor='#B09868' levelName='Poorly Educated' values={jobs[1]} />
+	  <WorkforceLevel levelColor='#368A2E' levelName='Educated' values={jobs[2]} />
+	  <WorkforceLevel levelColor='#B981C0' levelName='Well Educated' values={jobs[3]} />
+	  <WorkforceLevel levelColor='#5796D1' levelName='Highly Educated' values={jobs[4]} />
+	  <WorkforceLevel                      levelName='TOTAL' values={jobs[5]} />
 	</$Panel>
 }
 

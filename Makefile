@@ -24,6 +24,10 @@ build: clean restore build-ui
 dev-demand:
 	@npx esbuild ui_src/demandfactors.jsx --bundle --outfile=dist/demandfactors.js
 	copy dist\demandfactors.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.demandfactors.js"
+	
+dev-workforce:
+	@npx esbuild ui_src/workforce.jsx --bundle --outfile=dist/workforce.js
+	copy dist\workforce.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.workforce.js"
 
 package-win:
 	@-mkdir dist
