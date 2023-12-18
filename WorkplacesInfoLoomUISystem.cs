@@ -29,6 +29,8 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         public int Total; // assertions: Total=Service+Commercial+Industry+Office, Total=Employee+Empty
         public int Service; // jobs in city services
         public int Commercial; // jobs in commercial zones
+        public int Leisure; // jobs in commercial zones
+        public int Extractor; // jobs in industrial zones
         public int Industrial; // jobs in industrial zones
         public int Office; // jobs in office zones
         public int Employee; // employees
@@ -46,6 +48,10 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         writer.Write(info.Service);
         writer.PropertyName("commercial");
         writer.Write(info.Commercial);
+        writer.PropertyName("leisure");
+        writer.Write(info.Leisure);
+        writer.PropertyName("extractor");
+        writer.Write(info.Extractor);
         writer.PropertyName("industry");
         writer.Write(info.Industrial);
         writer.PropertyName("office");
@@ -86,7 +92,10 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         public ComponentTypeHandle<PrefabRef> m_PrefabRefHandle;
 
         [ReadOnly]
-        public ComponentTypeHandle<IndustrialCompany> m_IndustrialCompanyHandle; // ExtractorCompany
+        public ComponentTypeHandle<IndustrialCompany> m_IndustrialCompanyHandle;
+
+        [ReadOnly]
+        public ComponentTypeHandle<Game.Companies.ExtractorCompany> m_ExtractorCompanyHandle;
 
         [ReadOnly]
         public ComponentTypeHandle<CommercialCompany> m_CommercialCompanyHandle;
@@ -101,7 +110,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         public ComponentLookup<SpawnableBuildingData> m_SpawnableBuildingFromEntity;
 
         [ReadOnly]
-        public ComponentLookup<ResourceData> m_ResourceDatas;
+        public ComponentLookup<ResourceData> m_ResourceDatas; // this is for future use to access resource prefab data
 
         [ReadOnly]
         public ResourcePrefabs m_ResourcePrefabs;
@@ -124,6 +133,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
             NativeArray<WorkProvider> nativeArray4 = chunk.GetNativeArray(ref m_WorkProviderHandle);
             BufferAccessor<Employee> bufferAccessor = chunk.GetBufferAccessor(ref m_EmployeeHandle);
             BufferAccessor<Resources> bufferResources = chunk.GetBufferAccessor(ref m_ResourcesHandle);
+            bool isExtractor = chunk.Has(ref m_ExtractorCompanyHandle);
             bool isIndustrial = chunk.Has(ref m_IndustrialCompanyHandle);
             bool isCommercial = chunk.Has(ref m_CommercialCompanyHandle);
             bool isService = !(isIndustrial || isCommercial);
@@ -149,26 +159,54 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                 m_IntResults[1] += employees.Length;
                 m_EmploymentDataResults[0] += workplacesData;
                 m_EmploymentDataResults[1] += employeesData;
+
                 // Office detection
                 // This is a bit hacky approach based on produced resource
                 // The game uses resource weight to distinguish Office companies from Industrial ones
-                // It is however retrieved from Resource Prefab
+                // It is however retrieved from Resource Prefab (ResourceData.m_Weight)
                 // Here I am doing 2 simplifications until I'll learn a better way to do it
                 // a) I am assuming that the last resource in the buffer is the one produced; Idk if this holds always
                 // b) I don't retrieve prefab, just check for Software, Media, Telecom and Financial; there won't be new resources any time soon, so...
                 DynamicBuffer<Resources> resources = bufferResources[i];
                 //string res = "";
                 bool isOffice = false;
+                bool isLeisure = false;
                 Resource lastRes = Resource.NoResource;
                 if (resources.Length > 0)
                 {
                     lastRes = resources[resources.Length - 1].m_Resource;
                     //res += $" {compRes.m_Resource} {compRes.m_Amount}";
                     isOffice = (lastRes == Resource.Software || lastRes == Resource.Telecom || lastRes == Resource.Financial || lastRes == Resource.Media);
+                    isLeisure = lastRes != Resource.Money;
                 }
-                Plugin.Log($"company {isCommercial}/{isIndustrial}/{isOffice}:{lastRes}");
+                Plugin.Log($"company {isCommercial}/{isLeisure}/{isIndustrial}/{isExtractor}/{isOffice}:{lastRes}");
+
+                WorkplacesAtLevelInfo ProcessLevel(WorkplacesAtLevelInfo info, int workplaces, int employees)
+                {
+                    //WorkplacesAtLevelInfo info0 = m_Results[level];
+                    info.Total += workplaces;
+                    if (isService) info.Service += workplaces;
+                    if (isCommercial)
+                    {
+                        if (isLeisure) info.Leisure += workplaces;
+                        else info.Commercial = workplaces;
+                    }
+                    if (isIndustrial)
+                    {
+                        if (isExtractor) info.Extractor += workplaces;
+                        else if(isOffice) info.Office += workplaces;
+                        else info.Industrial += workplaces;
+                    }
+                    info.Employee += employees;
+                    info.Open += workplaces - employees;
+                    return info;
+                }
+
                 // Work with a local variable to avoid CS0206 error
-                WorkplacesAtLevelInfo info0 = m_Results[0]; // uneducated
+
+                // uneducated
+                /*
+                WorkplacesAtLevelInfo info0 = m_Results[0];
                 info0.Total += workplacesData.uneducated;
                 if (isService) info0.Service += workplacesData.uneducated;
                 if (isCommercial) info0.Commercial += workplacesData.uneducated;
@@ -176,7 +214,12 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                 info0.Employee += employeesData.uneducated;
                 info0.Open += workplacesData.uneducated - employeesData.uneducated;
                 m_Results[0] = info0;
-                WorkplacesAtLevelInfo info1 = m_Results[1]; // poorlyEducated
+                */
+                m_Results[0] = ProcessLevel(m_Results[0], workplacesData.uneducated, employeesData.uneducated);
+
+                // poorlyEducated
+                /*
+                WorkplacesAtLevelInfo info1 = m_Results[1]; 
                 info1.Total += workplacesData.poorlyEducated;
                 if (isService) info1.Service += workplacesData.poorlyEducated;
                 if (isCommercial) info1.Commercial += workplacesData.poorlyEducated;
@@ -184,7 +227,12 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                 info1.Employee += employeesData.poorlyEducated;
                 info1.Open += workplacesData.poorlyEducated - employeesData.poorlyEducated;
                 m_Results[1] = info1;
-                WorkplacesAtLevelInfo info2 = m_Results[2]; // educated
+                */
+                m_Results[1] = ProcessLevel(m_Results[1], workplacesData.poorlyEducated, employeesData.poorlyEducated);
+
+                // educated
+                /*
+                WorkplacesAtLevelInfo info2 = m_Results[2];
                 info2.Total += workplacesData.educated;
                 if (isService) info2.Service += workplacesData.educated;
                 if (isCommercial) info2.Commercial += workplacesData.educated;
@@ -192,7 +240,12 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                 info2.Employee += employeesData.educated;
                 info2.Open += workplacesData.educated - employeesData.educated;
                 m_Results[2] = info2;
-                WorkplacesAtLevelInfo info3 = m_Results[3]; // wellEducated
+                */
+                m_Results[2] = ProcessLevel(m_Results[2], workplacesData.educated, employeesData.educated);
+
+                // wellEducated
+                /*
+                WorkplacesAtLevelInfo info3 = m_Results[3]; 
                 info3.Total += workplacesData.wellEducated;
                 if (isService) info3.Service += workplacesData.wellEducated;
                 if (isCommercial) info3.Commercial += workplacesData.wellEducated;
@@ -200,7 +253,12 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                 info3.Employee += employeesData.wellEducated;
                 info3.Open += workplacesData.wellEducated - employeesData.wellEducated;
                 m_Results[3] = info3;
-                WorkplacesAtLevelInfo info4 = m_Results[4]; // highlyEducated
+                */
+                m_Results[3] = ProcessLevel(m_Results[3], workplacesData.wellEducated, employeesData.wellEducated);
+
+                // highlyEducated
+                /*
+                WorkplacesAtLevelInfo info4 = m_Results[4]; 
                 info4.Total += workplacesData.highlyEducated;
                 if (isService) info4.Service += workplacesData.highlyEducated;
                 if (isCommercial) info4.Commercial += workplacesData.highlyEducated;
@@ -208,6 +266,8 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                 info4.Employee += employeesData.highlyEducated;
                 info4.Open += workplacesData.highlyEducated - employeesData.highlyEducated;
                 m_Results[4] = info4;
+                */
+                m_Results[4] = ProcessLevel(m_Results[4], workplacesData.highlyEducated, employeesData.highlyEducated);
             }
         }
 
@@ -235,6 +295,9 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         public ComponentTypeHandle<PropertyRenter> __Game_Buildings_PropertyRenter_RO_ComponentTypeHandle;
 
         [ReadOnly]
+        public ComponentTypeHandle<Game.Companies.ExtractorCompany> __Game_Companies_ExtractorCompany_RO_ComponentTypeHandle;
+
+        [ReadOnly]
         public ComponentTypeHandle<IndustrialCompany> __Game_Companies_IndustrialCompany_RO_ComponentTypeHandle;
 
         [ReadOnly]
@@ -259,6 +322,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
             __Game_Companies_Employee_RO_BufferTypeHandle = state.GetBufferTypeHandle<Employee>(isReadOnly: true);
             __Game_Economy_Resources_RO_BufferTypeHandle = state.GetBufferTypeHandle<Resources>(isReadOnly: true);
             __Game_Companies_WorkProvider_RO_ComponentTypeHandle = state.GetComponentTypeHandle<WorkProvider>(isReadOnly: true);
+            __Game_Companies_ExtractorCompany_RO_ComponentTypeHandle = state.GetComponentTypeHandle<Game.Companies.ExtractorCompany>(isReadOnly: true);
             __Game_Companies_IndustrialCompany_RO_ComponentTypeHandle = state.GetComponentTypeHandle<IndustrialCompany>(isReadOnly: true);
             __Game_Companies_CommercialCompany_RO_ComponentTypeHandle = state.GetComponentTypeHandle<CommercialCompany>(isReadOnly: true);
             __Game_Buildings_PropertyRenter_RO_ComponentTypeHandle = state.GetComponentTypeHandle<PropertyRenter>(isReadOnly: true);
@@ -279,13 +343,13 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
 
     private EntityQuery m_WorkplaceModifiedQuery;
 
-    private GetterValueBinding<EmploymentData> m_EmployeesData;
+    //private GetterValueBinding<EmploymentData> m_EmployeesData;
 
-    private GetterValueBinding<EmploymentData> m_WorkplacesData;
+    //private GetterValueBinding<EmploymentData> m_WorkplacesData;
 
-    private GetterValueBinding<int> m_Workplaces;
+    //private GetterValueBinding<int> m_Workplaces;
 
-    private GetterValueBinding<int> m_Workers;
+    //private GetterValueBinding<int> m_Workers;
 
     private RawValueBinding m_uiResults;
 
@@ -355,10 +419,10 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         m_IntResults = new NativeArray<int>(2, Allocator.Persistent);
         m_EmploymentDataResults = new NativeArray<EmploymentData>(2, Allocator.Persistent);
         m_Results = new NativeArray<WorkplacesAtLevelInfo>(5, Allocator.Persistent); // there are 5 education levels
-        AddBinding(m_WorkplacesData = new GetterValueBinding<EmploymentData>(kGroup, "ilWorkplacesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[0], new ValueWriter<EmploymentData>()));
-        AddBinding(m_EmployeesData = new GetterValueBinding<EmploymentData>(kGroup, "ilEmployeesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[1], new ValueWriter<EmploymentData>()));
-        AddBinding(m_Workplaces = new GetterValueBinding<int>(kGroup, "ilWorkplaces", () => (m_IntResults.IsCreated && m_IntResults.Length == 2) ? m_IntResults[0] : 0));
-        AddBinding(m_Workers = new GetterValueBinding<int>(kGroup, "ilEmployees", () => (m_IntResults.IsCreated && m_IntResults.Length == 2) ? m_IntResults[1] : 0));
+        //AddBinding(m_WorkplacesData = new GetterValueBinding<EmploymentData>(kGroup, "ilWorkplacesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[0], new ValueWriter<EmploymentData>()));
+        //AddBinding(m_EmployeesData = new GetterValueBinding<EmploymentData>(kGroup, "ilEmployeesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[1], new ValueWriter<EmploymentData>()));
+        //AddBinding(m_Workplaces = new GetterValueBinding<int>(kGroup, "ilWorkplaces", () => (m_IntResults.IsCreated && m_IntResults.Length == 2) ? m_IntResults[0] : 0));
+        //AddBinding(m_Workers = new GetterValueBinding<int>(kGroup, "ilEmployees", () => (m_IntResults.IsCreated && m_IntResults.Length == 2) ? m_IntResults[1] : 0));
 
         AddBinding(m_uiResults = new RawValueBinding(kGroup, "ilWorkplaces", delegate (IJsonWriter binder)
         {
@@ -386,23 +450,29 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
             return;
 
         ResetResults();
+
+        // update handles
         __TypeHandle.__Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Prefabs_WorkplaceData_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Buildings_PropertyRenter_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Companies_WorkProvider_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
+        __TypeHandle.__Game_Companies_ExtractorCompany_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Companies_IndustrialCompany_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Companies_CommercialCompany_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Companies_Employee_RO_BufferTypeHandle.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Economy_Resources_RO_BufferTypeHandle.Update(ref base.CheckedStateRef);
         __TypeHandle.__Unity_Entities_Entity_TypeHandle.Update(ref base.CheckedStateRef);
+
+        // prepare and schedule job
         CalculateWorkplaceDataJob jobData = default(CalculateWorkplaceDataJob);
         jobData.m_EntityHandle = __TypeHandle.__Unity_Entities_Entity_TypeHandle;
         jobData.m_EmployeeHandle = __TypeHandle.__Game_Companies_Employee_RO_BufferTypeHandle;
         jobData.m_ResourcesHandle = __TypeHandle.__Game_Economy_Resources_RO_BufferTypeHandle; // Game.Economy.Resources
         jobData.m_WorkProviderHandle = __TypeHandle.__Game_Companies_WorkProvider_RO_ComponentTypeHandle;
         jobData.m_PropertyRenterHandle = __TypeHandle.__Game_Buildings_PropertyRenter_RO_ComponentTypeHandle;
+        jobData.m_ExtractorCompanyHandle = __TypeHandle.__Game_Companies_ExtractorCompany_RO_ComponentTypeHandle;
         jobData.m_IndustrialCompanyHandle = __TypeHandle.__Game_Companies_IndustrialCompany_RO_ComponentTypeHandle; // Game.Companies.IndustrialCompany
         jobData.m_CommercialCompanyHandle = __TypeHandle.__Game_Companies_CommercialCompany_RO_ComponentTypeHandle;
         jobData.m_PrefabRefHandle = __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentTypeHandle;
@@ -414,15 +484,15 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         jobData.m_Results = m_Results;
         jobData.m_ResourcePrefabs = m_ResourceSystem.GetPrefabs();
         JobChunkExtensions.Schedule(jobData, m_WorkplaceQuery, base.Dependency).Complete();
-        m_EmployeesData.Update();
-        m_WorkplacesData.Update();
-        m_Workplaces.Update();
-        m_Workers.Update();
-        m_uiResults.Update();
 
+        // update ui bindings
+        //m_EmployeesData.Update();
+        //m_WorkplacesData.Update();
+        //m_Workplaces.Update();
+        //m_Workers.Update();
+        m_uiResults.Update();
         // DEBUG
         //Utils.InspectComponentsInChunks(EntityManager, m_WorkplaceQuery, "JOBS");
-
     }
 
     private void ResetResults()
@@ -438,6 +508,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         }
     }
 
+    /* not used
     private int GetWorkplaces()
     {
         if (!m_IntResults.IsCreated || m_IntResults.Length != 2)
@@ -455,7 +526,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         }
         return m_IntResults[1];
     }
-
+    
     private EmploymentData GetWorkplacesData()
     {
         if (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2)
@@ -473,6 +544,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         }
         return m_EmploymentDataResults[1];
     }
+    */
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void __AssignQueries(ref SystemState state)
