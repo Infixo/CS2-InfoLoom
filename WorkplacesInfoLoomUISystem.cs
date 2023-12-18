@@ -37,6 +37,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         public int Open; // open positions
         public WorkplacesAtLevelInfo(int _level) { Level = _level; }
     }
+
     private static void WriteData(IJsonWriter writer, WorkplacesAtLevelInfo info)
     {
         writer.TypeBegin("workplacesAtLevelInfo");
@@ -63,12 +64,14 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         writer.TypeEnd();
     }
 
+    /* not used
     private enum Result
     {
         Workplaces,
         Employees,
         Count
     }
+    */
 
     [BurstCompile]
     private struct CalculateWorkplaceDataJob : IJobChunk
@@ -109,15 +112,15 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         [ReadOnly]
         public ComponentLookup<SpawnableBuildingData> m_SpawnableBuildingFromEntity;
 
-        [ReadOnly]
-        public ComponentLookup<ResourceData> m_ResourceDatas; // this is for future use to access resource prefab data
+        //[ReadOnly]
+        //public ComponentLookup<ResourceData> m_ResourceDatas; // TODO: this is for future use to access resource prefab data
 
-        [ReadOnly]
-        public ResourcePrefabs m_ResourcePrefabs;
+        //[ReadOnly]
+        //public ResourcePrefabs m_ResourcePrefabs; // TODO: this is for future use to access resource prefab data
 
-        public NativeArray<int> m_IntResults;
+        //public NativeArray<int> m_IntResults;
 
-        public NativeArray<EmploymentData> m_EmploymentDataResults;
+        //public NativeArray<EmploymentData> m_EmploymentDataResults;
 
         public NativeArray<WorkplacesAtLevelInfo> m_Results;
 
@@ -153,12 +156,14 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                         buildingLevel = m_SpawnableBuildingFromEntity[prefabRef2.m_Prefab].m_Level;
                     }
                 }
-                EmploymentData workplacesData = EmploymentData.GetWorkplacesData(workProvider.m_MaxWorkers, buildingLevel, workplaceData.m_Complexity); // this holds workplaces for each level
-                EmploymentData employeesData = EmploymentData.GetEmployeesData(employees, workplacesData.total - employees.Length); // this holds employees for each level
-                m_IntResults[0] += workplacesData.total;
-                m_IntResults[1] += employees.Length;
-                m_EmploymentDataResults[0] += workplacesData;
-                m_EmploymentDataResults[1] += employeesData;
+                // this holds workplaces for each level
+                EmploymentData workplacesData = EmploymentData.GetWorkplacesData(workProvider.m_MaxWorkers, buildingLevel, workplaceData.m_Complexity);
+                // this holds employees for each level
+                EmploymentData employeesData = EmploymentData.GetEmployeesData(employees, workplacesData.total - employees.Length);
+                //m_IntResults[0] += workplacesData.total;
+                //m_IntResults[1] += employees.Length;
+                //m_EmploymentDataResults[0] += workplacesData;
+                //m_EmploymentDataResults[1] += employeesData;
 
                 // Office detection
                 // This is a bit hacky approach based on produced resource
@@ -168,23 +173,21 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                 // a) I am assuming that the last resource in the buffer is the one produced; Idk if this holds always
                 // b) I don't retrieve prefab, just check for Software, Media, Telecom and Financial; there won't be new resources any time soon, so...
                 DynamicBuffer<Resources> resources = bufferResources[i];
-                //string res = "";
                 bool isOffice = false;
                 bool isMoney = false;
                 Resource lastRes = Resource.NoResource;
                 if (resources.Length > 0)
                 {
                     lastRes = resources[resources.Length - 1].m_Resource;
-                    //res += $" {compRes.m_Resource} {compRes.m_Amount}";
                     isOffice = (lastRes == Resource.Software || lastRes == Resource.Telecom || lastRes == Resource.Financial || lastRes == Resource.Media);
                     isMoney = lastRes == Resource.Money;
                 }
                 //Plugin.Log($"company {isCommercial}/{isMoney}/{isIndustrial}/{isExtractor}/{isOffice}:{lastRes} " +
                 //    $"{workplacesData.uneducated} {workplacesData.poorlyEducated} {workplacesData.educated} {workplacesData.wellEducated} {workplacesData.highlyEducated}");
 
+                // Work with a local variable to avoid CS0206 error
                 WorkplacesAtLevelInfo ProcessLevel(WorkplacesAtLevelInfo info, int workplaces, int employees)
                 {
-                    //WorkplacesAtLevelInfo info0 = m_Results[level];
                     info.Total += workplaces;
                     if (isService) info.Service += workplaces;
                     if (isCommercial)
@@ -203,71 +206,15 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                     return info;
                 }
 
-                // Work with a local variable to avoid CS0206 error
-
                 // uneducated
-                /*
-                WorkplacesAtLevelInfo info0 = m_Results[0];
-                info0.Total += workplacesData.uneducated;
-                if (isService) info0.Service += workplacesData.uneducated;
-                if (isCommercial) info0.Commercial += workplacesData.uneducated;
-                if (isIndustrial) info0.Industrial += workplacesData.uneducated;
-                info0.Employee += employeesData.uneducated;
-                info0.Open += workplacesData.uneducated - employeesData.uneducated;
-                m_Results[0] = info0;
-                */
                 m_Results[0] = ProcessLevel(m_Results[0], workplacesData.uneducated, employeesData.uneducated);
-
                 // poorlyEducated
-                /*
-                WorkplacesAtLevelInfo info1 = m_Results[1]; 
-                info1.Total += workplacesData.poorlyEducated;
-                if (isService) info1.Service += workplacesData.poorlyEducated;
-                if (isCommercial) info1.Commercial += workplacesData.poorlyEducated;
-                if (isIndustrial) info1.Industrial += workplacesData.poorlyEducated;
-                info1.Employee += employeesData.poorlyEducated;
-                info1.Open += workplacesData.poorlyEducated - employeesData.poorlyEducated;
-                m_Results[1] = info1;
-                */
                 m_Results[1] = ProcessLevel(m_Results[1], workplacesData.poorlyEducated, employeesData.poorlyEducated);
-
                 // educated
-                /*
-                WorkplacesAtLevelInfo info2 = m_Results[2];
-                info2.Total += workplacesData.educated;
-                if (isService) info2.Service += workplacesData.educated;
-                if (isCommercial) info2.Commercial += workplacesData.educated;
-                if (isIndustrial) info2.Industrial += workplacesData.educated;
-                info2.Employee += employeesData.educated;
-                info2.Open += workplacesData.educated - employeesData.educated;
-                m_Results[2] = info2;
-                */
                 m_Results[2] = ProcessLevel(m_Results[2], workplacesData.educated, employeesData.educated);
-
                 // wellEducated
-                /*
-                WorkplacesAtLevelInfo info3 = m_Results[3]; 
-                info3.Total += workplacesData.wellEducated;
-                if (isService) info3.Service += workplacesData.wellEducated;
-                if (isCommercial) info3.Commercial += workplacesData.wellEducated;
-                if (isIndustrial) info3.Industrial += workplacesData.wellEducated;
-                info3.Employee += employeesData.wellEducated;
-                info3.Open += workplacesData.wellEducated - employeesData.wellEducated;
-                m_Results[3] = info3;
-                */
                 m_Results[3] = ProcessLevel(m_Results[3], workplacesData.wellEducated, employeesData.wellEducated);
-
                 // highlyEducated
-                /*
-                WorkplacesAtLevelInfo info4 = m_Results[4]; 
-                info4.Total += workplacesData.highlyEducated;
-                if (isService) info4.Service += workplacesData.highlyEducated;
-                if (isCommercial) info4.Commercial += workplacesData.highlyEducated;
-                if (isIndustrial) info4.Industrial += workplacesData.highlyEducated;
-                info4.Employee += employeesData.highlyEducated;
-                info4.Open += workplacesData.highlyEducated - employeesData.highlyEducated;
-                m_Results[4] = info4;
-                */
                 m_Results[4] = ProcessLevel(m_Results[4], workplacesData.highlyEducated, employeesData.highlyEducated);
             }
         }
@@ -338,11 +285,11 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
 
     private SimulationSystem m_SimulationSystem;
 
-    private ResourceSystem m_ResourceSystem;
+    //private ResourceSystem m_ResourceSystem; // TODO: for future
 
     private EntityQuery m_WorkplaceQuery;
 
-    private EntityQuery m_WorkplaceModifiedQuery;
+    //private EntityQuery m_WorkplaceModifiedQuery;
 
     //private GetterValueBinding<EmploymentData> m_EmployeesData;
 
@@ -354,9 +301,9 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
 
     private RawValueBinding m_uiResults;
 
-    private NativeArray<int> m_IntResults;
+    //private NativeArray<int> m_IntResults;
 
-    private NativeArray<EmploymentData> m_EmploymentDataResults;
+    //private NativeArray<EmploymentData> m_EmploymentDataResults;
 
     private NativeArray<WorkplacesAtLevelInfo> m_Results;
 
@@ -384,8 +331,8 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         base.OnCreate();
 
         m_SimulationSystem = base.World.GetOrCreateSystemManaged<SimulationSystem>(); // TODO: use UIUpdateState eventually
-        m_ResourceSystem = base.World.GetOrCreateSystemManaged<ResourceSystem>();
-
+        //m_ResourceSystem = base.World.GetOrCreateSystemManaged<ResourceSystem>();
+        
         m_WorkplaceQuery = GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[3]
@@ -401,6 +348,8 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
             },
             None = new ComponentType[1] { ComponentType.ReadOnly<Temp>() }
         });
+
+        /* not used
         m_WorkplaceModifiedQuery = GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[3]
@@ -419,7 +368,10 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         });
         m_IntResults = new NativeArray<int>(2, Allocator.Persistent);
         m_EmploymentDataResults = new NativeArray<EmploymentData>(2, Allocator.Persistent);
+        */
+
         m_Results = new NativeArray<WorkplacesAtLevelInfo>(6, Allocator.Persistent); // there are 5 education levels + 1 for totals
+
         //AddBinding(m_WorkplacesData = new GetterValueBinding<EmploymentData>(kGroup, "ilWorkplacesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[0], new ValueWriter<EmploymentData>()));
         //AddBinding(m_EmployeesData = new GetterValueBinding<EmploymentData>(kGroup, "ilEmployeesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[1], new ValueWriter<EmploymentData>()));
         //AddBinding(m_Workplaces = new GetterValueBinding<int>(kGroup, "ilWorkplaces", () => (m_IntResults.IsCreated && m_IntResults.Length == 2) ? m_IntResults[0] : 0));
@@ -439,8 +391,8 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
     [Preserve]
     protected override void OnDestroy()
     {
-        m_IntResults.Dispose();
-        m_EmploymentDataResults.Dispose();
+        //m_IntResults.Dispose();
+        //m_EmploymentDataResults.Dispose();
         m_Results.Dispose();
         base.OnDestroy();
     }
@@ -480,10 +432,10 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         jobData.m_PrefabRefFromEntity = __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentLookup;
         jobData.m_WorkplaceDataFromEntity = __TypeHandle.__Game_Prefabs_WorkplaceData_RO_ComponentLookup;
         jobData.m_SpawnableBuildingFromEntity = __TypeHandle.__Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup;
-        jobData.m_IntResults = m_IntResults;
-        jobData.m_EmploymentDataResults = m_EmploymentDataResults;
+        //jobData.m_IntResults = m_IntResults;
+        //jobData.m_EmploymentDataResults = m_EmploymentDataResults;
         jobData.m_Results = m_Results;
-        jobData.m_ResourcePrefabs = m_ResourceSystem.GetPrefabs();
+        //jobData.m_ResourcePrefabs = m_ResourceSystem.GetPrefabs(); // TODO
         JobChunkExtensions.Schedule(jobData, m_WorkplaceQuery, base.Dependency).Complete();
 
         // calculate totals
@@ -513,11 +465,13 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
 
     private void ResetResults()
     {
+        /* not used
         for (int i = 0; i < 2; i++)
         {
             m_EmploymentDataResults[i] = default(EmploymentData);
             m_IntResults[i] = 0;
         }
+        */
         for (int i = 0; i < 6; i++) // there are 5 education levels + 1 for totals
         {
             m_Results[i] = new WorkplacesAtLevelInfo(i);
