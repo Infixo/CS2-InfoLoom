@@ -170,16 +170,17 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                 DynamicBuffer<Resources> resources = bufferResources[i];
                 //string res = "";
                 bool isOffice = false;
-                bool isLeisure = false;
+                bool isMoney = false;
                 Resource lastRes = Resource.NoResource;
                 if (resources.Length > 0)
                 {
                     lastRes = resources[resources.Length - 1].m_Resource;
                     //res += $" {compRes.m_Resource} {compRes.m_Amount}";
                     isOffice = (lastRes == Resource.Software || lastRes == Resource.Telecom || lastRes == Resource.Financial || lastRes == Resource.Media);
-                    isLeisure = lastRes != Resource.Money;
+                    isMoney = lastRes == Resource.Money;
                 }
-                Plugin.Log($"company {isCommercial}/{isLeisure}/{isIndustrial}/{isExtractor}/{isOffice}:{lastRes}");
+                //Plugin.Log($"company {isCommercial}/{isMoney}/{isIndustrial}/{isExtractor}/{isOffice}:{lastRes} " +
+                //    $"{workplacesData.uneducated} {workplacesData.poorlyEducated} {workplacesData.educated} {workplacesData.wellEducated} {workplacesData.highlyEducated}");
 
                 WorkplacesAtLevelInfo ProcessLevel(WorkplacesAtLevelInfo info, int workplaces, int employees)
                 {
@@ -188,8 +189,8 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                     if (isService) info.Service += workplaces;
                     if (isCommercial)
                     {
-                        if (isLeisure) info.Leisure += workplaces;
-                        else info.Commercial = workplaces;
+                        if (isMoney) info.Commercial += workplaces;
+                        else info.Leisure += workplaces;
                     }
                     if (isIndustrial)
                     {
@@ -418,7 +419,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         });
         m_IntResults = new NativeArray<int>(2, Allocator.Persistent);
         m_EmploymentDataResults = new NativeArray<EmploymentData>(2, Allocator.Persistent);
-        m_Results = new NativeArray<WorkplacesAtLevelInfo>(5, Allocator.Persistent); // there are 5 education levels
+        m_Results = new NativeArray<WorkplacesAtLevelInfo>(6, Allocator.Persistent); // there are 5 education levels + 1 for totals
         //AddBinding(m_WorkplacesData = new GetterValueBinding<EmploymentData>(kGroup, "ilWorkplacesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[0], new ValueWriter<EmploymentData>()));
         //AddBinding(m_EmployeesData = new GetterValueBinding<EmploymentData>(kGroup, "ilEmployeesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[1], new ValueWriter<EmploymentData>()));
         //AddBinding(m_Workplaces = new GetterValueBinding<int>(kGroup, "ilWorkplaces", () => (m_IntResults.IsCreated && m_IntResults.Length == 2) ? m_IntResults[0] : 0));
@@ -485,6 +486,21 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         jobData.m_ResourcePrefabs = m_ResourceSystem.GetPrefabs();
         JobChunkExtensions.Schedule(jobData, m_WorkplaceQuery, base.Dependency).Complete();
 
+        // calculate totals
+        WorkplacesAtLevelInfo totals = new WorkplacesAtLevelInfo(-1);
+        for (int i = 0; i < 5; i++)
+        {
+            totals.Total += m_Results[i].Total;
+            totals.Service += m_Results[i].Service;
+            totals.Commercial += m_Results[i].Commercial;
+            totals.Leisure += m_Results[i].Leisure;
+            totals.Extractor += m_Results[i].Extractor;
+            totals.Industrial += m_Results[i].Industrial;
+            totals.Office += m_Results[i].Office;
+            totals.Employee += m_Results[i].Employee;
+            totals.Open += m_Results[i].Open;
+        }
+        m_Results[5] = totals;
         // update ui bindings
         //m_EmployeesData.Update();
         //m_WorkplacesData.Update();
@@ -502,7 +518,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
             m_EmploymentDataResults[i] = default(EmploymentData);
             m_IntResults[i] = 0;
         }
-        for (int i = 0; i < 5; i++) // there are 5 education levels
+        for (int i = 0; i < 6; i++) // there are 5 education levels + 1 for totals
         {
             m_Results[i] = new WorkplacesAtLevelInfo(i);
         }
