@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using Colossal;
 using Colossal.Collections;
 using Colossal.Serialization.Entities;
+using Colossal.UI.Binding;
 using Game.Agents;
 using Game.Buildings;
 using Game.Citizens;
@@ -16,11 +17,14 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Scripting;
+using Game;
+using Game.UI;
+using Game.Simulation; // TODO: use UIUpdateState and Advance() eventully...
 
-namespace Game.Simulation;
+namespace InfoLoom;
 
 [CompilerGenerated]
-public class CountEmploymentSystem : GameSystemBase, IDefaultSerializable, ISerializable
+public class WorkforceInfoLoomUISystem : UISystemBase
 {
     [BurstCompile]
     private struct CountEmploymentJob : IJobChunk
@@ -347,6 +351,10 @@ public class CountEmploymentSystem : GameSystemBase, IDefaultSerializable, ISeri
         }
     }
 
+    private const string kGroup = "populationInfo";
+
+    private SimulationSystem m_SimulationSystem;
+
     private EntityQuery m_AllAdultGroup;
 
     [DebugWatchValue]
@@ -412,6 +420,11 @@ public class CountEmploymentSystem : GameSystemBase, IDefaultSerializable, ISeri
 
     private TypeHandle __TypeHandle;
 
+    // InfoLoom
+    private RawValueBinding m_uiResults;
+
+    private NativeArray<int> m_Results;
+
     public override int GetUpdateInterval(SystemUpdatePhase phase)
     {
         return 16;
@@ -444,6 +457,8 @@ public class CountEmploymentSystem : GameSystemBase, IDefaultSerializable, ISeri
     protected override void OnCreate()
     {
         base.OnCreate();
+        m_SimulationSystem = base.World.GetOrCreateSystemManaged<SimulationSystem>(); // TODO: use UIUpdateState eventually
+        // main query
         m_AllAdultGroup = GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[1] { ComponentType.ReadOnly<Citizen>() },
@@ -454,6 +469,7 @@ public class CountEmploymentSystem : GameSystemBase, IDefaultSerializable, ISeri
                 ComponentType.ReadOnly<Temp>()
             }
         });
+        // data
         m_Workers = new NativeValue<int>(Allocator.Persistent);
         m_Adults = new NativeValue<int>(Allocator.Persistent);
         m_Unemployed = new NativeValue<int>(Allocator.Persistent);
@@ -479,6 +495,18 @@ public class CountEmploymentSystem : GameSystemBase, IDefaultSerializable, ISeri
         m_PotentialWorkersByEducation2 = new NativeCounter(Allocator.Persistent);
         m_PotentialWorkersByEducation3 = new NativeCounter(Allocator.Persistent);
         m_PotentialWorkersByEducation4 = new NativeCounter(Allocator.Persistent);
+        // InfoLoom
+        m_Results = new NativeArray<int>(6, Allocator.Persistent); // there are 5 education levels + 1 for totals
+
+        AddBinding(m_uiResults = new RawValueBinding(kGroup, "ilWorkforce", delegate (IJsonWriter binder)
+        {
+            binder.ArrayBegin(m_Results.Length);
+            for (int i = 0; i < m_Results.Length; i++)
+                binder.Write(m_Results[i]);
+            binder.ArrayEnd();
+        }));
+
+        Plugin.Log("WorkplacesInfoLoomUISystem created.");
     }
 
     [Preserve]
@@ -509,9 +537,12 @@ public class CountEmploymentSystem : GameSystemBase, IDefaultSerializable, ISeri
         m_PotentialWorkersByEducation2.Dispose();
         m_PotentialWorkersByEducation3.Dispose();
         m_PotentialWorkersByEducation4.Dispose();
+        // InfoLoom
+        m_Results.Dispose();
         base.OnDestroy();
     }
 
+    /* not used
     public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
     {
         writer.Write(m_EmployableByEducation);
@@ -529,15 +560,23 @@ public class CountEmploymentSystem : GameSystemBase, IDefaultSerializable, ISeri
             reader.Read(m_UnemploymentByEducation);
         }
     }
+    */
 
+    /* not used (serialization)
     public void SetDefaults(Context context)
     {
         m_Unemployment.value = 0;
     }
+    */
 
     [Preserve]
     protected override void OnUpdate()
     {
+        if (m_SimulationSystem.frameIndex % 128 != 77)
+            return;
+
+        ResetResults();
+
         __TypeHandle.__Game_Citizens_Household_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Objects_OutsideConnection_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Buildings_PropertyRenter_RO_ComponentLookup.Update(ref base.CheckedStateRef);
@@ -605,6 +644,25 @@ public class CountEmploymentSystem : GameSystemBase, IDefaultSerializable, ISeri
         SumEmploymentJob jobData2 = sumEmploymentJob;
         base.Dependency = IJobExtensions.Schedule(jobData2, dependsOn);
         m_WriteDependencies = base.Dependency;
+
+        // InfoLoom
+        base.Dependency.Complete(); // finish the job
+        m_uiResults.Update(); // update UI
+    }
+
+    private void ResetResults()
+    {
+        /* not used
+        for (int i = 0; i < 2; i++)
+        {
+            m_EmploymentDataResults[i] = default(EmploymentData);
+            m_IntResults[i] = 0;
+        }
+        */
+        for (int i = 0; i < 6; i++) // there are 5 education levels + 1 for totals
+        {
+            m_Results[i] = i; //new WorkplacesAtLevelInfo(i);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -620,7 +678,7 @@ public class CountEmploymentSystem : GameSystemBase, IDefaultSerializable, ISeri
     }
 
     [Preserve]
-    public CountEmploymentSystem()
+    public WorkforceInfoLoomUISystem()
     {
     }
 }
