@@ -75,16 +75,29 @@ const TableExample = () => {
   );
 };
 
-const WorkforceLevel = ({levelColor, levelName, values}) => {
-  console.log(levelColor, levelName, values);
+const WorkforceLevel = ({levelColor, levelName, levelValues}) => {
+  console.log(levelColor); console.log(levelName); console.log(levelValues);
   return (
-		<div class="legend_fqG">
-		  <div class="color-legend_Bzi">
-		    <div class="symbol_aAH" style={{backgroundColor: levelColor }}></div>
-	        <div>{levelName}</div>
-		  </div>
-		  num1 num2 num3 num4
-		</div>  
+    <div class="legend_fqG">
+	  <div class="color-legend_Bzi">
+	    <div class="symbol_aAH" style={{backgroundColor: levelColor }}></div>
+	    <div>{levelName}</div>
+      </div>
+	  {/* level values */}
+      {levelValues.map((item, index) => (
+		<div key={index} class="labels_L7Q row_S2v small_ExK" style={{marginTop: '1rem'}}>
+		  <div class="row_S2v">{item["total"]}</div>
+		  <div class="row_S2v">{item["service"]}</div>
+		  <div class="row_S2v">{item["commercial"]}</div>
+		  <div class="row_S2v">{item["leisure"]}</div>
+		  <div class="row_S2v">{item["extractor"]}</div>
+		  <div class="row_S2v">{item["industry"]}</div>
+		  <div class="row_S2v">{item["office"]}</div>
+		  <div class="row_S2v">{item["employee"]}</div>
+		  <div class="row_S2v">{item["open"]}</div>
+		</div>
+	  ))}
+	</div>
   );
 };
 
@@ -100,8 +113,8 @@ const $Workforce = ({react}) => {
     // 4 - num students (in locals) 4 <= 1
     // 5 - num workers (in locals) 5 <= 1
     // 6 - oldest cim
-	const [jobs, setJobs] = react.useState([]);
-	useDataUpdate(react, 'workplaces.ilWorkplaces', setJobs);
+	const [workplaces, setWorkplaces] = react.useState([])
+	useDataUpdate(react, 'workplaces.ilWorkplaces', setWorkplaces)
 
 	//const [details, setDetails] = react.useState([])
 	//useDataUpdate(react, 'populationInfo.structureDetails', setDetails)
@@ -122,16 +135,44 @@ const $Workforce = ({react}) => {
 		window.dispatchEvent(event);
 	};
 
-    const headers = ['Residential Low','Residential Medium','Residential High','Commercial','Industrial','Storage','Office'];
+    const headers = {
+		total: 'Total',
+		service: 'Services',
+		commercial: 'Commercial',
+		leisure: 'Leisure',
+		extractor: 'Extractors',
+		industry: 'Industrial',
+		office: 'Office',
+		employee: 'Employees',
+		open: 'Open',
+	};
 	
-	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.5 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
+	//console.log("headers=",headers)
+	console.log("workplaces=",workplaces)
+	/*
+	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.3 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
 	  <WorkforceLevel                      levelName='Education' values={headers} />
-	  <WorkforceLevel levelColor='#808080' levelName='Uneducated' values={jobs[0]} />
-	  <WorkforceLevel levelColor='#B09868' levelName='Poorly Educated' values={jobs[1]} />
-	  <WorkforceLevel levelColor='#368A2E' levelName='Educated' values={jobs[2]} />
-	  <WorkforceLevel levelColor='#B981C0' levelName='Well Educated' values={jobs[3]} />
-	  <WorkforceLevel levelColor='#5796D1' levelName='Highly Educated' values={jobs[4]} />
-	  <WorkforceLevel                      levelName='TOTAL' values={jobs[5]} />
+	  <WorkforceLevel levelColor='#808080' levelName='Uneducated' values={workplaces[0]} />
+	  <WorkforceLevel levelColor='#B09868' levelName='Poorly Educated' values={workplaces[1]} />
+	  <WorkforceLevel levelColor='#368A2E' levelName='Educated' values={workplaces[2]} />
+	  <WorkforceLevel levelColor='#B981C0' levelName='Well Educated' values={workplaces[3]} />
+	  <WorkforceLevel levelColor='#5796D1' levelName='Highly Educated' values={workplaces[4]} />
+	  <WorkforceLevel                      levelName='TOTAL' values={workplaces[5]} />
+	</$Panel>
+	*/
+	/*
+	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.3 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
+	  <WorkforceLevel                      levelName='Education' levelValues={headers} />
+	  <WorkforceLevel levelColor='#808080' levelName='Uneducated' levelValues={headers} />
+	  <WorkforceLevel levelColor='#B09868' levelName='Poorly Educated' levelValues={headers} />
+	  <WorkforceLevel levelColor='#368A2E' levelName='Educated' levelValues={headers} />
+	  <WorkforceLevel levelColor='#B981C0' levelName='Well Educated' levelValues={headers} />
+	  <WorkforceLevel levelColor='#5796D1' levelName='Highly Educated' levelValues={headers} />
+	  <WorkforceLevel                      levelName='TOTAL' levelValues={headers} />
+	</$Panel>
+	*/
+	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.3 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
+	<p>TEST</p>
 	</$Panel>
 }
 
