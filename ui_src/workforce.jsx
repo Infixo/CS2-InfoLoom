@@ -55,45 +55,26 @@ const tableStyles = {
   },
 };
 
-const TableExample = () => {
-	
-  const rows = Array.from({ length: 6 }, (_, rowIndex) => (
-    <tr key={rowIndex}>
-      {Array.from({ length: 7 }, (_, colIndex) => (
-        <td key={colIndex} style={tableStyles.tableCell}>
-          <div class="row_S2v">Row {rowIndex + 1}, Col {colIndex + 1}</div>
-        </td>
-      ))}
-    </tr>
-  ));
-  return (
-    <div style={tableStyles.tableContainer}>
-      <table style={tableStyles.customTable}>
-        {rows}
-      </table>
-    </div>
-  );
-};
 
 const WorkforceLevel = ({levelColor, levelName, levelValues}) => {
   //console.log(levelColor); console.log(levelName); console.log(levelValues);
   // <div class="legend_fqG" style={{justifyContent: 'spaceEvenly'}}>
   return (
 
-    <div class="labels_L7Q row_S2v" style={{width: '95%', paddingTop: '3rem', paddingBottom: '3rem'}}>
-		<div style={{ display: 'flex', alignItems: 'center', width: '15%' }}>
+    <div class="labels_L7Q row_S2v" style={{width: '95%', paddingTop: '1rem', paddingBottom: '1rem'}}>
+		<div style={{ display: 'flex', alignItems: 'center', width: '18%' }}>
 			<div class="symbol_aAH" style={{backgroundColor: levelColor }}></div>
 			<div>{levelName}</div>
 		</div>
-		  <div class="row_S2v" style={{width: '10%'}}>{levelValues["total"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '10%'}}>{levelValues["service"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '10%'}}>{levelValues["commercial"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '10%'}}>{levelValues["leisure"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '10%'}}>{levelValues["extractor"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '10%'}}>{levelValues["industry"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '10%'}}>{levelValues["office"]}</div>
-		  <div class="row_S2v" style={{width: '10%'}}>{levelValues["employee"]}</div>
-		  <div class="row_S2v" style={{width: '10%'}}>{levelValues["open"]}</div>
+		  <div class="row_S2v"           style={{width: '10%', justifyContent: 'center'}}>{levelValues["total"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["service"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["commercial"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["leisure"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["extractor"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["industry"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["office"]}</div>
+		  <div class="row_S2v"           style={{width: '10%', justifyContent: 'center'}}>{levelValues["employee"]}</div>
+		  <div class="row_S2v"           style={{width: '10%', justifyContent: 'center'}}>{levelValues["open"]}</div>
 	</div>
   );
 };
@@ -153,41 +134,24 @@ const $Workforce = ({react}) => {
 
 	/*
 	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.3 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
-	  <WorkforceLevel                      levelName='Education' values={headers} />
-	  <WorkforceLevel levelColor='#808080' levelName='Uneducated' values={workplaces[0]} />
-	  <WorkforceLevel levelColor='#B09868' levelName='Poorly Educated' values={workplaces[1]} />
-	  <WorkforceLevel levelColor='#368A2E' levelName='Educated' values={workplaces[2]} />
-	  <WorkforceLevel levelColor='#B981C0' levelName='Well Educated' values={workplaces[3]} />
-	  <WorkforceLevel levelColor='#5796D1' levelName='Highly Educated' values={workplaces[4]} />
-	  <WorkforceLevel                      levelName='TOTAL' values={workplaces[5]} />
-	</$Panel>
-	*/
-	/*
-	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.3 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
-	  <WorkforceLevel                      levelName='Education' levelValues={headers} />
-	  <WorkforceLevel levelColor='#808080' levelName='Uneducated' levelValues={headers} />
-	  <WorkforceLevel levelColor='#B09868' levelName='Poorly Educated' levelValues={headers} />
-	  <WorkforceLevel levelColor='#368A2E' levelName='Educated' levelValues={headers} />
-	  <WorkforceLevel levelColor='#B981C0' levelName='Well Educated' levelValues={headers} />
-	  <WorkforceLevel levelColor='#5796D1' levelName='Highly Educated' levelValues={headers} />
-	  <WorkforceLevel                      levelName='TOTAL' levelValues={headers} />
-	</$Panel>
-	*/
-	/*
-	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.3 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
 	<p>TEST</p>
 	</$Panel>
 	*/
-	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.3 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
+	return <$Panel react={react} title="Workplace Distribution" onClose={onClose} initialSize={{ width: window.innerWidth * 0.40, height: window.innerHeight * 0.20 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
 		{workplaces.length === 0 ? (
 			<p>Waiting...</p>
 		) : (
 		<div>
+	  <div style={{height: '10rem'}}></div>
+	  <WorkforceLevel                      levelName='Education' levelValues={headers} />
+	  <div style={{height: '5rem'}}></div>
 	  <WorkforceLevel levelColor='#808080' levelName='Uneducated' levelValues={workplaces[0]} />
 	  <WorkforceLevel levelColor='#B09868' levelName='Poorly Educated' levelValues={workplaces[1]} />
 	  <WorkforceLevel levelColor='#368A2E' levelName='Educated' levelValues={workplaces[2]} />
 	  <WorkforceLevel levelColor='#B981C0' levelName='Well Educated' levelValues={workplaces[3]} />
 	  <WorkforceLevel levelColor='#5796D1' levelName='Highly Educated' levelValues={workplaces[4]} />
+	  <div style={{height: '5rem'}}></div>
+	  <WorkforceLevel                      levelName='TOTAL' levelValues={workplaces[5]} />
 	  </div>
 		)}
 	</$Panel>
