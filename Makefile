@@ -29,6 +29,10 @@ dev-workforce:
 	@npx esbuild ui_src/workforce.jsx --bundle --outfile=dist/workforce.js
 	copy dist\workforce.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.workforce.js"
 
+dev-demo:
+	@npx esbuild ui_src/demographics.jsx --bundle --outfile=dist/demographics.js
+	copy dist\demographics.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.demographics.js"
+
 package-win:
 	@-mkdir dist
 	@cmd /c copy /y "bin\Debug\netstandard2.1\0Harmony.dll" "dist\"

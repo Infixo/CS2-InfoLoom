@@ -76,27 +76,24 @@ const TableExample = () => {
 };
 
 const WorkforceLevel = ({levelColor, levelName, levelValues}) => {
-  console.log(levelColor); console.log(levelName); console.log(levelValues);
+  //console.log(levelColor); console.log(levelName); console.log(levelValues);
+  // <div class="legend_fqG" style={{justifyContent: 'spaceEvenly'}}>
   return (
-    <div class="legend_fqG">
-	  <div class="color-legend_Bzi">
-	    <div class="symbol_aAH" style={{backgroundColor: levelColor }}></div>
-	    <div>{levelName}</div>
-      </div>
-	  {/* level values */}
-      {levelValues.map((item, index) => (
-		<div key={index} class="labels_L7Q row_S2v small_ExK" style={{marginTop: '1rem'}}>
-		  <div class="row_S2v">{item["total"]}</div>
-		  <div class="row_S2v">{item["service"]}</div>
-		  <div class="row_S2v">{item["commercial"]}</div>
-		  <div class="row_S2v">{item["leisure"]}</div>
-		  <div class="row_S2v">{item["extractor"]}</div>
-		  <div class="row_S2v">{item["industry"]}</div>
-		  <div class="row_S2v">{item["office"]}</div>
-		  <div class="row_S2v">{item["employee"]}</div>
-		  <div class="row_S2v">{item["open"]}</div>
+
+    <div class="labels_L7Q row_S2v" style={{width: '95%', paddingTop: '3rem', paddingBottom: '3rem'}}>
+		<div style={{ display: 'flex', alignItems: 'center', width: '15%' }}>
+			<div class="symbol_aAH" style={{backgroundColor: levelColor }}></div>
+			<div>{levelName}</div>
 		</div>
-	  ))}
+		  <div class="row_S2v" style={{width: '10%'}}>{levelValues["total"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '10%'}}>{levelValues["service"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '10%'}}>{levelValues["commercial"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '10%'}}>{levelValues["leisure"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '10%'}}>{levelValues["extractor"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '10%'}}>{levelValues["industry"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '10%'}}>{levelValues["office"]}</div>
+		  <div class="row_S2v" style={{width: '10%'}}>{levelValues["employee"]}</div>
+		  <div class="row_S2v" style={{width: '10%'}}>{levelValues["open"]}</div>
 	</div>
   );
 };
@@ -147,8 +144,13 @@ const $Workforce = ({react}) => {
 		open: 'Open',
 	};
 	
-	//console.log("headers=",headers)
-	console.log("workplaces=",workplaces)
+	//if (workplaces.length !== 0) {
+//		console.log("workplaces=", workplaces);
+		//console.log(workplaces[0]); console.log(workplaces[1]);
+	//} else {
+//		console.log("workplaces has 0 elements");
+//	}
+
 	/*
 	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.3 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
 	  <WorkforceLevel                      levelName='Education' values={headers} />
@@ -171,9 +173,25 @@ const $Workforce = ({react}) => {
 	  <WorkforceLevel                      levelName='TOTAL' levelValues={headers} />
 	</$Panel>
 	*/
+	/*
 	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.3 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
 	<p>TEST</p>
 	</$Panel>
+	*/
+	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.3 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
+		{workplaces.length === 0 ? (
+			<p>Waiting...</p>
+		) : (
+		<div>
+	  <WorkforceLevel levelColor='#808080' levelName='Uneducated' levelValues={workplaces[0]} />
+	  <WorkforceLevel levelColor='#B09868' levelName='Poorly Educated' levelValues={workplaces[1]} />
+	  <WorkforceLevel levelColor='#368A2E' levelName='Educated' levelValues={workplaces[2]} />
+	  <WorkforceLevel levelColor='#B981C0' levelName='Well Educated' levelValues={workplaces[3]} />
+	  <WorkforceLevel levelColor='#5796D1' levelName='Highly Educated' levelValues={workplaces[4]} />
+	  </div>
+		)}
+	</$Panel>
+
 }
 
 // Registering the panel with HookUI so it shows up in the menu
