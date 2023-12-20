@@ -104,7 +104,6 @@ public class InfoLoom_Demographics : UIExtension
         this.extensionContent = this.LoadEmbeddedResource("InfoLoom.dist.demographics.js");
     }
 }
-
 public class InfoLoom_Workforce : UIExtension
 {
     public new readonly string extensionID = "infoloom.workforce";
@@ -114,6 +113,18 @@ public class InfoLoom_Workforce : UIExtension
     public InfoLoom_Workforce()
     {
         this.extensionContent = this.LoadEmbeddedResource("InfoLoom.dist.workforce.js");
+    }
+}
+
+public class InfoLoom_Workplaces : UIExtension
+{
+    public new readonly string extensionID = "infoloom.workplaces";
+    public new readonly string extensionContent;
+    public new readonly ExtensionType extensionType = ExtensionType.Panel;
+
+    public InfoLoom_Workplaces()
+    {
+        this.extensionContent = this.LoadEmbeddedResource("InfoLoom.dist.workplaces.js");
     }
 }
 

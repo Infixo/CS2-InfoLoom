@@ -79,7 +79,7 @@ const WorkforceLevel = ({levelColor, levelName, levelValues}) => {
   );
 };
 
-const $Workforce = ({react}) => {
+const $Workplaces = ({react}) => {
 	
     //const [oldestCim, setOldestCim] = react.useState(0)
     //useDataUpdate(react, 'populationInfo.oldest_citizen', setOldestCim)
@@ -108,7 +108,7 @@ const $Workforce = ({react}) => {
 	//paragraphs.push( <HorizontalLine key={i} length={totals[i]/100} /> );
 	
 	const onClose = () => {
-		const data = { type: "toggle_visibility", id: 'infoloom.workforce' };
+		const data = { type: "toggle_visibility", id: 'infoloom.workplaces' };
 		const event = new CustomEvent('hookui', { detail: data });
 		window.dispatchEvent(event);
 	};
@@ -132,7 +132,12 @@ const $Workforce = ({react}) => {
 //		console.log("workplaces has 0 elements");
 //	}
 
-	return <$Panel react={react} title="Workforce Structure" onClose={onClose} initialSize={{ width: window.innerWidth * 0.40, height: window.innerHeight * 0.20 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
+	/*
+	return <$Panel react={react} title="Workforce" onClose={onClose} initialSize={{ width: window.innerWidth * 0.5, height: window.innerHeight * 0.3 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
+	<p>TEST</p>
+	</$Panel>
+	*/
+	return <$Panel react={react} title="Workplace Distribution" onClose={onClose} initialSize={{ width: window.innerWidth * 0.40, height: window.innerHeight * 0.20 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
 		{workplaces.length === 0 ? (
 			<p>Waiting...</p>
 		) : (
@@ -155,8 +160,8 @@ const $Workforce = ({react}) => {
 
 // Registering the panel with HookUI so it shows up in the menu
 window._$hookui.registerPanel({
-    id: "infoloom.workforce",
-    name: "InfoLoom: Workforce",
+    id: "infoloom.workplaces",
+    name: "InfoLoom: Workplaces",
 	icon: "Media/Game/Icons/Workers.svg",
-    component: $Workforce
+    component: $Workplaces
 })

@@ -12,11 +12,13 @@ build-ui:
 	@npx esbuild ui_src/demographics.jsx --bundle --outfile=dist/demographics.js
 	@npx esbuild ui_src/workforce.jsx --bundle --outfile=dist/workforce.js
 	@npx esbuild ui_src/demandfactors.jsx --bundle --outfile=dist/demandfactors.js
+	@npx esbuild ui_src/workplaces.jsx --bundle --outfile=dist/workplaces.js
 
 copy-ui:
 	copy dist\demographics.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.demographics.js"
 	copy dist\workforce.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.workforce.js"
 	copy dist\demandfactors.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.demandfactors.js"
+	copy dist\workplaces.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.workplaces.js"
 
 build: clean restore build-ui
 	@dotnet build /p:BepInExVersion=$(BEPINEX_VERSION)
@@ -28,6 +30,10 @@ dev-demand:
 dev-workforce:
 	@npx esbuild ui_src/workforce.jsx --bundle --outfile=dist/workforce.js
 	copy dist\workforce.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.workforce.js"
+	
+dev-workplaces:
+	@npx esbuild ui_src/workplaces.jsx --bundle --outfile=dist/workplaces.js
+	copy dist\workplaces.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.workplaces.js"
 
 dev-demo:
 	@npx esbuild ui_src/demographics.jsx --bundle --outfile=dist/demographics.js

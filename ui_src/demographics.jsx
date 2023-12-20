@@ -1,5 +1,6 @@
 import React from 'react'
-import {useDataUpdate, $Panel} from 'hookui-framework'
+import { useDataUpdate } from 'hookui-framework'
+import $Panel from './panel'
 
 const AlignedParagraph = ({ left, right }) => {
   const containerStyle = {
@@ -63,7 +64,13 @@ const $Demographics = ({react}) => {
 	}
 	//paragraphs.push( <HorizontalLine key={i} length={totals[i]/100} /> );
 
-    return <$Panel react={react} title="Demographics">
+	const onClose = () => {
+		const data = { type: "toggle_visibility", id: 'infoloom.demographics' };
+		const event = new CustomEvent('hookui', { detail: data });
+		window.dispatchEvent(event);
+	};
+
+	return <$Panel react={react} title="Demographics" onClose={onClose} initialSize={{ width: window.innerWidth * 0.2, height: window.innerHeight * 0.4 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
 		<div>
 			<AlignedParagraph left="All Citizens" right={totals[0]} />
 			<AlignedParagraph left="- Locals" right={totals[1]} />
@@ -89,7 +96,7 @@ const $Demographics = ({react}) => {
 // Registering the panel with HookUI so it shows up in the menu
 window._$hookui.registerPanel({
     id: "infoloom.demographics",
-    name: "Demographics",
+    name: "InfoLoom: Demographics",
     icon: "Media/Game/Icons/Population.svg",
     component: $Demographics
 })

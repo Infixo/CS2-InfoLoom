@@ -145,7 +145,7 @@ const $DemandFactors = ({ react }) => {
 // Registering the panel with HookUI so it shows up in the menu
 window._$hookui.registerPanel({
 	id: "infoloom.demandfactors",
-	name: "Demand Factors",
+	name: "InfoLoom: Demand Factors",
 	icon: "Media/Game/Icons/CityStatistics.svg",
 	component: $DemandFactors
 });

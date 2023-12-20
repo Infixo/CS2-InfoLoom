@@ -50,6 +50,7 @@
 	<ItemGroup>
 	  <EmbeddedResource Include="dist/demographics.js" />
 	  <EmbeddedResource Include="dist/workforce.js" />
+	  <EmbeddedResource Include="dist/workplaces.js" />
 	  <EmbeddedResource Include="dist/demandfactors.js" />
 	</ItemGroup>
 
