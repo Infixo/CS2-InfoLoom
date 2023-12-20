@@ -26,6 +26,42 @@ namespace InfoLoom;
 [CompilerGenerated]
 public class WorkforceInfoLoomUISystem : UISystemBase
 {
+    private struct WorkforceAtLevelInfo
+    {
+        public int Level;
+        public int Total; // all Adults and Teens, not Dead, not Students - potential workers; Total = Worker+Unemployed
+        public int Worker; // working citizens
+        public int Unemployed; // not-working citizens
+        public int Homeless; // not-working and homeless; Homeless is part of Unemployed
+        public int Employable; // working but in weird places Employable = Outside + Under, Employable is part of Worker
+        public int Outside; // working out of the city
+        public int Under; // underemployed, working at jobs with lower level
+        public WorkforceAtLevelInfo(int _level) { Level = _level; }
+    }
+
+    private static void WriteData(IJsonWriter writer, WorkforceAtLevelInfo info)
+    {
+        writer.TypeBegin("WorkforceAtLevelInfo");
+        writer.PropertyName("level");
+        writer.Write(info.Level);
+        writer.PropertyName("total");
+        writer.Write(info.Total);
+        writer.PropertyName("worker");
+        writer.Write(info.Worker);
+        writer.PropertyName("unemployed");
+        writer.Write(info.Unemployed);
+        writer.PropertyName("homeless");
+        writer.Write(info.Homeless);
+        writer.PropertyName("employable");
+        writer.Write(info.Employable);
+        writer.PropertyName("outside");
+        writer.Write(info.Outside);
+        writer.PropertyName("under");
+        writer.Write(info.Under);
+        writer.TypeEnd();
+    }
+
+
     [BurstCompile]
     private struct CountEmploymentJob : IJobChunk
     {
@@ -91,6 +127,8 @@ public class WorkforceInfoLoomUISystem : UISystemBase
         public NativeCounter.Concurrent m_UnemploymentByEducation3;
 
         public NativeCounter.Concurrent m_UnemploymentByEducation4;
+
+        public NativeArray<WorkforceAtLevelInfo> m_Results;
 
         private void AddPotential(int level)
         {
@@ -160,50 +198,80 @@ public class WorkforceInfoLoomUISystem : UISystemBase
 
         public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
         {
-            NativeArray<HouseholdMember> nativeArray = chunk.GetNativeArray(ref m_HouseholdMemberType);
-            if (!nativeArray.IsCreated)
-            {
-                return;
-            }
-            NativeArray<Citizen> nativeArray2 = chunk.GetNativeArray(ref m_CitizenType);
-            NativeArray<Worker> nativeArray3 = chunk.GetNativeArray(ref m_WorkerType);
-            NativeArray<HealthProblem> nativeArray4 = chunk.GetNativeArray(ref m_HealthProblemType);
-            bool isCreated = nativeArray3.IsCreated;
-            bool flag = chunk.Has(ref m_StudentType);
-            bool isCreated2 = nativeArray4.IsCreated;
+            //Plugin.Log($"chunk with {chunk.Count} entities");
+            NativeArray<HouseholdMember> householdMemberArray = chunk.GetNativeArray(ref m_HouseholdMemberType);
+            // this is probably not needed - all Citizen and Worker components are paired with HouseholdMember
+            //if (!nativeArray.IsCreated)
+            //{
+                //return;
+            //}
+            NativeArray<Citizen> citizenArray = chunk.GetNativeArray(ref m_CitizenType);
+            NativeArray<Worker> workerArray = chunk.GetNativeArray(ref m_WorkerType);
+            NativeArray<HealthProblem> healthProblemArray = chunk.GetNativeArray(ref m_HealthProblemType);
+            bool isWorker = workerArray.IsCreated;
+            // [Worker and Student] are exclusive - there are no entities that have both - so, this can be used at Query level
+            //bool isStudent = chunk.Has(ref m_StudentType); // students ARE excluded
+            bool isHealthProblem = healthProblemArray.IsCreated;
             for (int i = 0; i < chunk.Count; i++)
             {
-                Citizen citizen = nativeArray2[i];
+                Citizen citizen = citizenArray[i];
                 CitizenAge age = citizen.GetAge();
+                // skip children and seniors
                 if (age == CitizenAge.Child || age == CitizenAge.Elderly)
                 {
                     continue;
                 }
-                Entity household = nativeArray[i].m_Household;
-                if ((isCreated2 && CitizenUtils.IsDead(nativeArray4[i])) || (citizen.m_State & (CitizenFlags.Tourist | CitizenFlags.Commuter)) != 0 || !m_Households.HasComponent(household) || (m_Households[household].m_Flags & HouseholdFlags.MovedIn) == 0 || m_MovingAways.HasComponent(household))
+                Entity household = householdMemberArray[i].m_Household;
+                // skip: dead citizens, tourists and commuters, non-existing households (technical), not MovedIn yet, already MovingAways
+                if ((isHealthProblem && CitizenUtils.IsDead(healthProblemArray[i])) || (citizen.m_State & (CitizenFlags.Tourist | CitizenFlags.Commuter)) != 0 || !m_Households.HasComponent(household) || (m_Households[household].m_Flags & HouseholdFlags.MovedIn) == 0 || m_MovingAways.HasComponent(household))
                 {
                     continue;
                 }
-                m_Adults.Increment();
-                if (isCreated)
+                // PROCESS ENTITY
+                int educationLevel = citizen.GetEducationLevel();
+                //Plugin.Log($"{age} {educationLevel} {isWorker}");
+                WorkforceAtLevelInfo info = m_Results[educationLevel];
+                //m_Adults.Increment(); // it is called Adults, but counts also Teens
+                info.Total++;
+                if (isWorker)
                 {
-                    m_Workers.Increment();
-                    int educationLevel = citizen.GetEducationLevel();
-                    AddPotential(educationLevel);
-                    Worker worker = nativeArray3[i];
-                    if (m_OutsideConnections.HasComponent(worker.m_Workplace) || worker.m_Level < educationLevel)
+                    //m_Workers.Increment(); // actual workers
+                    info.Worker++;
+                    //AddPotential(educationLevel);
+                    Worker worker = workerArray[i];
+                    // This counts people working outside (???) or underemployed
+                    //if (m_OutsideConnections.HasComponent(worker.m_Workplace) || worker.m_Level < educationLevel)
+                    //{
+                        //AddEmployable(educationLevel);
+                    //}
+                    bool isEmployable = false;
+                    if (m_OutsideConnections.HasComponent(worker.m_Workplace)) { info.Outside++; isEmployable = true; }
+                    if (worker.m_Level < educationLevel) { info.Under++; isEmployable = true; }
+                    if (isEmployable) info.Employable++;
+                }
+                else
+                {
+                    info.Unemployed++;
+                    if (!m_PropertyRenters.HasComponent(household)) // students ARE excluded
                     {
-                        AddEmployable(educationLevel);
+                        info.Homeless++;
+                        //m_Unemployed.Increment();
+                        //int educationLevel2 = citizen.GetEducationLevel();
+                        //AddPotential(educationLevel2);
+                        //AddEmployable(educationLevel2); // this is actually confusing, anyone not-working is employable, so this is no extra info
+                        //AddUnemployment(educationLevel2);
                     }
                 }
-                else if (!flag && m_PropertyRenters.HasComponent(household))
-                {
-                    m_Unemployed.Increment();
-                    int educationLevel2 = citizen.GetEducationLevel();
-                    AddPotential(educationLevel2);
-                    AddEmployable(educationLevel2);
-                    AddUnemployment(educationLevel2);
-                }
+                // Potentials - already workers, not students, not homeless
+                // Employable
+                // Unemployment - not worker, not student
+                // student=0, home=0 -> counts
+                // student=0, home=1 -> counts [ok, typical unemployed]
+                // student=1, home=0 -> counts [weird, student but no home?] BUGGED
+                // student=1, home=1 -> excluded [ok, typical student]
+                // I should be showing homeless, because they may be leaving city soon...
+                // [Worker and Student] are exclusive - there are no entities that have both - so, this can be used at Query level
+                m_Results[educationLevel] = info;
             }
         }
 
@@ -213,6 +281,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
         }
     }
 
+    /* not used
     private struct SumEmploymentJob : IJob
     {
         public NativeCounter m_PotentialWorkersByEducation0;
@@ -306,6 +375,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
             m_UnemploymentByEducation4.Count = 0;
         }
     }
+    */
 
     private struct TypeHandle
     {
@@ -413,18 +483,20 @@ public class WorkforceInfoLoomUISystem : UISystemBase
 
     private NativeCounter m_PotentialWorkersByEducation4;
 
-    [DebugWatchDeps]
-    private JobHandle m_WriteDependencies;
+    //[DebugWatchDeps]
+    //private JobHandle m_WriteDependencies;
 
-    private JobHandle m_ReadDependencies;
+    //private JobHandle m_ReadDependencies;
 
     private TypeHandle __TypeHandle;
 
     // InfoLoom
+
     private RawValueBinding m_uiResults;
 
-    private NativeArray<int> m_Results;
+    private NativeArray<WorkforceAtLevelInfo> m_Results;
 
+    /* not used
     public override int GetUpdateInterval(SystemUpdatePhase phase)
     {
         return 16;
@@ -452,6 +524,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
     {
         m_ReadDependencies = JobHandle.CombineDependencies(m_ReadDependencies, reader);
     }
+    */
 
     [Preserve]
     protected override void OnCreate()
@@ -495,14 +568,15 @@ public class WorkforceInfoLoomUISystem : UISystemBase
         m_PotentialWorkersByEducation2 = new NativeCounter(Allocator.Persistent);
         m_PotentialWorkersByEducation3 = new NativeCounter(Allocator.Persistent);
         m_PotentialWorkersByEducation4 = new NativeCounter(Allocator.Persistent);
+
         // InfoLoom
-        m_Results = new NativeArray<int>(6, Allocator.Persistent); // there are 5 education levels + 1 for totals
+        m_Results = new NativeArray<WorkforceAtLevelInfo>(6, Allocator.Persistent); // there are 5 education levels + 1 for totals
 
         AddBinding(m_uiResults = new RawValueBinding(kGroup, "ilWorkforce", delegate (IJsonWriter binder)
         {
             binder.ArrayBegin(m_Results.Length);
             for (int i = 0; i < m_Results.Length; i++)
-                binder.Write(m_Results[i]);
+                WriteData(binder, m_Results[i]);
             binder.ArrayEnd();
         }));
 
@@ -575,6 +649,8 @@ public class WorkforceInfoLoomUISystem : UISystemBase
         if (m_SimulationSystem.frameIndex % 128 != 77)
             return;
 
+        //Plugin.Log($"Update at frame {m_SimulationSystem.frameIndex}");
+
         ResetResults();
 
         __TypeHandle.__Game_Citizens_Household_RO_ComponentLookup.Update(ref base.CheckedStateRef);
@@ -614,7 +690,10 @@ public class WorkforceInfoLoomUISystem : UISystemBase
         jobData.m_PotentialWorkersByEducation2 = m_PotentialWorkersByEducation2.ToConcurrent();
         jobData.m_PotentialWorkersByEducation3 = m_PotentialWorkersByEducation3.ToConcurrent();
         jobData.m_PotentialWorkersByEducation4 = m_PotentialWorkersByEducation4.ToConcurrent();
-        JobHandle dependsOn = JobChunkExtensions.ScheduleParallel(jobData, m_AllAdultGroup, JobHandle.CombineDependencies(base.Dependency, m_ReadDependencies));
+        jobData.m_Results = m_Results;
+        JobChunkExtensions.Schedule(jobData, m_AllAdultGroup, base.Dependency).Complete();
+
+        /* not needed
         SumEmploymentJob sumEmploymentJob = default(SumEmploymentJob);
         sumEmploymentJob.m_Adults = m_Adults;
         sumEmploymentJob.m_Unemployed = m_Unemployed;
@@ -644,9 +723,25 @@ public class WorkforceInfoLoomUISystem : UISystemBase
         SumEmploymentJob jobData2 = sumEmploymentJob;
         base.Dependency = IJobExtensions.Schedule(jobData2, dependsOn);
         m_WriteDependencies = base.Dependency;
+        */
 
         // InfoLoom
-        base.Dependency.Complete(); // finish the job
+        //base.Dependency.Complete(); // finish the job
+
+        // calculate totals
+        WorkforceAtLevelInfo totals = new WorkforceAtLevelInfo(-1);
+        for (int i = 0; i < 5; i++)
+        {
+            totals.Total += m_Results[i].Total;
+            totals.Worker += m_Results[i].Worker;
+            totals.Unemployed += m_Results[i].Unemployed;
+            totals.Homeless += m_Results[i].Homeless;
+            totals.Employable += m_Results[i].Employable;
+            totals.Outside += m_Results[i].Outside;
+            totals.Under += m_Results[i].Under;
+        }
+        m_Results[5] = totals;
+
         m_uiResults.Update(); // update UI
     }
 
@@ -661,7 +756,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
         */
         for (int i = 0; i < 6; i++) // there are 5 education levels + 1 for totals
         {
-            m_Results[i] = i; //new WorkplacesAtLevelInfo(i);
+            m_Results[i] = new WorkforceAtLevelInfo(i);
         }
     }
 
