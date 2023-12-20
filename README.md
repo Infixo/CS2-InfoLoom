@@ -3,7 +3,8 @@ InfoLoom is a Cities Skylines 2 mod that adds new UI windows with extra informat
 Currently:
 - Demand factors
 - (w.i.p.) Demographics
-- (w.i.p.) Workforce structure
+- Workforce structure
+- Workplaces distribution
 
 ## Features
 

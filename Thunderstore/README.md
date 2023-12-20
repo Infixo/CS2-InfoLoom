@@ -3,7 +3,8 @@ InfoLoom is a Cities Skylines 2 mod that adds new UI windows with extra informat
 Currently:
 - Demand factors
 - (w.i.p.) Demographics
-- (w.i.p.) Workforce structure
+- Workforce structure
+- Workplaces distribution
 
 ## Features
 
@@ -14,6 +15,19 @@ Currently:
 - Also, industrial demand is a higher value from the two: industrial building demand and storage demand.
 
 ![Demand factors](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/demandfactors.png)
+
+### Workforce structure
+- Shows workforce structure by education level.
+- Total: all potential workers, i.e. teens and adults, excluding students, that are moved in and moving away.
+- Under: cims working on positions below their education level.
+- Outside: cims working outside of the city.
+- Homeless: unemployed cims with no home.
+
+### Workplaces distribution
+- Shows available workplaces split into: city services, commercial sales, commercial leisure, industry extractors, industry manufacturing, and office.
+- Leisure are commercial companies selling immaterial resurces.
+
+![Workforce and Workplaces](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/worforce_jobs.png)
 
 ### Resources consumption
 - This feature is disabled by default because it changes the data shown on the vanilla UI. Enable it in the config file by setting SeparateConsumption to true.
@@ -40,6 +54,8 @@ Currently:
 - Nothing atm.
 
 ### Changelog
+- v0.3.0 (2023-12-20)
+  - New features: worforce structure and workplaces distribution.
 - v0.2.2 (2023-12-17)
   - Demand factors window is reformatted, to be more aligned with game's visual style.
   - New features: shows all factors, building demand and resources consumption.

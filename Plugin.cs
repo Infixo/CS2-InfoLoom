@@ -92,7 +92,7 @@ public class Plugin : BaseUnityPlugin
         //Patcher.ListAllPatches();
     }
 }
-
+/*
 public class InfoLoom_Demographics : UIExtension
 {
     public new readonly string extensionID = "infoloom.demographics";
@@ -104,6 +104,7 @@ public class InfoLoom_Demographics : UIExtension
         this.extensionContent = this.LoadEmbeddedResource("InfoLoom.dist.demographics.js");
     }
 }
+*/
 public class InfoLoom_Workforce : UIExtension
 {
     public new readonly string extensionID = "infoloom.workforce";
