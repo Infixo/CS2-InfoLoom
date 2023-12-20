@@ -62,18 +62,19 @@ const WorkforceLevel = ({levelColor, levelName, levelValues}) => {
   return (
 
     <div class="labels_L7Q row_S2v" style={{width: '95%', paddingTop: '1rem', paddingBottom: '1rem'}}>
-		<div style={{ display: 'flex', alignItems: 'center', width: '18%' }}>
+		<div style={{width: '1%'}}></div>
+		<div style={{ display: 'flex', alignItems: 'center', width: '20%' }}>
 			<div class="symbol_aAH" style={{backgroundColor: levelColor }}></div>
 			<div>{levelName}</div>
 		</div>
-		  <div class="row_S2v"           style={{width: '10%', justifyContent: 'center'}}>{levelValues["total"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["service"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["commercial"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["leisure"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["extractor"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["industry"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["office"]}</div>
-		  <div class="row_S2v"           style={{width: '10%', justifyContent: 'center'}}>{levelValues["employee"]}</div>
+		  <div class="row_S2v"           style={{width: '11%', justifyContent: 'center'}}>{levelValues["total"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '8%', justifyContent: 'center'}}>{levelValues["service"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '8%', justifyContent: 'center'}}>{levelValues["commercial"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '8%', justifyContent: 'center'}}>{levelValues["leisure"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '8%', justifyContent: 'center'}}>{levelValues["extractor"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '8%', justifyContent: 'center'}}>{levelValues["industry"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '8%', justifyContent: 'center'}}>{levelValues["office"]}</div>
+		  <div class="row_S2v"           style={{width: '11%', justifyContent: 'center'}}>{levelValues["employee"]}</div>
 		  <div class="row_S2v"           style={{width: '10%', justifyContent: 'center'}}>{levelValues["open"]}</div>
 	</div>
   );
@@ -115,11 +116,11 @@ const $Workplaces = ({react}) => {
 
     const headers = {
 		total: 'Total',
-		service: 'Services',
-		commercial: 'Commercial',
+		service: 'City',
+		commercial: 'Sales',
 		leisure: 'Leisure',
-		extractor: 'Extractors',
-		industry: 'Industrial',
+		extractor: 'Extract',
+		industry: 'Industry',
 		office: 'Office',
 		employee: 'Employees',
 		open: 'Open',
@@ -137,7 +138,7 @@ const $Workplaces = ({react}) => {
 	<p>TEST</p>
 	</$Panel>
 	*/
-	return <$Panel react={react} title="Workplace Distribution" onClose={onClose} initialSize={{ width: window.innerWidth * 0.40, height: window.innerHeight * 0.20 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
+	return <$Panel react={react} title="Workplace Distribution" onClose={onClose} initialSize={{ width: window.innerWidth * 0.35, height: window.innerHeight * 0.20 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
 		{workplaces.length === 0 ? (
 			<p>Waiting...</p>
 		) : (
