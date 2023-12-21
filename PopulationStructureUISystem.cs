@@ -152,6 +152,7 @@ public class PopulationStructureUISystem : UISystemBase
                 int ageInDays = day - citizen.m_BirthDay;
                 if (ageInDays > m_Totals[6]) m_Totals[6] = ageInDays; // oldest cim
                 ageInDays = ageInDays/10; // INFIXO: TODO
+                if (ageInDays>9) ageInDays = 9;
                 PopulationAtAgeInfo info = m_Results[ageInDays];
                 // process at-age info
                 info.Total++;
@@ -450,7 +451,7 @@ public class PopulationStructureUISystem : UISystemBase
 
         // allocate memory for results
         m_Totals = new NativeArray<int>(7, Allocator.Persistent);
-        m_Results = new NativeArray<PopulationAtAgeInfo>(20, Allocator.Persistent); // INFIXO: TODO
+        m_Results = new NativeArray<PopulationAtAgeInfo>(10, Allocator.Persistent); // INFIXO: TODO
         Plugin.Log("ProductionStructureUISystem created.");
     }
 

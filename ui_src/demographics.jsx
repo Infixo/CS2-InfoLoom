@@ -77,9 +77,9 @@ const CanvasWithSquares = () => {
 // base - represents entire bar
 // xpos, ypos - location of the bar
 const PopulationBar = ({ react, xpos, ypos, length, base, info}) => {
-	const [svgContent, setSvgContent] = react.useState(
-    "<text x='100' y='100' fontSize='20' fill='red'>" + info.total + "</text>"
-	);
+	//const [svgContent, setSvgContent] = react.useState(
+    //"<text x='100' y='100' fontSize='20' fill='red'>" + info.total + "</text>"
+	//);
 	//console.log(svgContent);
 
 	//const [total, setTotal] = react.useState(info.total);
@@ -99,20 +99,36 @@ const PopulationBar = ({ react, xpos, ypos, length, base, info}) => {
 	const x_school3 = length*info.school3/base;
 	const x_school4 = length*info.school4/base;
 	const x_other = length*info.other/base;
-	const test1 = "<text x=0 y="+barY+" fontSize=12 fill='red'>" + info.total + "</text>"
-	console.log(test1);
-		//<text y={barY+barH-1} x={xpos-90} fill="white" fontSize={barH-1} textAnchor="middle">{info.age}</text>
-		//<text y={barY+barH-1} x={xpos-50} fill="white" fontSize={barH-1} textAnchor="middle">{info.total}</text>
-		//<rect y={barY} height={barH} fill='#99E2FF' width={x_work}    x={xpos}/> // work
-		//<rect y={barY} height={barH} fill='#DAFF7F' width={x_school1} x={xpos+x_work} /> // elementary
-		//<rect y={barY} height={barH} fill='#7FFF8E' width={x_school2} x={xpos+x_work+x_school1} /> // high school
-		//<rect y={barY} height={barH} fill='#7F92FF' width={x_school3} x={xpos+x_work+x_school1+x_school2} /> // college
-		//<rect y={barY} height={barH} fill='#D67FFF' width={x_school4} x={xpos+x_work+x_school1+x_school2+x_school3} /> // university
-		//<rect y={barY} height={barH} fill='#C09881' width={x_other} x={xpos+x_work+x_school1+x_school2+x_school3+x_school4} /> // other
 	
+	// generate SVG content
+	//const htmlArray = [];
+	//const test1 = "<text x=0 y="+barY+" fontSize=12 fill='red'>" + info.total + "</text>";
+	//htmlArray.push(test1);
+	
+	//console.log(test1);
+	//const textAge   = "<text y=" + (barY+barH-1) + " x=" + (xpos-90) + " fill='white' fontSize=" + (barH-1) + " textAnchor='middle'>" + info.age   + "</text>";
+	//const textTotal = "<text y=" + (barY+barH-1) + " x=" + (xpos-50) + " fill='white' fontSize=" + (barH-1) + " textAnchor='middle'>" + info.total + "</text>";
+	//htmlArray.push(textAge);
+	//htmlArray.push(textTotal);
+	//htmlArray.push(	"<rect y=" + barY + " height=" + barH + " fill='#99E2FF' width=" + x_work + " x=" + xpos + "></rect>" ); // work
+	//const svgString = '<rect y="60" height="12" fill="#99E2FF" width="578.1428571428571" x="100"/>';	
+	//htmlArray.push(svgString);
+	//console.log(htmlArray)
+	//	<div dangerouslySetInnerHTML={{ __html: htmlArray.join('') }} />
+		//<p dangerouslySetInnerHTML={{ __html: textAge }} />
+
 	
 	return (
-		<div dangerouslySetInnerHTML={{ __html: test1 }} />	
+	  <>
+		<text y={barY+barH-1} x={xpos-90} fill='white' fontSize={barH-1} textAnchor='middle'>{info.age}</text>
+		<text y={barY+barH-1} x={xpos-50} fill='white' fontSize={barH-1} textAnchor='middle'>{info.total}</text>
+		<rect y={barY} height={barH} fill='#99E2FF' width={x_work}    x={xpos} /> // work
+		<rect y={barY} height={barH} fill='#DAFF7F' width={x_school1} x={xpos+x_work} /> // elementary
+		<rect y={barY} height={barH} fill='#7FFF8E' width={x_school2} x={xpos+x_work+x_school1} /> // high school
+		<rect y={barY} height={barH} fill='#7F92FF' width={x_school3} x={xpos+x_work+x_school1+x_school2} /> // college
+		<rect y={barY} height={barH} fill='#D67FFF' width={x_school4} x={xpos+x_work+x_school1+x_school2+x_school3} /> // university
+		<rect y={barY} height={barH} fill='#C09881' width={x_other}   x={xpos+x_work+x_school1+x_school2+x_school3+x_school4} /> // other
+	  </>
 	);
 };
 
