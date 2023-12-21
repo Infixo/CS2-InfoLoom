@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { useDataUpdate } from 'hookui-framework'
 import $Panel from './panel'
-import { useEffect, useRef } from 'react';
+//import { useState, useEffect, useRef } from 'react';
 
 const AlignedParagraph = ({ left, right }) => {
   const containerStyle = {
@@ -77,8 +77,11 @@ const CanvasWithSquares = () => {
 // base - represents entire bar
 // xpos, ypos - location of the bar
 const PopulationBar = ({ xpos, ypos, length, base, info}) => {
-	const barH = 10;
-	const curYPos = ypos+info.age * barH; // TODO: bar height
+	//const [total, setTotal] = react.useState(info.total);
+  
+	//console.log("bar", info);
+	const barH = 12;
+	const barY = ypos + info.age * barH; // TODO: bar height
 	const x_work = length*info.work/base;
 	const x_school1 = length*info.school1/base;
 	const x_school2 = length*info.school2/base;
@@ -86,13 +89,15 @@ const PopulationBar = ({ xpos, ypos, length, base, info}) => {
 	const x_school4 = length*info.school4/base;
 	const x_other = length*info.other/base;
 	return (
-	  <>
-		<rect y={curYPos} height={barH} fill='#99E2FF' width={x_work}    x={xpos}/> // work
-		<rect y={curYPos} height={barH} fill='#DAFF7F' width={x_school1} x={xpos+x_work} /> // elementary
-		<rect y={curYPos} height={barH} fill='#7FFF8E' width={x_school2} x={xpos+x_work+x_school1} /> // high school
-		<rect y={curYPos} height={barH} fill='#7F92FF' width={x_school3} x={xpos+x_work+x_school1+x_school2} /> // college
-		<rect y={curYPos} height={barH} fill='#D67FFF' width={x_school4} x={xpos+x_work+x_school1+x_school2+x_school3} /> // university
-		<rect y={curYPos} height={barH} fill='#C09881' width={x_other} x={xpos+x_work+x_school1+x_school2+x_school3+x_school4} /> // other
+	  <>	  
+		<text y={barY+barH-1} x={xpos-90} fill="white" fontSize={barH-1} textAnchor="middle">{info.age}</text>
+		<text y={barY+barH-1} x={xpos-50} fill="white" fontSize={barH-1} textAnchor="middle">{info.total}</text>
+		<rect y={barY} height={barH} fill='#99E2FF' width={x_work}    x={xpos}/> // work
+		<rect y={barY} height={barH} fill='#DAFF7F' width={x_school1} x={xpos+x_work} /> // elementary
+		<rect y={barY} height={barH} fill='#7FFF8E' width={x_school2} x={xpos+x_work+x_school1} /> // high school
+		<rect y={barY} height={barH} fill='#7F92FF' width={x_school3} x={xpos+x_work+x_school1+x_school2} /> // college
+		<rect y={barY} height={barH} fill='#D67FFF' width={x_school4} x={xpos+x_work+x_school1+x_school2+x_school3} /> // university
+		<rect y={barY} height={barH} fill='#C09881' width={x_other} x={xpos+x_work+x_school1+x_school2+x_school3+x_school4} /> // other
 	  </>
 	);
 };
@@ -134,25 +139,7 @@ const $Demographics = ({react}) => {
 
 	return <$Panel react={react} title="Demographics" onClose={onClose} initialSize={{ width: window.innerWidth * 0.2, height: window.innerHeight * 0.4 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
 	
-		<svg width='100%' height='50%' >
-		{(() => {
-			const bars = [];
-			details.forEach( info => {
-				bars.push(
-					//<rect key={info.age} x='10' y={info.age * 10} width={info.total / 20} height='10' fill="yellow" />
-					<PopulationBar key={info.age} xpos={10} ypos={0} length={500} base={10000} info={info} />
-				);
-			});
-			return bars;
-		})()}
-			
-		</svg>
 	
-		<div>
-			<HorizontalLine2 length={200} strokeWidth={20} color="#202020" />
-			<HorizontalLine2 length={300} strokeWidth={10} color="#3498db" />
-			<HorizontalLine2 length={150} strokeWidth={30} color="#aaaaaa" />
-		</div>	
 		<div>
 			<AlignedParagraph left="All Citizens" right={totals[0]} />
 			<AlignedParagraph left="- Locals" right={totals[1]} />
@@ -162,6 +149,21 @@ const $Demographics = ({react}) => {
 			<AlignedParagraph left="Workers" right={totals[5]} />
 			<AlignedParagraph left="Oldest citizen" right={totals[6]} />
 		</div>
+		
+		<svg width='100%' height='50%' >
+		{(() => {
+			const bars = [];
+			details.forEach( info => {
+				bars.push(
+					//<rect key={info.age} x='10' y={info.age * 10} width={info.total / 20} height='10' fill="yellow" />
+					<PopulationBar key={info.age} xpos={100} ypos={0} length={500} base={7000} info={info} />
+				);
+			});
+			return bars;
+		})()}
+			
+		</svg>
+		
 		<div>
 		{(() => {
 			const paragraphs = [];
