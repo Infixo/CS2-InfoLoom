@@ -76,8 +76,19 @@ const CanvasWithSquares = () => {
 // length - maximum length that corresponds with base
 // base - represents entire bar
 // xpos, ypos - location of the bar
-const PopulationBar = ({ xpos, ypos, length, base, info}) => {
+const PopulationBar = ({ react, xpos, ypos, length, base, info}) => {
+	const [svgContent, setSvgContent] = react.useState(
+    "<text x='100' y='100' fontSize='20' fill='red'>" + info.total + "</text>"
+	);
+	//console.log(svgContent);
+
 	//const [total, setTotal] = react.useState(info.total);
+	
+	//if (total !== info.total)
+	//{
+		//setTotal(info.total);
+		//console.log("new total", info.total, total);
+	//}
   
 	//console.log("bar", info);
 	const barH = 12;
@@ -88,17 +99,20 @@ const PopulationBar = ({ xpos, ypos, length, base, info}) => {
 	const x_school3 = length*info.school3/base;
 	const x_school4 = length*info.school4/base;
 	const x_other = length*info.other/base;
+	const test1 = "<text x=0 y="+barY+" fontSize=12 fill='red'>" + info.total + "</text>"
+	console.log(test1);
+		//<text y={barY+barH-1} x={xpos-90} fill="white" fontSize={barH-1} textAnchor="middle">{info.age}</text>
+		//<text y={barY+barH-1} x={xpos-50} fill="white" fontSize={barH-1} textAnchor="middle">{info.total}</text>
+		//<rect y={barY} height={barH} fill='#99E2FF' width={x_work}    x={xpos}/> // work
+		//<rect y={barY} height={barH} fill='#DAFF7F' width={x_school1} x={xpos+x_work} /> // elementary
+		//<rect y={barY} height={barH} fill='#7FFF8E' width={x_school2} x={xpos+x_work+x_school1} /> // high school
+		//<rect y={barY} height={barH} fill='#7F92FF' width={x_school3} x={xpos+x_work+x_school1+x_school2} /> // college
+		//<rect y={barY} height={barH} fill='#D67FFF' width={x_school4} x={xpos+x_work+x_school1+x_school2+x_school3} /> // university
+		//<rect y={barY} height={barH} fill='#C09881' width={x_other} x={xpos+x_work+x_school1+x_school2+x_school3+x_school4} /> // other
+	
+	
 	return (
-	  <>	  
-		<text y={barY+barH-1} x={xpos-90} fill="white" fontSize={barH-1} textAnchor="middle">{info.age}</text>
-		<text y={barY+barH-1} x={xpos-50} fill="white" fontSize={barH-1} textAnchor="middle">{info.total}</text>
-		<rect y={barY} height={barH} fill='#99E2FF' width={x_work}    x={xpos}/> // work
-		<rect y={barY} height={barH} fill='#DAFF7F' width={x_school1} x={xpos+x_work} /> // elementary
-		<rect y={barY} height={barH} fill='#7FFF8E' width={x_school2} x={xpos+x_work+x_school1} /> // high school
-		<rect y={barY} height={barH} fill='#7F92FF' width={x_school3} x={xpos+x_work+x_school1+x_school2} /> // college
-		<rect y={barY} height={barH} fill='#D67FFF' width={x_school4} x={xpos+x_work+x_school1+x_school2+x_school3} /> // university
-		<rect y={barY} height={barH} fill='#C09881' width={x_other} x={xpos+x_work+x_school1+x_school2+x_school3+x_school4} /> // other
-	  </>
+		<div dangerouslySetInnerHTML={{ __html: test1 }} />	
 	);
 };
 
@@ -156,7 +170,7 @@ const $Demographics = ({react}) => {
 			details.forEach( info => {
 				bars.push(
 					//<rect key={info.age} x='10' y={info.age * 10} width={info.total / 20} height='10' fill="yellow" />
-					<PopulationBar key={info.age} xpos={100} ypos={0} length={500} base={7000} info={info} />
+					<PopulationBar key={info.age} react={react} xpos={100} ypos={0} length={500} base={7000} info={info} />
 				);
 			});
 			return bars;
