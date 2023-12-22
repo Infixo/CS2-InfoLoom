@@ -19,12 +19,12 @@ const AlignedParagraph = ({ left, right }) => {
 	marginRight: '10%', // Start 10% from the right edge
     textAlign: 'right',
   };	
-  return (
-    <p style={containerStyle}>
-      <span style={leftTextStyle}>{left}</span>
-      <span style={rightTextStyle}>{right}</span>
-    </p>
-  );
+	return (
+		<div class="labels_L7Q row_S2v" style={{width: '95%', paddingTop: '1rem', paddingBottom: '1rem', lineHeight: '100%', marginTop: '2rem' }}>
+			<div class="row_S2v"           style={{width: '60%', justifyContent: 'center'}}>{left}</div>
+			<div class="row_S2v"           style={{width: '40%', justifyContent: 'center'}}>{right}</div>
+		</div>
+	);
 };
 
 const HorizontalLine = ({ length }) => {
@@ -149,12 +149,12 @@ const PopulationBar = ({ legend, length, base, info, barH}) => {
 		<div style={{ display: 'flex' }}>
 			<div style={{ width: `${x_age}px`,   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: `${barH-2}px` }}>{info.age}</div>
 			<div style={{ width: `${x_total}px`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: `${barH-2}px` }}>{info.total}</div>
-			<div style={{ height: `${barH}px`, width: `${x_work}px`,    backgroundColor: '#99E2FF' }}></div>
+			<div style={{ height: `${barH}px`, width: `${x_work}px`,    backgroundColor: '#C09881' }}></div>
 			<div style={{ height: `${barH}px`, width: `${x_school1}px`, backgroundColor: '#DAFF7F' }}></div>
 			<div style={{ height: `${barH}px`, width: `${x_school2}px`, backgroundColor: '#7FFF8E' }}></div>
-			<div style={{ height: `${barH}px`, width: `${x_school3}px`, backgroundColor: '#7F92FF' }}></div>
-			<div style={{ height: `${barH}px`, width: `${x_school4}px`, backgroundColor: '#D67FFF' }}></div>
-			<div style={{ height: `${barH}px`, width: `${x_other}px`,   backgroundColor: '#C09881' }}></div>
+			<div style={{ height: `${barH}px`, width: `${x_school3}px`, backgroundColor: '#51FFE4' }}></div>
+			<div style={{ height: `${barH}px`, width: `${x_school4}px`, backgroundColor: '#7FDAFF' }}></div>
+			<div style={{ height: `${barH}px`, width: `${x_other}px`,   backgroundColor: '#D8D8D8' }}></div>
 		</div>
 	);
 };
@@ -193,34 +193,48 @@ const $Demographics = ({react}) => {
 		const event = new CustomEvent('hookui', { detail: data });
 		window.dispatchEvent(event);
 	};
+	
+	const panWidth = window.innerWidth * 0.20;
+	const panHeight = window.innerHeight * 0.86;
+	const barHeight = panHeight * 0.9 / 110;
+	console.log("barHeight", barHeight);
 
-	return <$Panel react={react} title="Demographics" onClose={onClose} initialSize={{ width: window.innerWidth * 0.2, height: window.innerHeight * 0.4 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
-	
-	
-		<div>
+	return <$Panel react={react} title="Demographics" onClose={onClose} initialSize={{ width: panWidth, height: panHeight }} initialPosition={{ top: window.innerHeight * 0.009, left: window.innerWidth * 0.053 }}>
+	  <div style={{ display: 'flex', flexDirection: 'row' }}>
+		<div style={{width: '50%'}} >
 			<AlignedParagraph left="All Citizens" right={totals[0]} />
 			<AlignedParagraph left="- Locals" right={totals[1]} />
 			<AlignedParagraph left="- Tourists" right={totals[2]} />
 			<AlignedParagraph left="- Commuters" right={totals[3]} />
+		</div>
+		<div style={{width: '50%'}} >
 			<AlignedParagraph left="Students" right={totals[4]} />
 			<AlignedParagraph left="Workers" right={totals[5]} />
 			<AlignedParagraph left="Oldest citizen" right={totals[6]} />
 		</div>
+	  </div>
+	  
+	  <div style={{height: '10rem'}}></div>
 		
 		<svg width='100%' height='50%' >
+			<line x1="100" y1="0" x2="100" y2="600" stroke="white" strokeWidth="1" />
+			<line x1="200" y1="0" x2="200" y2="600" stroke="white" strokeWidth="1" />
+			<line x1="300" y1="0" x2="300" y2="600" stroke="white" strokeWidth="1" />
+			<line x1="400" y1="0" x2="400" y2="600" stroke="white" strokeWidth="1" />
+			<line x1="500" y1="0" x2="500" y2="600" stroke="white" strokeWidth="1" />
 		{(() => {
 			const bars = [];
 			details.forEach( info => {
 				bars.push(
 					//<rect key={info.age} x='10' y={info.age * 10} width={info.total / 20} height='10' fill="yellow" />
-					<PopulationBar key={info.age} legend={80} length={500} base={7000} info={info} barH={12}/>
+					<PopulationBar key={info.age} legend={panWidth*0.1} length={panWidth*0.9} base={5000} info={info} barH={11}/>
 				);
 			});
 			return bars;
 		})()}
 			
 		</svg>
-		
+		{/* DEBUG
 		<div>
 		{(() => {
 			const paragraphs = [];
@@ -230,7 +244,7 @@ const $Demographics = ({react}) => {
 			return paragraphs;
 		})()}
 		</div>
-		
+		*/}
 	</$Panel>
 }
 
