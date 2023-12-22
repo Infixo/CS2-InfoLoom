@@ -57,10 +57,10 @@ Currently:
 2. The config file is automatically created in BepInEx/config folder when the game is run once.
 
 ### Known Issues
-- When Demographics window is open, the game stops responding to the mouse commands.
+- Nothing atm.
 
 ### Changelog
-- v0.4.0 (2023-12-22)
+- v0.4.1 (2023-12-22)
   - New feature: demographics.
 - v0.3.0 (2023-12-20)
   - New features: worforce structure and workplaces distribution.

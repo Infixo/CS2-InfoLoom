@@ -143,7 +143,7 @@ const $Demographics = ({react}) => {
 		<div style={{ height: `${barHeight}px`, width: `${barHeight*3}px`, backgroundColor: '#D8D8D8' }}/><div>Other</div>{/* silver gray */}
 	  </div>
 	  <div style={{height: '3rem'}}></div>		
-	  <svg>
+	  <svg width={panWidth} height={panHeight*0.85}>
 		{gridLines}
 		{(() => {
 			const bars = [];
