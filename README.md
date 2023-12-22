@@ -2,11 +2,17 @@
 InfoLoom is a Cities Skylines 2 mod that adds new UI windows with extra information.
 Currently:
 - Demand factors
-- (w.i.p.) Demographics
+- Demographics
 - Workforce structure
 - Workplaces distribution
 
 ## Features
+
+### Demographics
+- Key information about current city demographics in one place.
+- Age distribution histogram that also shows cims' activity structure.
+
+![Demographics](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/demographics.png)
 
 ### Demand factors
 - Shows individual demand factor VALUES for each demand type. Helpful to learn actual importance of each factor.
@@ -51,9 +57,11 @@ Currently:
 2. The config file is automatically created in BepInEx/config folder when the game is run once.
 
 ### Known Issues
-- Nothing atm.
+- When Demographics window is open, the game stops responding to the mouse commands.
 
 ### Changelog
+- v0.4.0 (2023-12-22)
+  - New feature: demographics.
 - v0.3.0 (2023-12-20)
   - New features: worforce structure and workplaces distribution.
 - v0.2.2 (2023-12-17)
