@@ -76,7 +76,7 @@ const CanvasWithSquares = () => {
 // length - maximum length that corresponds with base
 // base - represents entire bar
 // xpos, ypos - location of the bar
-const PopulationBar = ({ react, xpos, ypos, length, base, info}) => {
+const PopulationBarSVG = ({ react, xpos, ypos, length, base, info}) => {
 	//const [svgContent, setSvgContent] = react.useState(
     //"<text x='100' y='100' fontSize='20' fill='red'>" + info.total + "</text>"
 	//);
@@ -129,6 +129,33 @@ const PopulationBar = ({ react, xpos, ypos, length, base, info}) => {
 		<rect y={barY} height={barH} fill='#D67FFF' width={x_school4} x={xpos+x_work+x_school1+x_school2+x_school3} /> // university
 		<rect y={barY} height={barH} fill='#C09881' width={x_other}   x={xpos+x_work+x_school1+x_school2+x_school3+x_school4} /> // other
 	  </>
+	);
+};
+
+// length - maximum length that corresponds with base
+// base - represents entire bar
+// xpos, ypos - location of the bar
+const PopulationBar = ({ legend, length, base, info, barH}) => {
+	const x_age = legend * 20/100;
+	const x_total = legend * 80/100;
+	const x_work = length*info.work/base;
+	const x_school1 = length*info.school1/base;
+	const x_school2 = length*info.school2/base;
+	const x_school3 = length*info.school3/base;
+	const x_school4 = length*info.school4/base;
+	const x_other = length*info.other/base;
+
+	return (
+		<div style={{ display: 'flex' }}>
+			<div style={{ width: `${x_age}px`,   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: `${barH-2}px` }}>{info.age}</div>
+			<div style={{ width: `${x_total}px`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: `${barH-2}px` }}>{info.total}</div>
+			<div style={{ height: `${barH}px`, width: `${x_work}px`,    backgroundColor: '#99E2FF' }}></div>
+			<div style={{ height: `${barH}px`, width: `${x_school1}px`, backgroundColor: '#DAFF7F' }}></div>
+			<div style={{ height: `${barH}px`, width: `${x_school2}px`, backgroundColor: '#7FFF8E' }}></div>
+			<div style={{ height: `${barH}px`, width: `${x_school3}px`, backgroundColor: '#7F92FF' }}></div>
+			<div style={{ height: `${barH}px`, width: `${x_school4}px`, backgroundColor: '#D67FFF' }}></div>
+			<div style={{ height: `${barH}px`, width: `${x_other}px`,   backgroundColor: '#C09881' }}></div>
+		</div>
 	);
 };
 
@@ -186,7 +213,7 @@ const $Demographics = ({react}) => {
 			details.forEach( info => {
 				bars.push(
 					//<rect key={info.age} x='10' y={info.age * 10} width={info.total / 20} height='10' fill="yellow" />
-					<PopulationBar key={info.age} react={react} xpos={100} ypos={0} length={500} base={7000} info={info} />
+					<PopulationBar key={info.age} legend={80} length={500} base={7000} info={info} barH={12}/>
 				);
 			});
 			return bars;
