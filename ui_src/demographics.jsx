@@ -43,12 +43,12 @@ const PopulationBarSVG = ({ react, xpos, ypos, length, base, info}) => {
 	  <>
 		<text y={barY+barH-1} x={xpos-90} fill='white' fontSize={barH-1} textAnchor='middle'>{info.age}</text>
 		<text y={barY+barH-1} x={xpos-50} fill='white' fontSize={barH-1} textAnchor='middle'>{info.total}</text>
-		<rect y={barY} height={barH} fill='#99E2FF' width={x_work}    x={xpos} /> // work
-		<rect y={barY} height={barH} fill='#DAFF7F' width={x_school1} x={xpos+x_work} /> // elementary
-		<rect y={barY} height={barH} fill='#7FFF8E' width={x_school2} x={xpos+x_work+x_school1} /> // high school
-		<rect y={barY} height={barH} fill='#7F92FF' width={x_school3} x={xpos+x_work+x_school1+x_school2} /> // college
-		<rect y={barY} height={barH} fill='#D67FFF' width={x_school4} x={xpos+x_work+x_school1+x_school2+x_school3} /> // university
-		<rect y={barY} height={barH} fill='#C09881' width={x_other}   x={xpos+x_work+x_school1+x_school2+x_school3+x_school4} /> // other
+		<rect y={barY} height={barH} fill='#99E2FF' width={x_work}    x={xpos} /> // work, pastel blue
+		<rect y={barY} height={barH} fill='#DAFF7F' width={x_school1} x={xpos+x_work} /> // elementary, pale lime
+		<rect y={barY} height={barH} fill='#7FFF8E' width={x_school2} x={xpos+x_work+x_school1} /> // high school, mint green
+		<rect y={barY} height={barH} fill='#7F92FF' width={x_school3} x={xpos+x_work+x_school1+x_school2} /> // college, light blue
+		<rect y={barY} height={barH} fill='#D67FFF' width={x_school4} x={xpos+x_work+x_school1+x_school2+x_school3} /> // university, lavender blue
+		<rect y={barY} height={barH} fill='#C09881' width={x_other}   x={xpos+x_work+x_school1+x_school2+x_school3+x_school4} /> // other, light brown
 	  </>
 	);
 };
@@ -70,12 +70,12 @@ const PopulationBar = ({ legend, length, base, info, barH}) => {
 		<div style={{ display: 'flex' }}>
 			<div style={{ width: `${x_age}px`,   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: `${barH-2}px` }}>{info.age}</div>
 			<div style={{ width: `${x_total}px`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: `${barH-2}px` }}>{info.total}</div>
-			<div style={{ height: `${barH}px`, width: `${x_work}px`,    backgroundColor: '#C09881' }}></div>
-			<div style={{ height: `${barH}px`, width: `${x_school1}px`, backgroundColor: '#DAFF7F' }}></div>
-			<div style={{ height: `${barH}px`, width: `${x_school2}px`, backgroundColor: '#7FFF8E' }}></div>
-			<div style={{ height: `${barH}px`, width: `${x_school3}px`, backgroundColor: '#51FFE4' }}></div>
-			<div style={{ height: `${barH}px`, width: `${x_school4}px`, backgroundColor: '#7FDAFF' }}></div>
-			<div style={{ height: `${barH}px`, width: `${x_other}px`,   backgroundColor: '#D8D8D8' }}></div>
+			<div style={{ height: `${barH}px`, width: `${x_work}px`,    backgroundColor: '#C09881' }}></div>{/* light brown */}
+			<div style={{ height: `${barH}px`, width: `${x_school1}px`, backgroundColor: '#DAFF7F' }}></div>{/* pale lime   */}
+			<div style={{ height: `${barH}px`, width: `${x_school2}px`, backgroundColor: '#7FFF8E' }}></div>{/* mint green  */}
+			<div style={{ height: `${barH}px`, width: `${x_school3}px`, backgroundColor: '#51FFE4' }}></div>{/* turquoise   */}
+			<div style={{ height: `${barH}px`, width: `${x_school4}px`, backgroundColor: '#2361FF' }}></div>{/* bright blue */}
+			<div style={{ height: `${barH}px`, width: `${x_other}px`,   backgroundColor: '#D8D8D8' }}></div>{/* silver gray */}
 		</div>
 	);
 };
@@ -104,13 +104,13 @@ const $Demographics = ({react}) => {
 	
 	const panWidth = window.innerWidth * 0.20;
 	const panHeight = window.innerHeight * 0.86;
-	const barHeight = panHeight * 0.8 / 110; // TODO: 110 is number of bars - should correspond with backend
+	const barHeight = panHeight * 0.77 / 110; // TODO: 110 is number of bars - should correspond with backend
 	const lineSpan = panWidth * 0.9 / 5; // 1000 pop lines span
 	
   const gridLines = Array.from({ length: 5 }, (_, index) => (
     <line key={index}
       x1={panWidth*0.1 + lineSpan*(index+1)} y1="0"
-      x2={panWidth*0.1 + lineSpan*(index+1)} y2={panHeight * 0.85}
+      x2={panWidth*0.1 + lineSpan*(index+1)} y2={panHeight * 0.83}
       stroke="white"  strokeWidth="1"
     />
   ));	
@@ -123,16 +123,26 @@ const $Demographics = ({react}) => {
 			<AlignedParagraph left="- Locals" right={totals[1]} />
 			<AlignedParagraph left="- Tourists" right={totals[2]} />
 			<AlignedParagraph left="- Commuters" right={totals[3]} />
+			<AlignedParagraph left="Moving Away" right={totals[7]} />
 		</div>
 		<div style={{width: '50%'}} >
+			<AlignedParagraph left="Oldest citizen" right={totals[6]} />
 			<AlignedParagraph left="Students" right={totals[4]} />
 			<AlignedParagraph left="Workers" right={totals[5]} />
-			<AlignedParagraph left="Oldest citizen" right={totals[6]} />
+			<AlignedParagraph left="Homeless" right="t.b.d." />
+			<AlignedParagraph left="Dead" right={totals[8]} />
 		</div>
 	  </div>
-	  
-	  <div style={{height: '10rem'}}></div>
-		
+	  <div style={{height: '3rem'}}></div>	  
+	  <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', fontSize: `${barHeight+2}px` }}>
+		<div style={{ height: `${barHeight}px`, width: `${barHeight*3}px`, backgroundColor: '#C09881' }}/><div>Work</div>{/* light brown */}
+		<div style={{ height: `${barHeight}px`, width: `${barHeight*3}px`, backgroundColor: '#DAFF7F' }}/><div>Elementary</div>{/* pale lime */}
+		<div style={{ height: `${barHeight}px`, width: `${barHeight*3}px`, backgroundColor: '#7FFF8E' }}/><div>High school</div>{/* mint green */}
+		<div style={{ height: `${barHeight}px`, width: `${barHeight*3}px`, backgroundColor: '#51FFE4' }}/><div>College</div>{/* turquoise  */}
+		<div style={{ height: `${barHeight}px`, width: `${barHeight*3}px`, backgroundColor: '#2361FF' }}/><div>University</div>{/* bright blue */}
+		<div style={{ height: `${barHeight}px`, width: `${barHeight*3}px`, backgroundColor: '#D8D8D8' }}/><div>Other</div>{/* silver gray */}
+	  </div>
+	  <div style={{height: '3rem'}}></div>		
 	  <svg>
 		{gridLines}
 		{(() => {
