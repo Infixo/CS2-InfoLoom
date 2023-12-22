@@ -1,7 +1,6 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { useDataUpdate } from 'hookui-framework'
 import $Panel from './panel'
-//import { useState, useEffect, useRef } from 'react';
 
 const AlignedParagraph = ({ left, right }) => {
   const containerStyle = {
@@ -27,70 +26,10 @@ const AlignedParagraph = ({ left, right }) => {
 	);
 };
 
-const HorizontalLine = ({ length }) => {
-  const lineStyle = {
-    width: `${length}px`,
-    borderBottom: '5px solid white', // Adjust the border style as needed
-    margin: '1px 0', // Adjust the margin as needed
-  };
-  return <div style={lineStyle}></div>;
-};
-
-
-const HorizontalLine2 = ({ length, strokeWidth, color }) => {
-  return (
-    <div>
-    <svg height="2" width={length}>
-      <line x1="0" y1="1" x2={length} y2="1" stroke={color} strokeWidth={strokeWidth} />
-    </svg>
-	</div>
-  );
-};
-
-const CanvasWithSquares = () => {
-  const canvasRef = useRef(null);
-
-  react.useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    // Draw the first square
-    context.fillStyle = 'blue';
-    context.fillRect(50, 50, 100, 100);
-
-    // Draw the second square
-    context.fillStyle = 'green';
-    context.fillRect(200, 50, 100, 100);
-  }, []); // The empty dependency array ensures that this effect runs only once after the initial render
-
-  return (
-    <canvas
-      ref={canvasRef}
-      width={400}
-      height={200}
-      style={{ border: '1px solid black' }}
-    ></canvas>
-  );
-};
-
 // length - maximum length that corresponds with base
 // base - represents entire bar
 // xpos, ypos - location of the bar
 const PopulationBarSVG = ({ react, xpos, ypos, length, base, info}) => {
-	//const [svgContent, setSvgContent] = react.useState(
-    //"<text x='100' y='100' fontSize='20' fill='red'>" + info.total + "</text>"
-	//);
-	//console.log(svgContent);
-
-	//const [total, setTotal] = react.useState(info.total);
-	
-	//if (total !== info.total)
-	//{
-		//setTotal(info.total);
-		//console.log("new total", info.total, total);
-	//}
-  
-	//console.log("bar", info);
 	const barH = 12;
 	const barY = ypos + info.age * barH; // TODO: bar height
 	const x_work = length*info.work/base;
@@ -99,24 +38,6 @@ const PopulationBarSVG = ({ react, xpos, ypos, length, base, info}) => {
 	const x_school3 = length*info.school3/base;
 	const x_school4 = length*info.school4/base;
 	const x_other = length*info.other/base;
-	
-	// generate SVG content
-	//const htmlArray = [];
-	//const test1 = "<text x=0 y="+barY+" fontSize=12 fill='red'>" + info.total + "</text>";
-	//htmlArray.push(test1);
-	
-	//console.log(test1);
-	//const textAge   = "<text y=" + (barY+barH-1) + " x=" + (xpos-90) + " fill='white' fontSize=" + (barH-1) + " textAnchor='middle'>" + info.age   + "</text>";
-	//const textTotal = "<text y=" + (barY+barH-1) + " x=" + (xpos-50) + " fill='white' fontSize=" + (barH-1) + " textAnchor='middle'>" + info.total + "</text>";
-	//htmlArray.push(textAge);
-	//htmlArray.push(textTotal);
-	//htmlArray.push(	"<rect y=" + barY + " height=" + barH + " fill='#99E2FF' width=" + x_work + " x=" + xpos + "></rect>" ); // work
-	//const svgString = '<rect y="60" height="12" fill="#99E2FF" width="578.1428571428571" x="100"/>';	
-	//htmlArray.push(svgString);
-	//console.log(htmlArray)
-	//	<div dangerouslySetInnerHTML={{ __html: htmlArray.join('') }} />
-		//<p dangerouslySetInnerHTML={{ __html: textAge }} />
-
 	
 	return (
 	  <>
@@ -162,9 +83,6 @@ const PopulationBar = ({ legend, length, base, info, barH}) => {
 
 const $Demographics = ({react}) => {
 	
-    const [oldestCim, setOldestCim] = react.useState(0)
-    useDataUpdate(react, 'populationInfo.oldest_citizen', setOldestCim)
-	
     // 0 - num citizens in the city 0 = 1+2+3
     // 1 - num locals
     // 2 - num tourists
@@ -178,16 +96,6 @@ const $Demographics = ({react}) => {
 	const [details, setDetails] = react.useState([])
 	useDataUpdate(react, 'populationInfo.structureDetails', setDetails)
 
-
-	// TEST
-	const numbers = Array.from({ length: 20 }, (_, index) => index + 1)
-
-	const lines = [];
-	for (let i = 0; i < numbers.length; i++) {
-		lines.push(<HorizontalLine key={i} length={numbers[i]*50} />);
-	}
-	//paragraphs.push( <HorizontalLine key={i} length={totals[i]/100} /> );
-
 	const onClose = () => {
 		const data = { type: "toggle_visibility", id: 'infoloom.demographics' };
 		const event = new CustomEvent('hookui', { detail: data });
@@ -196,10 +104,19 @@ const $Demographics = ({react}) => {
 	
 	const panWidth = window.innerWidth * 0.20;
 	const panHeight = window.innerHeight * 0.86;
-	const barHeight = panHeight * 0.9 / 110;
-	console.log("barHeight", barHeight);
+	const barHeight = panHeight * 0.8 / 110; // TODO: 110 is number of bars - should correspond with backend
+	const lineSpan = panWidth * 0.9 / 5; // 1000 pop lines span
+	
+  const gridLines = Array.from({ length: 5 }, (_, index) => (
+    <line key={index}
+      x1={panWidth*0.1 + lineSpan*(index+1)} y1="0"
+      x2={panWidth*0.1 + lineSpan*(index+1)} y2={panHeight * 0.85}
+      stroke="white"  strokeWidth="1"
+    />
+  ));	
 
 	return <$Panel react={react} title="Demographics" onClose={onClose} initialSize={{ width: panWidth, height: panHeight }} initialPosition={{ top: window.innerHeight * 0.009, left: window.innerWidth * 0.053 }}>
+	
 	  <div style={{ display: 'flex', flexDirection: 'row' }}>
 		<div style={{width: '50%'}} >
 			<AlignedParagraph left="All Citizens" right={totals[0]} />
@@ -216,24 +133,19 @@ const $Demographics = ({react}) => {
 	  
 	  <div style={{height: '10rem'}}></div>
 		
-		<svg width='100%' height='50%' >
-			<line x1="100" y1="0" x2="100" y2="600" stroke="white" strokeWidth="1" />
-			<line x1="200" y1="0" x2="200" y2="600" stroke="white" strokeWidth="1" />
-			<line x1="300" y1="0" x2="300" y2="600" stroke="white" strokeWidth="1" />
-			<line x1="400" y1="0" x2="400" y2="600" stroke="white" strokeWidth="1" />
-			<line x1="500" y1="0" x2="500" y2="600" stroke="white" strokeWidth="1" />
+	  <svg>
+		{gridLines}
 		{(() => {
 			const bars = [];
 			details.forEach( info => {
 				bars.push(
-					//<rect key={info.age} x='10' y={info.age * 10} width={info.total / 20} height='10' fill="yellow" />
-					<PopulationBar key={info.age} legend={panWidth*0.1} length={panWidth*0.9} base={5000} info={info} barH={11}/>
+					<PopulationBar key={info.age} legend={panWidth*0.1} length={panWidth*0.9} base={5000} info={info} barH={barHeight}/>
 				);
 			});
 			return bars;
 		})()}
-			
-		</svg>
+	  </svg>
+	  
 		{/* DEBUG
 		<div>
 		{(() => {
@@ -245,6 +157,7 @@ const $Demographics = ({react}) => {
 		})()}
 		</div>
 		*/}
+		
 	</$Panel>
 }
 
