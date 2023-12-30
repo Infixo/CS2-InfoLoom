@@ -18,11 +18,15 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Scripting;
+using Game;
+using Game.Simulation;
+using Game.UI;
+using Colossal.UI.Binding;
 
-namespace Game.Simulation;
+namespace InfoLoom;
 
 [CompilerGenerated]
-public class CommercialDemandSystem : GameSystemBase, IDefaultSerializable, ISerializable
+public class CommercialDemandUISystem : UISystemBase
 {
     [BurstCompile]
     private struct UpdateCommercialDemandJob : IJob
@@ -302,6 +306,10 @@ public class CommercialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
         }
     }
 
+    private const string kGroup = "cityInfo";
+
+    private SimulationSystem m_SimulationSystem;
+
     private ResourceSystem m_ResourceSystem;
 
     private TaxSystem m_TaxSystem;
@@ -365,6 +373,13 @@ public class CommercialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
     [DebugWatchValue(color = "#2b6795")]
     public int buildingDemand => m_LastBuildingDemand;
 
+    // InfoLoom
+
+    private RawValueBinding m_uiResults;
+    private RawValueBinding m_uiStrings;
+
+    private NativeArray<int> m_Results;
+
     public override int GetUpdateInterval(SystemUpdatePhase phase)
     {
         return 16;
@@ -408,6 +423,7 @@ public class CommercialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
     protected override void OnCreate()
     {
         base.OnCreate();
+        m_SimulationSystem = base.World.GetOrCreateSystemManaged<SimulationSystem>(); // TODO: use UIUpdateState eventually
         m_ResourceSystem = base.World.GetOrCreateSystemManaged<ResourceSystem>();
         m_TaxSystem = base.World.GetOrCreateSystemManaged<TaxSystem>();
         m_CountEmploymentSystem = base.World.GetOrCreateSystemManaged<CountEmploymentSystem>();
@@ -430,6 +446,35 @@ public class CommercialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
         RequireForUpdate(m_EconomyParameterQuery);
         RequireForUpdate(m_DemandParameterQuery);
         RequireForUpdate(m_CommercialProcessDataQuery);
+
+        // InfoLoom
+        m_Results = new NativeArray<int>(10, Allocator.Persistent);
+
+        AddBinding(m_uiResults = new RawValueBinding(kGroup, "ilDemandCommercial", delegate (IJsonWriter binder)
+        {
+            binder.ArrayBegin(m_Results.Length);
+            for (int i = 0; i < m_Results.Length; i++)
+                binder.Write(m_Results[i]);
+            binder.ArrayEnd();
+        }));
+
+        AddBinding(m_uiStrings = new RawValueBinding(kGroup, "ilDemandComStrings", delegate (IJsonWriter writer)
+        {
+            writer.TypeBegin("CommercialDemandStrings");
+            writer.PropertyName("string0");
+            writer.Write($"Pos 0: {m_Results[0]}");
+            writer.PropertyName("string1");
+            writer.Write($"Pos 1: {m_Results[1]}");
+            writer.PropertyName("string2");
+            writer.Write($"Pos 2: {m_Results[2]}");
+            writer.PropertyName("string3");
+            writer.Write($"Pos 3: {m_Results[3]}");
+            writer.PropertyName("string4");
+            writer.Write($"Pos 4: {m_Results[4]}");
+            writer.TypeEnd();
+        }));
+
+        Plugin.Log("CommercialDemandUISystem created.");
     }
 
     [Preserve]
@@ -528,6 +573,12 @@ public class CommercialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
     [Preserve]
     protected override void OnUpdate()
     {
+        if (m_SimulationSystem.frameIndex % 128 != 55)
+            return;
+        Plugin.Log($"OnUpdate: {m_SimulationSystem.frameIndex}");
+        base.OnUpdate();
+        ResetResults();
+        /*
         if (!m_DemandParameterQuery.IsEmptyIgnoreFilter && !m_EconomyParameterQuery.IsEmptyIgnoreFilter)
         {
             m_LastCompanyDemand = m_CompanyDemand.value;
@@ -589,6 +640,18 @@ public class CommercialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
             m_CountFreeWorkplacesSystem.AddReader(base.Dependency);
             m_TaxSystem.AddReader(base.Dependency);
         }
+        */
+        // Update UI
+        m_uiResults.Update();
+        m_uiStrings.Update();
+    }
+
+    private void ResetResults()
+    {
+        for (int i = 0; i < m_Results.Length; i++) // there are 5 education levels + 1 for totals
+        {
+            m_Results[i] = i*i; // new WorkforceAtLevelInfo(i);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -604,7 +667,7 @@ public class CommercialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
     }
 
     [Preserve]
-    public CommercialDemandSystem()
+    public CommercialDemandUISystem()
     {
     }
 }

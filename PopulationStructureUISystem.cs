@@ -417,7 +417,7 @@ public class PopulationStructureUISystem : UISystemBase
 
     protected override void OnUpdate()
     {
-        if (m_SimulationSystem.frameIndex % 128 != 77)
+        if (m_SimulationSystem.frameIndex % 128 != 44)
             return;
 
         //Plugin.Log($"OnUpdate at frame {m_SimulationSystem.frameIndex}");
