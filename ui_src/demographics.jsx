@@ -120,17 +120,17 @@ const $Demographics = ({react}) => {
 	  <div style={{ display: 'flex', flexDirection: 'row' }}>
 		<div style={{width: '50%'}} >
 			<AlignedParagraph left="All Citizens" right={totals[0]} />
-			<AlignedParagraph left="- Locals" right={totals[1]} />
 			<AlignedParagraph left="- Tourists" right={totals[2]} />
 			<AlignedParagraph left="- Commuters" right={totals[3]} />
-			<AlignedParagraph left="Moving Away" right={totals[7]} />
+			<AlignedParagraph left="- Moving Away" right={totals[7]} />
+			<AlignedParagraph left="Population" right={totals[1]} />
 		</div>
 		<div style={{width: '50%'}} >
-			<AlignedParagraph left="Oldest citizen" right={totals[6]} />
+			<AlignedParagraph left="Dead" right={totals[8]} />
 			<AlignedParagraph left="Students" right={totals[4]} />
 			<AlignedParagraph left="Workers" right={totals[5]} />
-			<AlignedParagraph left="Homeless" right="t.b.d." />
-			<AlignedParagraph left="Dead" right={totals[8]} />
+			<AlignedParagraph left="Homeless" right={totals[9]} />
+			<AlignedParagraph left="Oldest citizen" right={totals[6]} />
 		</div>
 	  </div>
 	  <div style={{height: '3rem'}}></div>	  

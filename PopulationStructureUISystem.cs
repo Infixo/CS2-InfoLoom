@@ -15,6 +15,7 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using System;
+using Game.Buildings;
 
 namespace InfoLoom;
 
@@ -105,6 +106,12 @@ public class PopulationStructureUISystem : UISystemBase
         [ReadOnly]
         public ComponentLookup<Household> m_Households;
 
+        [ReadOnly]
+        public ComponentLookup<HomelessHousehold> m_HomelessHouseholds;
+
+        [ReadOnly]
+        public ComponentLookup<PropertyRenter> m_PropertyRenters;
+
         public TimeData m_TimeData;
 
         //public uint m_UpdateFrameIndex;
@@ -140,8 +147,8 @@ public class PopulationStructureUISystem : UISystemBase
                 Citizen citizen = citizenArray[i];
                 Entity household = householdMemberArray[i].m_Household;
 
-                // skip: non-existing households (technical), not MovedIn yet
-                if (!m_Households.HasComponent(household) || (m_Households[household].m_Flags & HouseholdFlags.MovedIn) == 0)
+                // skip: non-existing households (technical), and with flag not set
+                if (!m_Households.HasComponent(household) || m_Households[household].m_Flags == HouseholdFlags.None)
                 {
                     continue;
                 }
@@ -153,23 +160,55 @@ public class PopulationStructureUISystem : UISystemBase
                     continue;
                 }
 
+                // citizen data
+                bool isCommuter = ((citizen.m_State & CitizenFlags.Commuter) != CitizenFlags.None);
+                bool isTourist = ((citizen.m_State & CitizenFlags.Tourist) != CitizenFlags.None);
+                bool isMovedIn = ((m_Households[household].m_Flags & HouseholdFlags.MovedIn) != HouseholdFlags.None);
+
+                // are components in sync with flags?
+                //if (isTourist || m_TouristHouseholds.HasComponent(household))
+                //Plugin.Log($"{entity.Index}: tourist {isTourist} {isTouristHousehold} {m_Households[household].m_Flags}");
+                //if (isCommuter || m_CommuterHouseholds.HasComponent(household))
+                //Plugin.Log($"{entity.Index}: commuter {isCommuter} {isCommuterHousehold} {m_Households[household].m_Flags}");
+                // Infixo: notes for the future
+                // Tourists: citizen flag is always set, component sometimes exists, sometimes not
+                //           most of them don't have MovedIn flag set, just Tourist flag in household
+                //           usually Tourist household flag is correlated with TouristHousehold component, but NOT always
+                //           MovedIn tourists DON'T have TouristHousehold component - why??? where do they stay?
+                //           tl;dr CitizenFlags.Tourist is the only reliable way
+                // Commuters: very similar logic, CitizenFlag is always SET
+                //            CommuterHousehold component is present when household flag is Commuter
+                //                                        is not present when flag is MovedIn
+
+                // count All, Tourists and Commuters
+                m_Totals[0]++; // all
+                if (isTourist) m_Totals[2]++; // tourists
+                else if (isCommuter) m_Totals[3]++; // commuters
+                if (isTourist || isCommuter)
+                    continue; // not local, go for the next
+
                 // skip but count citizens moving away
+                // 231230 moved after Tourist & Commuter check, so it will show only Locals that are moving away (more important info)
                 if (m_MovingAways.HasComponent(household))
                 {
                     m_Totals[7]++; // moving aways
                     continue;
                 }
 
-                // citizen data
-                bool isCommuter = ((citizen.m_State & CitizenFlags.Commuter) != CitizenFlags.None);
-                bool isTourist = ((citizen.m_State & CitizenFlags.Commuter) != CitizenFlags.None);
-                // we don't know if it is already settled?
-                m_Totals[0]++; // all
-                if (isTourist) m_Totals[2]++; // tourists
-                else if (isCommuter) m_Totals[3]++; // commuters
-                else m_Totals[1]++; // locals
-                if (isTourist || isCommuter)
-                    continue; // not local, go for the next
+                // finally, count local population
+                if (isMovedIn) m_Totals[1]++; // locals; game Population is: MovedIn, not Tourist & Commuter, not dead
+                else
+                {
+                    // skip glitches e.g. there is a case with Tourist household, but citizen is NOT Tourist
+                    //Plugin.Log($"Warning: unknown citizen {citizen.m_State} household {m_Households[household].m_Flags}");
+                    continue;
+                }
+
+                // homeless citizens, already MovingAway are not included (they are gone, anyway)
+                if (m_HomelessHouseholds.HasComponent(household) || !m_PropertyRenters.HasComponent(household))
+                {
+                    m_Totals[9]++; // homeless
+                }
 
                 // get age
                 int ageInDays = day - citizen.m_BirthDay;
@@ -258,14 +297,14 @@ public class PopulationStructureUISystem : UISystemBase
         [ReadOnly]
         public ComponentLookup<MovingAway> __Game_Agents_MovingAway_RO_ComponentLookup;
 
-        //[ReadOnly]
-        //public ComponentLookup<PropertyRenter> __Game_Buildings_PropertyRenter_RO_ComponentLookup; // Infixo: for future use, to count homeless
+        [ReadOnly]
+        public ComponentLookup<PropertyRenter> __Game_Buildings_PropertyRenter_RO_ComponentLookup;
 
         [ReadOnly]
         public ComponentLookup<Household> __Game_Citizens_Household_RO_ComponentLookup;
 
-        //[ReadOnly]
-        //public ComponentTypeHandle<WorkProvider> __Game_Companies_WorkProvider_RO_ComponentTypeHandle;
+        [ReadOnly]
+        public ComponentLookup<HomelessHousehold> __Game_Citizens_HomelessHousehold_RO_ComponentLookup;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void __AssignHandles(ref SystemState state)
@@ -280,9 +319,9 @@ public class PopulationStructureUISystem : UISystemBase
 
             // lookups
             __Game_Agents_MovingAway_RO_ComponentLookup = state.GetComponentLookup<MovingAway>(isReadOnly: true);
-            //__Game_Buildings_PropertyRenter_RO_ComponentLookup = state.GetComponentLookup<PropertyRenter>(isReadOnly: true); // Infixo: for future, homeless
+            __Game_Buildings_PropertyRenter_RO_ComponentLookup = state.GetComponentLookup<PropertyRenter>(isReadOnly: true);
             __Game_Citizens_Household_RO_ComponentLookup = state.GetComponentLookup<Household>(isReadOnly: true);
-
+            __Game_Citizens_HomelessHousehold_RO_ComponentLookup = state.GetComponentLookup<HomelessHousehold>(isReadOnly: true);
         }
     }
 
@@ -316,6 +355,7 @@ public class PopulationStructureUISystem : UISystemBase
     // 6 - oldest cim
     // 7 - moving aways
     // 8 - dead cims
+    // 9 - homeless citizens
 
     private NativeArray<PopulationAtAgeInfo> m_Results; // final results, will be filled via jobs and then written as output
 
@@ -362,7 +402,7 @@ public class PopulationStructureUISystem : UISystemBase
         }));
 
         // allocate memory for results
-        m_Totals = new NativeArray<int>(9, Allocator.Persistent);
+        m_Totals = new NativeArray<int>(10, Allocator.Persistent);
         m_Results = new NativeArray<PopulationAtAgeInfo>(110, Allocator.Persistent); // INFIXO: TODO
         Plugin.Log("PopulationStructureUISystem created.");
     }
@@ -397,8 +437,10 @@ public class PopulationStructureUISystem : UISystemBase
         __TypeHandle.__Game_Citizens_HealthProblem_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
 
         __TypeHandle.__Game_Agents_MovingAway_RO_ComponentLookup.Update(ref base.CheckedStateRef);
+        __TypeHandle.__Game_Buildings_PropertyRenter_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Citizens_HouseholdMember_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Citizens_Household_RO_ComponentLookup.Update(ref base.CheckedStateRef);
+        __TypeHandle.__Game_Citizens_HomelessHousehold_RO_ComponentLookup.Update(ref base.CheckedStateRef);
 
         PopulationStructureJob structureJob = default(PopulationStructureJob);
         structureJob.m_EntityType = __TypeHandle.__Unity_Entities_Entity_TypeHandle;
@@ -409,6 +451,8 @@ public class PopulationStructureUISystem : UISystemBase
         structureJob.m_HealthProblemType = __TypeHandle.__Game_Citizens_HealthProblem_RO_ComponentTypeHandle;
         structureJob.m_HouseholdMemberType = __TypeHandle.__Game_Citizens_HouseholdMember_RO_ComponentTypeHandle;
         structureJob.m_Households = __TypeHandle.__Game_Citizens_Household_RO_ComponentLookup;
+        structureJob.m_PropertyRenters = __TypeHandle.__Game_Buildings_PropertyRenter_RO_ComponentLookup; 
+        structureJob.m_HomelessHouseholds = __TypeHandle.__Game_Citizens_HomelessHousehold_RO_ComponentLookup;
         //structureJob.m_UpdateFrameType = __TypeHandle.__Game_Simulation_UpdateFrame_SharedComponentTypeHandle;
         //structureJob.m_Students = __TypeHandle.__Game_Buildings_Student_RO_BufferLookup;
         //structureJob.m_Purposes = __TypeHandle.__Game_Citizens_TravelPurpose_RO_ComponentLookup;
