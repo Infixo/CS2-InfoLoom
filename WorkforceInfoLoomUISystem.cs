@@ -87,6 +87,9 @@ public class WorkforceInfoLoomUISystem : UISystemBase
         public ComponentLookup<PropertyRenter> m_PropertyRenters;
 
         [ReadOnly]
+        public ComponentLookup<HomelessHousehold> m_HomelessHouseholds;
+
+        [ReadOnly]
         public ComponentLookup<MovingAway> m_MovingAways;
 
         [ReadOnly]
@@ -242,7 +245,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
                     // This counts people working outside (???) or underemployed
                     //if (m_OutsideConnections.HasComponent(worker.m_Workplace) || worker.m_Level < educationLevel)
                     //{
-                        //AddEmployable(educationLevel);
+                    //AddEmployable(educationLevel);
                     //}
                     bool isEmployable = false;
                     if (m_OutsideConnections.HasComponent(worker.m_Workplace)) { info.Outside++; isEmployable = true; }
@@ -252,15 +255,15 @@ public class WorkforceInfoLoomUISystem : UISystemBase
                 else
                 {
                     info.Unemployed++;
-                    if (!m_PropertyRenters.HasComponent(household)) // students ARE excluded
-                    {
-                        info.Homeless++;
-                        //m_Unemployed.Increment();
-                        //int educationLevel2 = citizen.GetEducationLevel();
-                        //AddPotential(educationLevel2);
-                        //AddEmployable(educationLevel2); // this is actually confusing, anyone not-working is employable, so this is no extra info
-                        //AddUnemployment(educationLevel2);
-                    }
+                }
+                if (m_HomelessHouseholds.HasComponent(household) || !m_PropertyRenters.HasComponent(household)) // students ARE excluded
+                {
+                    info.Homeless++;
+                    //m_Unemployed.Increment();
+                    //int educationLevel2 = citizen.GetEducationLevel();
+                    //AddPotential(educationLevel2);
+                    //AddEmployable(educationLevel2); // this is actually confusing, anyone not-working is employable, so this is no extra info
+                    //AddUnemployment(educationLevel2);
                 }
                 // Potentials - already workers, not students, not homeless
                 // Employable
@@ -401,6 +404,9 @@ public class WorkforceInfoLoomUISystem : UISystemBase
         public ComponentLookup<PropertyRenter> __Game_Buildings_PropertyRenter_RO_ComponentLookup;
 
         [ReadOnly]
+        public ComponentLookup<HomelessHousehold> __Game_Citizens_HomelessHousehold_RO_ComponentLookup;
+
+        [ReadOnly]
         public ComponentLookup<OutsideConnection> __Game_Objects_OutsideConnection_RO_ComponentLookup;
 
         [ReadOnly]
@@ -418,6 +424,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
             // lookups
             __Game_Agents_MovingAway_RO_ComponentLookup = state.GetComponentLookup<MovingAway>(isReadOnly: true);
             __Game_Buildings_PropertyRenter_RO_ComponentLookup = state.GetComponentLookup<PropertyRenter>(isReadOnly: true);
+            __Game_Citizens_HomelessHousehold_RO_ComponentLookup = state.GetComponentLookup<HomelessHousehold>(isReadOnly: true);
             __Game_Objects_OutsideConnection_RO_ComponentLookup = state.GetComponentLookup<OutsideConnection>(isReadOnly: true);
             __Game_Citizens_Household_RO_ComponentLookup = state.GetComponentLookup<Household>(isReadOnly: true);
         }
@@ -658,6 +665,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
         __TypeHandle.__Game_Citizens_Household_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Objects_OutsideConnection_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Buildings_PropertyRenter_RO_ComponentLookup.Update(ref base.CheckedStateRef);
+        __TypeHandle.__Game_Citizens_HomelessHousehold_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Agents_MovingAway_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Citizens_HouseholdMember_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Citizens_Student_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
@@ -672,6 +680,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
         jobData.m_HouseholdMemberType = __TypeHandle.__Game_Citizens_HouseholdMember_RO_ComponentTypeHandle;
         jobData.m_MovingAways = __TypeHandle.__Game_Agents_MovingAway_RO_ComponentLookup;
         jobData.m_PropertyRenters = __TypeHandle.__Game_Buildings_PropertyRenter_RO_ComponentLookup;
+        jobData.m_HomelessHouseholds = __TypeHandle.__Game_Citizens_HomelessHousehold_RO_ComponentLookup;
         jobData.m_OutsideConnections = __TypeHandle.__Game_Objects_OutsideConnection_RO_ComponentLookup;
         jobData.m_Households = __TypeHandle.__Game_Citizens_Household_RO_ComponentLookup;
         jobData.m_Workers = m_WorkersTemp.ToConcurrent();
