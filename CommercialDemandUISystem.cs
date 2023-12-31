@@ -87,7 +87,7 @@ public class CommercialDemandUISystem : UISystemBase
 
         public Entity m_City;
 
-        public NativeValue<int> m_CompanyDemand;
+        //public NativeValue<int> m_CompanyDemand;
 
         public NativeValue<int> m_BuildingDemand;
 
@@ -126,6 +126,7 @@ public class CommercialDemandUISystem : UISystemBase
 
         public void Execute()
         {
+            Plugin.Log($"Execute: baseDem {m_DemandParameters.m_CommercialBaseDemand} freeRatio {m_DemandParameters.m_FreeCommercialProportion} baseConsSum {m_BaseConsumptionSum} resCons {m_EconomyParameters.m_ResourceConsumption} tourMult {m_EconomyParameters.m_TouristConsumptionMultiplier}");
             ResourceIterator iterator = ResourceIterator.GetIterator();
             Population population = m_Populations[m_City];
             Tourism tourism = m_Tourisms[m_City];
@@ -133,15 +134,19 @@ public class CommercialDemandUISystem : UISystemBase
             while (iterator.Next())
             {
                 int resourceIndex = EconomyUtils.GetResourceIndex(iterator.resource);
-                m_Consumptions[resourceIndex] = DemandUtils.EstimateResourceDemand(iterator.resource, ref m_EconomyParameters, population2, tourism.m_AverageTourists, m_ResourcePrefabs, m_ResourceDatas, m_BaseConsumptionSum) / 4;
+                int estConsumption = DemandUtils.EstimateResourceDemand(iterator.resource, ref m_EconomyParameters, population2, tourism.m_AverageTourists, m_ResourcePrefabs, m_ResourceDatas, m_BaseConsumptionSum);
+                m_Consumptions[resourceIndex] = estConsumption / 4;
                 m_Consumptions[resourceIndex] = math.max(m_Consumptions[resourceIndex], m_ActualConsumptions[resourceIndex]);
                 m_FreeProperties[resourceIndex] = 0;
+                if (estConsumption>0)
+                    Plugin.Log($"Consumption {iterator.resource}: est {estConsumption} act {m_ActualConsumptions[resourceIndex]}, per cit: est {(float)estConsumption/(float)population2:F2} act {(float)m_ActualConsumptions[resourceIndex]/(float)population2:F2}");
             }
             m_Consumptions[EconomyUtils.GetResourceIndex(Resource.Vehicles)] += DemandUtils.EstimateVehicleExtraDemand(population2);
             for (int i = 0; i < m_DemandFactors.Length; i++)
             {
                 m_DemandFactors[i] = 0;
             }
+            int emptyBuildings = 0;
             for (int j = 0; j < m_FreePropertyChunks.Length; j++)
             {
                 ArchetypeChunk archetypeChunk = m_FreePropertyChunks[j];
@@ -177,13 +182,21 @@ public class CommercialDemandUISystem : UISystemBase
                             m_FreeProperties[EconomyUtils.GetResourceIndex(iterator2.resource)]++;
                         }
                     }
+                    if (buildingPropertyData.m_AllowedSold != Resource.NoResource)
+                    {
+                        Plugin.Log($"Property {emptyBuildings}: {buildingPropertyData.m_AllowedSold}");
+                        emptyBuildings++;
+                    }
                 }
             }
-            m_CompanyDemand.value = 0;
+            Plugin.Log($"Free properties {emptyBuildings}, building demand is {m_BuildingDemand.value}");
+            //m_CompanyDemand.value = 0; // not used HERE, maybe needed for other systems
             bool flag2 = m_BuildingDemand.value > 0;
             m_BuildingDemand.value = 0;
             iterator = ResourceIterator.GetIterator();
             int num = 0;
+            int demandedResources = 0;
+            string excludedResources = ""; // TODO: change string into Native...
             while (iterator.Next())
             {
                 int resourceIndex2 = EconomyUtils.GetResourceIndex(iterator.resource);
@@ -219,13 +232,14 @@ public class CommercialDemandUISystem : UISystemBase
                 }
                 if (m_Consumptions[resourceIndex2] > 0)
                 {
-                    m_CompanyDemand.value += Mathf.RoundToInt(math.min(100, math.max(0, m_ResourceDemands[resourceIndex2])));
+                    //m_CompanyDemand.value += Mathf.RoundToInt(math.min(100, math.max(0, m_ResourceDemands[resourceIndex2])));
                     m_BuildingDemands[resourceIndex2] = math.max(0, Mathf.CeilToInt(math.min(math.max(1f, (float)math.min(1, m_Propertyless[resourceIndex2]) + (float)m_Companies[resourceIndex2] / m_DemandParameters.m_FreeCommercialProportion) - (float)m_FreeProperties[resourceIndex2], num8)));
                     if (m_BuildingDemands[resourceIndex2] > 0)
                     {
                         m_BuildingDemand.value += ((m_BuildingDemands[resourceIndex2] > 0) ? num8 : 0);
                     }
                 }
+                Plugin.Log($"Res {iterator.resource} ({num}): free {m_FreeProperties[resourceIndex2]} buldem {m_BuildingDemands[resourceIndex2]} wrkdem {num2} [ edu {num3:F2} wrk {num4:F2} cap {num5:F2} rat {num6:F2} tax {num7:F2} ] resdem {num8}");
                 if (!flag2 || (m_BuildingDemands[resourceIndex2] > 0 && num8 > 0))
                 {
                     int num9 = ((m_BuildingDemands[resourceIndex2] > 0) ? num8 : 0);
@@ -234,27 +248,34 @@ public class CommercialDemandUISystem : UISystemBase
                     int num10 = DemandUtils.GetDemandFactorEffect(m_ResourceDemands[resourceIndex2], num6) + DemandUtils.GetDemandFactorEffect(m_ResourceDemands[resourceIndex2], num5);
                     int demandFactorEffect3 = DemandUtils.GetDemandFactorEffect(m_ResourceDemands[resourceIndex2], num7);
                     int num11 = demandFactorEffect + demandFactorEffect2 + num10 + demandFactorEffect3;
-                    m_DemandFactors[2] += demandFactorEffect;
-                    m_DemandFactors[1] += demandFactorEffect2;
+                    m_DemandFactors[2] += demandFactorEffect; // EducatedWorkforce 
+                    m_DemandFactors[1] += demandFactorEffect2; // UneducatedWorkforce 
                     if (iterator.resource == Resource.Lodging)
                     {
-                        m_DemandFactors[9] += num10;
+                        m_DemandFactors[9] += num10; // TouristDemand 
                     }
                     else if (iterator.resource == Resource.Petrochemicals)
                     {
-                        m_DemandFactors[16] += num10;
+                        m_DemandFactors[16] += num10; // PetrolLocalDemand 
                     }
                     else
                     {
-                        m_DemandFactors[4] += num10;
+                        m_DemandFactors[4] += num10; // LocalDemand 
                     }
-                    m_DemandFactors[11] += demandFactorEffect3;
-                    m_DemandFactors[13] += math.min(0, num9 - num11);
+                    m_DemandFactors[11] += demandFactorEffect3; // Taxes 
+                    m_DemandFactors[13] += math.min(0, num9 - num11); // EmptyBuildings
+                    // InfoLoom
+                    demandedResources++;
+                    Plugin.Log($"... {iterator.resource}: resdem {num9} n10 {num10} effects {num11}, empty {num9-num11}");
                 }
+                else
+                    excludedResources += (excludedResources.Length == 0 ? "" : ",") + iterator.resource.ToString();
                 num++;
                 m_ResourceDemands[resourceIndex2] = math.min(100, math.max(0, m_ResourceDemands[resourceIndex2]));
             }
             m_BuildingDemand.value = math.clamp(2 * m_BuildingDemand.value / num, 0, 100);
+            // InfoLoom
+            Plugin.Log($"TOTAL: demanded {demandedResources} excluded {excludedResources}");
         }
     }
 
@@ -332,7 +353,7 @@ public class CommercialDemandUISystem : UISystemBase
 
     private EntityQuery m_CommercialProcessDataQuery;
 
-    private NativeValue<int> m_CompanyDemand;
+    //private NativeValue<int> m_CompanyDemand;
 
     private NativeValue<int> m_BuildingDemand;
 
@@ -356,22 +377,22 @@ public class CommercialDemandUISystem : UISystemBase
     [DebugWatchValue]
     private NativeArray<int> m_FreeProperties;
 
-    [DebugWatchDeps]
-    private JobHandle m_WriteDependencies;
+    //[DebugWatchDeps]
+    //private JobHandle m_WriteDependencies;
 
     private JobHandle m_ReadDependencies;
 
-    private int m_LastCompanyDemand;
+    //private int m_LastCompanyDemand;
 
-    private int m_LastBuildingDemand;
+    //private int m_LastBuildingDemand;
 
     private TypeHandle __TypeHandle;
 
-    [DebugWatchValue(color = "#008fff")]
-    public int companyDemand => m_LastCompanyDemand;
+    //[DebugWatchValue(color = "#008fff")]
+    //public int companyDemand => m_LastCompanyDemand;
 
-    [DebugWatchValue(color = "#2b6795")]
-    public int buildingDemand => m_LastBuildingDemand;
+    //[DebugWatchValue(color = "#2b6795")]
+    //public int buildingDemand => m_LastBuildingDemand;
 
     // InfoLoom
 
@@ -390,6 +411,7 @@ public class CommercialDemandUISystem : UISystemBase
         return 4;
     }
 
+    /*
     public NativeArray<int> GetDemandFactors(out JobHandle deps)
     {
         deps = m_WriteDependencies;
@@ -413,7 +435,11 @@ public class CommercialDemandUISystem : UISystemBase
         deps = m_WriteDependencies;
         return m_Consumption;
     }
+    */
 
+    // ZoneSpawnSystem and CommercialSpawnSystem are using this
+    // Both are called in SystemUpdatePhase.GameSimulation
+    // so in UIUpdate they should already be finished (because of EndFrameBarrier)
     public void AddReader(JobHandle reader)
     {
         m_ReadDependencies = JobHandle.CombineDependencies(m_ReadDependencies, reader);
@@ -435,7 +461,7 @@ public class CommercialDemandUISystem : UISystemBase
         m_DemandParameterQuery = GetEntityQuery(ComponentType.ReadOnly<DemandParameterData>());
         m_FreeCommercialQuery = GetEntityQuery(ComponentType.ReadOnly<CommercialProperty>(), ComponentType.ReadOnly<PropertyOnMarket>(), ComponentType.ReadOnly<PrefabRef>(), ComponentType.Exclude<Abandoned>(), ComponentType.Exclude<Destroyed>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Condemned>(), ComponentType.Exclude<Temp>());
         m_CommercialProcessDataQuery = GetEntityQuery(ComponentType.ReadOnly<IndustrialProcessData>(), ComponentType.ReadOnly<ServiceCompanyData>());
-        m_CompanyDemand = new NativeValue<int>(Allocator.Persistent);
+        //m_CompanyDemand = new NativeValue<int>(Allocator.Persistent);
         m_BuildingDemand = new NativeValue<int>(Allocator.Persistent);
         m_DemandFactors = new NativeArray<int>(18, Allocator.Persistent);
         int resourceCount = EconomyUtils.ResourceCount;
@@ -448,6 +474,7 @@ public class CommercialDemandUISystem : UISystemBase
         RequireForUpdate(m_CommercialProcessDataQuery);
 
         // InfoLoom
+        SetDefaults(); // there is no serialization, so init just for safety
         m_Results = new NativeArray<int>(10, Allocator.Persistent);
 
         AddBinding(m_uiResults = new RawValueBinding(kGroup, "ilDemandCommercial", delegate (IJsonWriter binder)
@@ -480,7 +507,7 @@ public class CommercialDemandUISystem : UISystemBase
     [Preserve]
     protected override void OnDestroy()
     {
-        m_CompanyDemand.Dispose();
+        //m_CompanyDemand.Dispose();
         m_BuildingDemand.Dispose();
         m_DemandFactors.Dispose();
         m_ResourceDemands.Dispose();
@@ -490,19 +517,19 @@ public class CommercialDemandUISystem : UISystemBase
         base.OnDestroy();
     }
 
-    public void SetDefaults(Context context)
+    public void SetDefaults() //Context context)
     {
-        m_CompanyDemand.value = 0;
-        m_BuildingDemand.value = 0;
+        //m_CompanyDemand.value = 0;
+        m_BuildingDemand.value = 50; // Infixo: default is 0 which is no demand, let's start with some demand
         m_DemandFactors.Fill(0);
         m_ResourceDemands.Fill(0);
         m_BuildingDemands.Fill(0);
         m_Consumption.Fill(0);
         m_FreeProperties.Fill(0);
-        m_LastCompanyDemand = 0;
-        m_LastBuildingDemand = 0;
+        //m_LastCompanyDemand = 0;
+        //m_LastBuildingDemand = 0;
     }
-
+    /* not used
     public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
     {
         writer.Write(m_CompanyDemand.value);
@@ -516,7 +543,8 @@ public class CommercialDemandUISystem : UISystemBase
         writer.Write(m_LastCompanyDemand);
         writer.Write(m_LastBuildingDemand);
     }
-
+    */
+    /* not used
     public void Deserialize<TReader>(TReader reader) where TReader : IReader
     {
         reader.Read(out int value);
@@ -569,7 +597,7 @@ public class CommercialDemandUISystem : UISystemBase
         reader.Read(out m_LastCompanyDemand);
         reader.Read(out m_LastBuildingDemand);
     }
-
+    */
     [Preserve]
     protected override void OnUpdate()
     {
@@ -578,11 +606,11 @@ public class CommercialDemandUISystem : UISystemBase
         Plugin.Log($"OnUpdate: {m_SimulationSystem.frameIndex}");
         base.OnUpdate();
         ResetResults();
-        /*
+        
         if (!m_DemandParameterQuery.IsEmptyIgnoreFilter && !m_EconomyParameterQuery.IsEmptyIgnoreFilter)
         {
-            m_LastCompanyDemand = m_CompanyDemand.value;
-            m_LastBuildingDemand = m_BuildingDemand.value;
+            //m_LastCompanyDemand = m_CompanyDemand.value;
+            //m_LastBuildingDemand = m_BuildingDemand.value;
             JobHandle deps;
             CountCompanyDataSystem.CommercialCompanyDatas commercialCompanyDatas = m_CountCompanyDataSystem.GetCommercialCompanyDatas(out deps);
             __TypeHandle.__Game_City_Tourism_RO_ComponentLookup.Update(ref base.CheckedStateRef);
@@ -615,7 +643,7 @@ public class CommercialDemandUISystem : UISystemBase
             updateCommercialDemandJob.m_TaxRates = m_TaxSystem.GetTaxRates();
             updateCommercialDemandJob.m_FreeWorkplaces = m_CountFreeWorkplacesSystem.GetFreeWorkplaces(out var deps3);
             updateCommercialDemandJob.m_BaseConsumptionSum = m_ResourceSystem.BaseConsumptionSum;
-            updateCommercialDemandJob.m_CompanyDemand = m_CompanyDemand;
+            //updateCommercialDemandJob.m_CompanyDemand = m_CompanyDemand;
             updateCommercialDemandJob.m_BuildingDemand = m_BuildingDemand;
             updateCommercialDemandJob.m_DemandFactors = m_DemandFactors;
             updateCommercialDemandJob.m_ResourceDemands = m_ResourceDemands;
@@ -633,14 +661,15 @@ public class CommercialDemandUISystem : UISystemBase
             updateCommercialDemandJob.m_ActualConsumptions = m_CountConsumptionSystem.GetConsumptions(out var deps4);
             UpdateCommercialDemandJob jobData = updateCommercialDemandJob;
             base.Dependency = IJobExtensions.Schedule(jobData, JobUtils.CombineDependencies(base.Dependency, m_ReadDependencies, deps4, outJobHandle, deps, outJobHandle2, deps2, deps3));
-            m_WriteDependencies = base.Dependency;
-            m_CountConsumptionSystem.AddConsumptionWriter(base.Dependency);
-            m_ResourceSystem.AddPrefabsReader(base.Dependency);
-            m_CountEmploymentSystem.AddReader(base.Dependency);
-            m_CountFreeWorkplacesSystem.AddReader(base.Dependency);
-            m_TaxSystem.AddReader(base.Dependency);
+            // since this is a copy of an actual simulation system but for UI purposes, then noone will read from us or wait for us
+            //m_WriteDependencies = base.Dependency;
+            //m_CountConsumptionSystem.AddConsumptionWriter(base.Dependency);
+            //m_ResourceSystem.AddPrefabsReader(base.Dependency);
+            //m_CountEmploymentSystem.AddReader(base.Dependency);
+            //m_CountFreeWorkplacesSystem.AddReader(base.Dependency);
+            //m_TaxSystem.AddReader(base.Dependency);
         }
-        */
+        
         // Update UI
         m_uiResults.Update();
         m_uiStrings.Update();
