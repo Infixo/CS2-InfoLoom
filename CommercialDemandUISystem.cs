@@ -126,9 +126,11 @@ public class CommercialDemandUISystem : UISystemBase
 
         public NativeArray<int> m_Results;
 
+        public NativeArray<Resource> m_ExcludedResources;
+
         public void Execute()
         {
-            Plugin.Log($"Execute: baseDem {m_DemandParameters.m_CommercialBaseDemand} freeRatio {m_DemandParameters.m_FreeCommercialProportion} baseConsSum {m_BaseConsumptionSum} resCons {m_EconomyParameters.m_ResourceConsumption} tourMult {m_EconomyParameters.m_TouristConsumptionMultiplier}");
+            //Plugin.Log($"Execute: baseDem {m_DemandParameters.m_CommercialBaseDemand} freeRatio {m_DemandParameters.m_FreeCommercialProportion} baseConsSum {m_BaseConsumptionSum} resCons {m_EconomyParameters.m_ResourceConsumption} tourMult {m_EconomyParameters.m_TouristConsumptionMultiplier}");
             // Calculate estimated and actual consumption
             ResourceIterator iterator = ResourceIterator.GetIterator();
             Population population = m_Populations[m_City];
@@ -137,8 +139,8 @@ public class CommercialDemandUISystem : UISystemBase
             while (iterator.Next())
             {
                 int resourceIndex = EconomyUtils.GetResourceIndex(iterator.resource);
-                int estConsumption = DemandUtils.EstimateResourceDemand(iterator.resource, ref m_EconomyParameters, population2, tourism.m_AverageTourists, m_ResourcePrefabs, m_ResourceDatas, m_BaseConsumptionSum);
-                m_Consumptions[resourceIndex] = estConsumption / 4;
+                //int estConsumption = DemandUtils.EstimateResourceDemand(iterator.resource, ref m_EconomyParameters, population2, tourism.m_AverageTourists, m_ResourcePrefabs, m_ResourceDatas, m_BaseConsumptionSum);
+                m_Consumptions[resourceIndex] = DemandUtils.EstimateResourceDemand(iterator.resource, ref m_EconomyParameters, population2, tourism.m_AverageTourists, m_ResourcePrefabs, m_ResourceDatas, m_BaseConsumptionSum) / 4;
                 m_Consumptions[resourceIndex] = math.max(m_Consumptions[resourceIndex], m_ActualConsumptions[resourceIndex]);
                 m_FreeProperties[resourceIndex] = 0;
                 // Infixo: uncomment to see consumption per citizen (useful for balancing purposes)
@@ -186,21 +188,23 @@ public class CommercialDemandUISystem : UISystemBase
                             m_FreeProperties[EconomyUtils.GetResourceIndex(iterator2.resource)]++;
                         }
                     }
+                    // InfoLoom
                     if (buildingPropertyData.m_AllowedSold != Resource.NoResource)
                     {
-                        Plugin.Log($"Property {m_Results[0]}: {buildingPropertyData.m_AllowedSold}");
+                        //Plugin.Log($"Property {m_Results[0]}: {buildingPropertyData.m_AllowedSold}");
                         m_Results[0]++;
                     }
                 }
             }
-            Plugin.Log($"Free properties {m_Results[0]}, building demand is {m_BuildingDemand.value}");
+            //Plugin.Log($"Free properties {m_Results[0]}, building demand is {m_BuildingDemand.value}");
             //m_CompanyDemand.value = 0; // not used HERE, maybe needed for other systems
             bool flag2 = m_BuildingDemand.value > 0;
             m_BuildingDemand.value = 0;
             iterator = ResourceIterator.GetIterator();
             int num = 0;
+            // InfoLoom: resources
             int numDemanded = 0;
-            string excludedResources = ""; // TODO: change string into Native...
+            //string excludedResources = ""; // TODO: change string into Native...
             // InfoLoom: available workforce
             for (int m = 0; m < 5; m++)
             {
@@ -208,7 +212,7 @@ public class CommercialDemandUISystem : UISystemBase
                 if (m >= 2) m_Results[8] += employable;
                 else m_Results[9] += employable;
             }
-            // InfoLoom: capacity utilization, resource efficiency
+            // InfoLoom: capacity utilization, sales efficiency
             int numStandard = 0, numLeisure = 0; // number of resources that are included in calculations
             float capUtilStd = 0f, capUtilLei = 0f, salesCapStd = 0f, salesCapLei = 0f;
             float taxRate = 0f, empCap = 0f;
@@ -257,9 +261,9 @@ public class CommercialDemandUISystem : UISystemBase
                     }
                     //Plugin.Log($"Com {iterator.resource}: noprop {m_Propertyless[resourceIndex2]} comp {m_Companies[resourceIndex2]} free {m_FreeProperties[resourceIndex2]} resdem {num8}");
                     m_Results[1] += m_Propertyless[resourceIndex2];
-                    m_Results[2] += m_Companies[resourceIndex2];
+                    //m_Results[2] += m_Companies[resourceIndex2];
                 }
-                Plugin.Log($"Res {iterator.resource} ({num}): free {m_FreeProperties[resourceIndex2]} buldem {m_BuildingDemands[resourceIndex2]} wrkdem {num2} [ edu {num3:F2} wrk {num4:F2} cap {num5:F2} rat {num6:F2} tax {num7:F2} ] resdem {num8}");
+                //Plugin.Log($"Res {iterator.resource} ({num}): free {m_FreeProperties[resourceIndex2]} buldem {m_BuildingDemands[resourceIndex2]} wrkdem {num2} [ edu {num3:F2} wrk {num4:F2} cap {num5:F2} rat {num6:F2} tax {num7:F2} ] resdem {num8}");
                 // InfoLoom gather data
                 float capUtil = ((m_TotalMaximums[resourceIndex2] == 0) ? 0.3f : (1f - (float)m_TotalAvailables[resourceIndex2] / (float)m_TotalMaximums[resourceIndex2])); // 0.3f is the threshold
                 float salesCapacity = (float)m_Productions[resourceIndex2] / (m_DemandParameters.m_CommercialBaseDemand * math.max(100f, (float)m_Consumptions[resourceIndex2]));
@@ -308,24 +312,34 @@ public class CommercialDemandUISystem : UISystemBase
                     //Plugin.Log($"... {iterator.resource}: resdem {num9} n10 {num10} effects {num11}, empty {num9-num11}");
                 }
                 else
-                    excludedResources += (excludedResources.Length == 0 ? "" : ",") + iterator.resource.ToString();
+                {
+                    //excludedResources += (excludedResources.Length == 0 ? "" : ",") + iterator.resource.ToString();
+                    Resource excludedResources = m_ExcludedResources[0] | iterator.resource;
+                    m_ExcludedResources[0] = excludedResources;
+                }
                 num++;
                 m_ResourceDemands[resourceIndex2] = math.min(100, math.max(0, m_ResourceDemands[resourceIndex2]));
             }
             m_BuildingDemand.value = math.clamp(2 * m_BuildingDemand.value / num, 0, 100);
             // InfoLoom
-            Plugin.Log($"TOTAL: demanded {numDemanded} excluded {excludedResources}");
-            Plugin.Log($"RESULTS: freeProperties {m_Results[0]} propertyless {m_Results[1]} companies {m_Results[2]}");
-            Plugin.Log($"TAX RATE: {taxRate / (float)(numStandard + numLeisure):F1}");
+            Plugin.Log($"RESOURCES: demanded {numDemanded} excluded {m_ExcludedResources[0]:X} {m_ExcludedResources[0]}");
+            Plugin.Log($"COMPANIES: freeProperties [0]={m_Results[0]} propertyless [1]={m_Results[1]}");// companies {m_Results[2]}");
+            m_Results[2] = Mathf.RoundToInt(10f * taxRate / (float)(numStandard + numLeisure));
+            Plugin.Log($"TAX RATE: [2]={m_Results[2]} {taxRate / (float)(numStandard + numLeisure):F1}");
             // 3 & 4 - capacity utilization rate. (available/maximum), non-leisure/leisure
             // 5 & 6 - resource efficiency (production/consumption), non-leisure/leisure
             //m_Results[3] = (numcapUtilStd / numStandard;
             //Plugin.Log($"STANDARD: {numStandard} {capUtilStd/(float)numStandard} {salesCapStd/(float)numStandard}");
             //Plugin.Log($"LEISURE: {numLeisure} {capUtilLei / (float)numLeisure} {salesCapLei / (float)numLeisure}");
-            Plugin.Log($"SERVICE UTILIZATION: std {capUtilStd / (float)numStandard} lei {capUtilLei / (float)numLeisure}, 30% is the default threshold");
-            Plugin.Log($"SALES CAPACITY: std {salesCapStd / (float)numStandard} lei {salesCapLei / (float)numLeisure}, 100% means capacity = consumption");
-            Plugin.Log($"EMPLOYEE CAPACITY RATIO: {100f*empCap/(float)numDemanded:F1}%, 75% is the default threshold");
-            Plugin.Log($"AVAILABLE WORKFORCE: educated {m_Results[8]} uneducated {m_Results[9]}");
+            m_Results[3] = Mathf.RoundToInt(100f * capUtilStd / (float)numStandard);
+            m_Results[4] = Mathf.RoundToInt(100f * capUtilLei / (float)numLeisure);
+            Plugin.Log($"SERVICE UTILIZATION: [3]={m_Results[3]} [4]={m_Results[4]} std {capUtilStd / (float)numStandard} lei {capUtilLei / (float)numLeisure}, 30% is the default threshold");
+            m_Results[5] = Mathf.RoundToInt(100f * salesCapStd / (float)numStandard);
+            m_Results[6] = Mathf.RoundToInt(100f * salesCapLei / (float)numLeisure);
+            Plugin.Log($"SALES CAPACITY: [5]={m_Results[5]} [6]={m_Results[6]} std {salesCapStd / (float)numStandard} lei {salesCapLei / (float)numLeisure}, 100% means capacity = consumption");
+            m_Results[7] = Mathf.RoundToInt(1000f * empCap / (float)numDemanded);
+            Plugin.Log($"EMPLOYEE CAPACITY RATIO: [7]={m_Results[7]} {100f*empCap/(float)numDemanded:F1}%, 75% is the default threshold");
+            Plugin.Log($"AVAILABLE WORKFORCE: educated [8]={m_Results[8]} uneducated [9]={m_Results[9]}");
         }
     }
 
@@ -450,6 +464,8 @@ public class CommercialDemandUISystem : UISystemBase
     private RawValueBinding m_uiStrings;
 
     private NativeArray<int> m_Results;
+    private NativeArray<Resource> m_ExcludedResources;
+
     // COMMERCIAL
     // 0 - free properties
     // 1 - propertyless companies
@@ -534,28 +550,31 @@ public class CommercialDemandUISystem : UISystemBase
         // InfoLoom
         SetDefaults(); // there is no serialization, so init just for safety
         m_Results = new NativeArray<int>(10, Allocator.Persistent);
+        m_ExcludedResources = new NativeArray<Resource>(1, Allocator.Persistent);
 
         AddBinding(m_uiResults = new RawValueBinding(kGroup, "ilDemandCommercial", delegate (IJsonWriter binder)
         {
-            binder.ArrayBegin(m_Results.Length);
+            binder.ArrayBegin(m_Results.Length+3);
             for (int i = 0; i < m_Results.Length; i++)
                 binder.Write(m_Results[i]);
+            //binder.PropertyName("excludedResources");
+            binder.Write(EconomyUtils.GetNames(m_ExcludedResources[0]));
+            //binder.PropertyName("taxRate");
+            binder.Write($"{(float)m_Results[2] / 10f:F1}%");
+            //binder.PropertyName("employeeCapacity");
+            binder.Write($"{(float)m_Results[7] / 10f:F1}%");
             binder.ArrayEnd();
         }));
 
         AddBinding(m_uiStrings = new RawValueBinding(kGroup, "ilDemandComStrings", delegate (IJsonWriter writer)
         {
             writer.TypeBegin("CommercialDemandStrings");
-            writer.PropertyName("string0");
-            writer.Write($"Pos 0: {m_Results[0]}");
-            writer.PropertyName("string1");
-            writer.Write($"Pos 1: {m_Results[1]}");
-            writer.PropertyName("string2");
-            writer.Write($"Pos 2: {m_Results[2]}");
-            writer.PropertyName("string3");
-            writer.Write($"Pos 3: {m_Results[3]}");
-            writer.PropertyName("string4");
-            writer.Write($"Pos 4: {m_Results[4]}");
+            writer.PropertyName("excludedResources");
+            writer.Write(EconomyUtils.GetNames(m_ExcludedResources[0]));
+            writer.PropertyName("taxRate");
+            writer.Write($"{(float)m_Results[2]/10f:F1}%");
+            writer.PropertyName("employeeCapacity");
+            writer.Write($"{(float)m_Results[7]/10f:F1}%");
             writer.TypeEnd();
         }));
 
@@ -572,6 +591,9 @@ public class CommercialDemandUISystem : UISystemBase
         m_BuildingDemands.Dispose();
         m_Consumption.Dispose();
         m_FreeProperties.Dispose();
+        // InfoLoom
+        m_Results.Dispose();
+        m_ExcludedResources.Dispose();
         base.OnDestroy();
     }
 
@@ -661,7 +683,7 @@ public class CommercialDemandUISystem : UISystemBase
     {
         if (m_SimulationSystem.frameIndex % 128 != 55)
             return;
-        Plugin.Log($"OnUpdate: {m_SimulationSystem.frameIndex}");
+        //Plugin.Log($"OnUpdate: {m_SimulationSystem.frameIndex}");
         base.OnUpdate();
         ResetResults();
         
@@ -718,8 +740,9 @@ public class CommercialDemandUISystem : UISystemBase
             updateCommercialDemandJob.m_City = m_CitySystem.City;
             updateCommercialDemandJob.m_ActualConsumptions = m_CountConsumptionSystem.GetConsumptions(out var deps4);
             updateCommercialDemandJob.m_Results = m_Results;
+            updateCommercialDemandJob.m_ExcludedResources = m_ExcludedResources;
             UpdateCommercialDemandJob jobData = updateCommercialDemandJob;
-            base.Dependency = IJobExtensions.Schedule(jobData, JobUtils.CombineDependencies(base.Dependency, m_ReadDependencies, deps4, outJobHandle, deps, outJobHandle2, deps2, deps3));
+            IJobExtensions.Schedule(jobData, JobUtils.CombineDependencies(base.Dependency, m_ReadDependencies, deps4, outJobHandle, deps, outJobHandle2, deps2, deps3)).Complete();
             // since this is a copy of an actual simulation system but for UI purposes, then noone will read from us or wait for us
             //m_WriteDependencies = base.Dependency;
             //m_CountConsumptionSystem.AddConsumptionWriter(base.Dependency);
@@ -736,10 +759,12 @@ public class CommercialDemandUISystem : UISystemBase
 
     private void ResetResults()
     {
-        for (int i = 0; i < m_Results.Length; i++) // there are 5 education levels + 1 for totals
-        {
-            m_Results[i] = i*i; // new WorkforceAtLevelInfo(i);
-        }
+        m_ExcludedResources[0] = Resource.NoResource;
+        m_Results.Fill<int>(0);
+        //for (int i = 0; i < m_Results.Length; i++) // there are 5 education levels + 1 for totals
+        //{
+            //m_Results[i] = 0; // new WorkforceAtLevelInfo(i);
+        //}
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
