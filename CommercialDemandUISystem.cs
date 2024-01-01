@@ -124,9 +124,12 @@ public class CommercialDemandUISystem : UISystemBase
 
         public NativeArray<int> m_ActualConsumptions;
 
+        public NativeArray<int> m_Results;
+
         public void Execute()
         {
             Plugin.Log($"Execute: baseDem {m_DemandParameters.m_CommercialBaseDemand} freeRatio {m_DemandParameters.m_FreeCommercialProportion} baseConsSum {m_BaseConsumptionSum} resCons {m_EconomyParameters.m_ResourceConsumption} tourMult {m_EconomyParameters.m_TouristConsumptionMultiplier}");
+            // Calculate estimated and actual consumption
             ResourceIterator iterator = ResourceIterator.GetIterator();
             Population population = m_Populations[m_City];
             Tourism tourism = m_Tourisms[m_City];
@@ -138,15 +141,16 @@ public class CommercialDemandUISystem : UISystemBase
                 m_Consumptions[resourceIndex] = estConsumption / 4;
                 m_Consumptions[resourceIndex] = math.max(m_Consumptions[resourceIndex], m_ActualConsumptions[resourceIndex]);
                 m_FreeProperties[resourceIndex] = 0;
-                if (estConsumption>0)
-                    Plugin.Log($"Consumption {iterator.resource}: est {estConsumption} act {m_ActualConsumptions[resourceIndex]}, per cit: est {(float)estConsumption/(float)population2:F2} act {(float)m_ActualConsumptions[resourceIndex]/(float)population2:F2}");
+                // Infixo: uncomment to see consumption per citizen (useful for balancing purposes)
+                //if (estConsumption>0)
+                    //Plugin.Log($"Consumption per cim {iterator.resource}: est {(float)estConsumption/(float)population2:F2} act {(float)m_ActualConsumptions[resourceIndex]/(float)population2:F2}");
             }
             m_Consumptions[EconomyUtils.GetResourceIndex(Resource.Vehicles)] += DemandUtils.EstimateVehicleExtraDemand(population2);
             for (int i = 0; i < m_DemandFactors.Length; i++)
             {
                 m_DemandFactors[i] = 0;
             }
-            int emptyBuildings = 0;
+            // Count free properties
             for (int j = 0; j < m_FreePropertyChunks.Length; j++)
             {
                 ArchetypeChunk archetypeChunk = m_FreePropertyChunks[j];
@@ -184,19 +188,30 @@ public class CommercialDemandUISystem : UISystemBase
                     }
                     if (buildingPropertyData.m_AllowedSold != Resource.NoResource)
                     {
-                        Plugin.Log($"Property {emptyBuildings}: {buildingPropertyData.m_AllowedSold}");
-                        emptyBuildings++;
+                        Plugin.Log($"Property {m_Results[0]}: {buildingPropertyData.m_AllowedSold}");
+                        m_Results[0]++;
                     }
                 }
             }
-            Plugin.Log($"Free properties {emptyBuildings}, building demand is {m_BuildingDemand.value}");
+            Plugin.Log($"Free properties {m_Results[0]}, building demand is {m_BuildingDemand.value}");
             //m_CompanyDemand.value = 0; // not used HERE, maybe needed for other systems
             bool flag2 = m_BuildingDemand.value > 0;
             m_BuildingDemand.value = 0;
             iterator = ResourceIterator.GetIterator();
             int num = 0;
-            int demandedResources = 0;
+            int numDemanded = 0;
             string excludedResources = ""; // TODO: change string into Native...
+            // InfoLoom: available workforce
+            for (int m = 0; m < 5; m++)
+            {
+                int employable = math.max(0, m_EmployableByEducation[m] - m_FreeWorkplaces[m]);
+                if (m >= 2) m_Results[8] += employable;
+                else m_Results[9] += employable;
+            }
+            // InfoLoom: capacity utilization, resource efficiency
+            int numStandard = 0, numLeisure = 0; // number of resources that are included in calculations
+            float capUtilStd = 0f, capUtilLei = 0f, salesCapStd = 0f, salesCapLei = 0f;
+            float taxRate = 0f, empCap = 0f;
             while (iterator.Next())
             {
                 int resourceIndex2 = EconomyUtils.GetResourceIndex(iterator.resource);
@@ -223,6 +238,8 @@ public class CommercialDemandUISystem : UISystemBase
                 }
                 float num5 = ((m_TotalMaximums[resourceIndex2] == 0) ? 0f : (-3f + 10f * (1f - (float)m_TotalAvailables[resourceIndex2] / (float)m_TotalMaximums[resourceIndex2])));
                 float num6 = 2f * (m_DemandParameters.m_CommercialBaseDemand * (float)m_Consumptions[resourceIndex2] - (float)m_Productions[resourceIndex2]) / math.max(100f, (float)m_Consumptions[resourceIndex2] + 1f);
+                //Plugin.Log($"Eff {iterator.resource}: capUtil {m_TotalAvailables[resourceIndex2]} / {m_TotalMaximums[resourceIndex2]} = {(m_TotalMaximums[resourceIndex2] == 0 ? "na" : (1f - (float)m_TotalAvailables[resourceIndex2] / (float)m_TotalMaximums[resourceIndex2]))}, " +
+                    //$"resEff {m_Productions[resourceIndex2]} / {m_Consumptions[resourceIndex2]} = {(float)m_Productions[resourceIndex2]/((float)m_Consumptions[resourceIndex2]+1f)}");
                 float num7 = -0.1f * ((float)TaxSystem.GetCommercialTaxRate(iterator.resource, m_TaxRates) - 10f);
                 m_ResourceDemands[resourceIndex2] = Mathf.RoundToInt(100f * (0.2f + num5 + num4 + num3 + num7 + num6));
                 int num8 = m_ResourceDemands[resourceIndex2];
@@ -238,8 +255,29 @@ public class CommercialDemandUISystem : UISystemBase
                     {
                         m_BuildingDemand.value += ((m_BuildingDemands[resourceIndex2] > 0) ? num8 : 0);
                     }
+                    //Plugin.Log($"Com {iterator.resource}: noprop {m_Propertyless[resourceIndex2]} comp {m_Companies[resourceIndex2]} free {m_FreeProperties[resourceIndex2]} resdem {num8}");
+                    m_Results[1] += m_Propertyless[resourceIndex2];
+                    m_Results[2] += m_Companies[resourceIndex2];
                 }
                 Plugin.Log($"Res {iterator.resource} ({num}): free {m_FreeProperties[resourceIndex2]} buldem {m_BuildingDemands[resourceIndex2]} wrkdem {num2} [ edu {num3:F2} wrk {num4:F2} cap {num5:F2} rat {num6:F2} tax {num7:F2} ] resdem {num8}");
+                // InfoLoom gather data
+                float capUtil = ((m_TotalMaximums[resourceIndex2] == 0) ? 0.3f : (1f - (float)m_TotalAvailables[resourceIndex2] / (float)m_TotalMaximums[resourceIndex2])); // 0.3f is the threshold
+                float salesCapacity = (float)m_Productions[resourceIndex2] / (m_DemandParameters.m_CommercialBaseDemand * math.max(100f, (float)m_Consumptions[resourceIndex2]));
+                if (resourceData.m_IsLeisure)
+                {
+                    // Meals,Lodging,Entertainment,Recreation
+                    numLeisure++;
+                    capUtilLei += capUtil;
+                    salesCapLei += salesCapacity;
+                }
+                else
+                {
+                    // Non-Leisure resources
+                    numStandard++;
+                    capUtilStd += capUtil;
+                    salesCapStd += salesCapacity;
+                }
+                taxRate += (float)TaxSystem.GetCommercialTaxRate(iterator.resource, m_TaxRates);
                 if (!flag2 || (m_BuildingDemands[resourceIndex2] > 0 && num8 > 0))
                 {
                     int num9 = ((m_BuildingDemands[resourceIndex2] > 0) ? num8 : 0);
@@ -265,8 +303,9 @@ public class CommercialDemandUISystem : UISystemBase
                     m_DemandFactors[11] += demandFactorEffect3; // Taxes 
                     m_DemandFactors[13] += math.min(0, num9 - num11); // EmptyBuildings
                     // InfoLoom
-                    demandedResources++;
-                    Plugin.Log($"... {iterator.resource}: resdem {num9} n10 {num10} effects {num11}, empty {num9-num11}");
+                    empCap += ((float)m_TotalCurrentWorkers[resourceIndex2] + 1f) / ((float)m_TotalMaxWorkers[resourceIndex2] + 1f);
+                    numDemanded++;
+                    //Plugin.Log($"... {iterator.resource}: resdem {num9} n10 {num10} effects {num11}, empty {num9-num11}");
                 }
                 else
                     excludedResources += (excludedResources.Length == 0 ? "" : ",") + iterator.resource.ToString();
@@ -275,7 +314,18 @@ public class CommercialDemandUISystem : UISystemBase
             }
             m_BuildingDemand.value = math.clamp(2 * m_BuildingDemand.value / num, 0, 100);
             // InfoLoom
-            Plugin.Log($"TOTAL: demanded {demandedResources} excluded {excludedResources}");
+            Plugin.Log($"TOTAL: demanded {numDemanded} excluded {excludedResources}");
+            Plugin.Log($"RESULTS: freeProperties {m_Results[0]} propertyless {m_Results[1]} companies {m_Results[2]}");
+            Plugin.Log($"TAX RATE: {taxRate / (float)(numStandard + numLeisure):F1}");
+            // 3 & 4 - capacity utilization rate. (available/maximum), non-leisure/leisure
+            // 5 & 6 - resource efficiency (production/consumption), non-leisure/leisure
+            //m_Results[3] = (numcapUtilStd / numStandard;
+            //Plugin.Log($"STANDARD: {numStandard} {capUtilStd/(float)numStandard} {salesCapStd/(float)numStandard}");
+            //Plugin.Log($"LEISURE: {numLeisure} {capUtilLei / (float)numLeisure} {salesCapLei / (float)numLeisure}");
+            Plugin.Log($"SERVICE UTILIZATION: std {capUtilStd / (float)numStandard} lei {capUtilLei / (float)numLeisure}, 30% is the default threshold");
+            Plugin.Log($"SALES CAPACITY: std {salesCapStd / (float)numStandard} lei {salesCapLei / (float)numLeisure}, 100% means capacity = consumption");
+            Plugin.Log($"EMPLOYEE CAPACITY RATIO: {100f*empCap/(float)numDemanded:F1}%, 75% is the default threshold");
+            Plugin.Log($"AVAILABLE WORKFORCE: educated {m_Results[8]} uneducated {m_Results[9]}");
         }
     }
 
@@ -400,6 +450,14 @@ public class CommercialDemandUISystem : UISystemBase
     private RawValueBinding m_uiStrings;
 
     private NativeArray<int> m_Results;
+    // COMMERCIAL
+    // 0 - free properties
+    // 1 - propertyless companies
+    // 2 - tax rate
+    // 3 & 4 - service utilization rate (available/maximum), non-leisure/leisure
+    // 5 & 6 - sales efficiency (sales capacity/consumption), non-leisure/leisure // how effectively a shop is utilizing its sales capacity by comparing the actual sales to the maximum sales potential
+    // 7 - employee capacity ratio // how efficiently the company is utilizing its workforce by comparing the actual number of employees to the maximum number it could employ
+    // 8 & 9 - educated & uneducated workforce
 
     public override int GetUpdateInterval(SystemUpdatePhase phase)
     {
@@ -659,6 +717,7 @@ public class CommercialDemandUISystem : UISystemBase
             updateCommercialDemandJob.m_TotalCurrentWorkers = commercialCompanyDatas.m_CurrentServiceWorkers;
             updateCommercialDemandJob.m_City = m_CitySystem.City;
             updateCommercialDemandJob.m_ActualConsumptions = m_CountConsumptionSystem.GetConsumptions(out var deps4);
+            updateCommercialDemandJob.m_Results = m_Results;
             UpdateCommercialDemandJob jobData = updateCommercialDemandJob;
             base.Dependency = IJobExtensions.Schedule(jobData, JobUtils.CombineDependencies(base.Dependency, m_ReadDependencies, deps4, outJobHandle, deps, outJobHandle2, deps2, deps3));
             // since this is a copy of an actual simulation system but for UI purposes, then noone will read from us or wait for us
