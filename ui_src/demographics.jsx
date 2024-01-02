@@ -113,7 +113,11 @@ const $Demographics = ({react}) => {
       x2={panWidth*0.1 + lineSpan*(index+1)} y2={panHeight * 0.83}
       stroke="white"  strokeWidth="1"
     />
-  ));	
+  ));
+  
+	// find the largest bar and scale it to fit the window properly
+	const largestBar = details.length > 0 ? Math.max(...details.map(info => info.total)) : 0;
+	const barBase = largestBar < 50 ? 50 : (largestBar < 500 ? 500 :  (largestBar < 5000 ? 5000 : 50000));
 
 	return <$Panel react={react} title="Demographics" onClose={onClose} initialSize={{ width: panWidth, height: panHeight }} initialPosition={{ top: window.innerHeight * 0.009, left: window.innerWidth * 0.053 }}>
 	
@@ -149,7 +153,7 @@ const $Demographics = ({react}) => {
 			const bars = [];
 			details.forEach( info => {
 				bars.push(
-					<PopulationBar key={info.age} legend={panWidth*0.1} length={panWidth*0.9} base={5000} info={info} barH={barHeight}/>
+					<PopulationBar key={info.age} legend={panWidth*0.1} length={panWidth*0.9} base={barBase} info={info} barH={barHeight}/>
 				);
 			});
 			return bars;
