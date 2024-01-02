@@ -1,44 +1,6 @@
 import React from 'react'
 import {useDataUpdate} from 'hookui-framework'
 import $Panel from './panel'
-
-const AlignedParagraph = ({ left, right }) => {
-  // Set color based on value of left
-  let color;
-  if (left < -50) {
-    color = 'red';
-  } else if (left > 50) {
-    color = '#00CC00';
-  } else {
-    color = 'white'; // default
-  };
-  const containerStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    textAlign: 'justify',
-	marginBottom: '0.1em', // Add some spacing between the <p> tags
-  };
-  const leftTextStyle = {
-	color: color,  
-    fontSize: '80%',
-    width: '20%',
-	marginLeft: '10%', // Start 10% from the left edge
-  };
-  const rightTextStyle = {
-    fontSize: '80%',
-    width: '60%',
-	marginRight: '10%', // Start 10% from the right edge
-    textAlign: 'right',
-  };	
-  return (
-    <p style={containerStyle}>
-      <span style={leftTextStyle}>{left}</span>
-      <span style={rightTextStyle}>{right}</span>
-    </p>
-  );
-};
-
-
   
 const DemandSection2 = ({title, value, factors }) => {
   return (
@@ -76,7 +38,7 @@ const DemandSection1 = ({ title, value, factors }) => {
         <ol>
           {factors.map((item, index) => (
             <li key={index}>       
-			<AlignedParagraph left={item["weight"]} right={item["factor"]} />
+			<RowWithTwoColumns left={item["weight"]} right={item["factor"]} />
 			</li>
           ))}
         </ol>
@@ -86,44 +48,116 @@ const DemandSection1 = ({ title, value, factors }) => {
 };
 
 
+const RowWithTwoColumns = ({left, right}) => {
+	return (
+	<div class="labels_L7Q row_S2v">
+		<div class="row_S2v" style={{width: '60%'}}>{left}</div>
+		<div class="row_S2v" style={{width: '40%'}}>{right}</div>
+	</div>
+	);
+};
+
+const RowWithThreeColumns = ({left, leftSmall, right1, right2}) => {
+	return (
+	<div class="labels_L7Q row_S2v">
+		<div class="row_S2v" style={{width: '60%', flexDirection: 'column'}}>
+			<p>{left}</p>
+			<p style={{fontSize: '80%'}}>{leftSmall}</p>
+		</div>
+		<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{right1}</div>
+		<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{right2}</div>
+	</div>
+	);
+};
+
+// simple horizontal line
+const DataDivider = () => {
+	return (
+	<div style={{height: '3rem', borderBottom: '1px solid gray'}} />
+	);
+};
+
+const ColumnCommercialData = ({ data }) => {
+	return (
+	<div style={{width: '70%', boxSizing: 'border-box', border: '1px solid gray'}}>
+	
+		<RowWithTwoColumns left="Empty buildings" right={data[0]} />
+		<RowWithTwoColumns left="Propertyless companies" right={data[1]} />
+		
+		<DataDivider />
+		
+		<RowWithTwoColumns left="Average tax rate" right={data[2]/10} />
+		
+		<DataDivider />
+
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '60%'}} />
+			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>Standard</div>
+			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>Leisure</div>
+		</div>
+		<RowWithThreeColumns left="TEST" leftSmall="testing" right1="xxx" right2="yyy" />
+
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '60%', flexDirection: 'column'}}>
+				<p>SERVICE UTILIZATION</p>
+				<p style={{fontSize: '80%'}}>30% is the default threshold</p>
+			</div>
+			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{`${data[3]}%`}</div>
+			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{`${data[4]}%`}</div>
+		</div>
+
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '60%', flexDirection: 'column'}}>
+				<p>SALES CAPACITY</p>
+				<p style={{fontSize: '80%'}}>100% when capacity = consumption</p>
+			</div>
+			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{`${data[5]}%`}</div>
+			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{`${data[6]}%`}</div>
+		</div>
+		
+		<DataDivider />
+		
+		<RowWithTwoColumns left="Employee capacity ratio" right={`${data[7]/10}%`} />
+		
+		<DataDivider />
+		
+		<div style={{display: 'flex', boxSizing: 'border-box', border: '1px solid gray'}}>
+			<div style={{width: '60%'}}>
+				AVAILABLE WORKFORCE
+			</div>
+			<div style={{width: '40%'}}>
+				<RowWithTwoColumns left="Educated" right={data[8]} />
+				<RowWithTwoColumns left="Uneducated" right={data[9]} />
+			</div>
+		</div>
+	</div>
+	);
+};
+
+const ColumnExcludedResources = ({ resources }) => {
+	return (
+	<div style={{width: '30%', boxSizing: 'border-box', border: '1px solid gray'}}>
+		<div class="row_S2v">No demand for:</div>
+        <ul>
+          {resources.map((item, index) => (
+            <li key={index}>
+				<div class="row_S2v small_ExK">{item}</div>
+			</li>
+          ))}
+        </ul>
+	</div>
+	);
+};
 
 const $Commercial = ({ react }) => {
-
-	// demand values are just single numbers
-	const [residentialLowDemand, setResidentialLowDemand] = react.useState(0)
-	useDataUpdate(react, 'cityInfo.residentialLowDemand', setResidentialLowDemand)
-	const [residentialMediumDemand, setResidentialMediumDemand] = react.useState(0)
-	useDataUpdate(react, 'cityInfo.residentialMediumDemand', setResidentialMediumDemand)
-	const [residentialHighDemand, setResidentialHighDemand] = react.useState(0)
-	useDataUpdate(react, 'cityInfo.residentialHighDemand', setResidentialHighDemand)
-	const [commercialDemand, setCommercialDemand] = react.useState(0)
-	useDataUpdate(react, 'cityInfo.commercialDemand', setCommercialDemand)
-	const [industrialDemand, setIndustrialDemand] = react.useState(0)
-	useDataUpdate(react, 'cityInfo.industrialDemand', setIndustrialDemand)
-	const [officeDemand, setOfficeDemand] = react.useState(0)
-	useDataUpdate(react, 'cityInfo.officeDemand', setOfficeDemand)
-
-	// demand factors: an array of variable number of elements with properties: __Type, factor, weight
-	const [residentialLowFactors, setResidentialLowFactors] = react.useState([])
-	useDataUpdate(react, 'cityInfo.residentialLowFactors', setResidentialLowFactors)
-	const [residentialMediumFactors, setResidentialMediumFactors] = react.useState([])
-	useDataUpdate(react, 'cityInfo.residentialMediumFactors', setResidentialMediumFactors)
-	const [residentialHighFactors, setResidentialHighFactors] = react.useState([])
-	useDataUpdate(react, 'cityInfo.residentialHighFactors', setResidentialHighFactors)
-	const [commercialFactors, setCommercialFactors] = react.useState([])
-	useDataUpdate(react, 'cityInfo.commercialFactors', setCommercialFactors)
-	const [industrialFactors, setIndustrialFactors] = react.useState([])
-	useDataUpdate(react, 'cityInfo.industrialFactors', setIndustrialFactors)
-	const [officeFactors, setOfficeFactors] = react.useState([])
-	useDataUpdate(react, 'cityInfo.officeFactors', setOfficeFactors)
-
-	// building demand
-	const [buildingDemand, setbuildingDemand] = react.useState([])
-	useDataUpdate(react, 'cityInfo.ilBuildingDemand', setbuildingDemand)
 	
-	// convert buildingDemand array into "demand factors"
-	const titles = ['Residential Low','Residential Medium','Residential High','Commercial','Industrial','Storage','Office'];
-	const buildingDemandFactors = titles.map((factor, index) => ({ factor, weight: buildingDemand[index] }));
+	// commercial data
+	const [commercialData, setCommercialData] = react.useState([])
+	useDataUpdate(react, 'cityInfo.ilCommercial', setCommercialData)
+	
+	// excluded resources
+	const [excludedResources, setExcludedResources] = react.useState([])
+	useDataUpdate(react, 'cityInfo.ilCommercialExRes', setExcludedResources)
 
 	const onClose = () => {
 		const data = { type: "toggle_visibility", id: 'infoloom.commercial' };
@@ -131,14 +165,15 @@ const $Commercial = ({ react }) => {
 		window.dispatchEvent(event);
 	};
 
-	return <$Panel react={react} title="Commercial Demand Factors" onClose={onClose} initialSize={{ width: window.innerWidth * 0.1, height: window.innerHeight * 0.83 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
-		<DemandSection2 title="BUILDING DEMAND" value={-1} factors={buildingDemandFactors} />
-		<DemandSection2 title="RESIDENTIAL LOW" value={residentialLowDemand} factors={residentialLowFactors} />
-		<DemandSection2 title="RESIDENTIAL MEDIUM" value={residentialMediumDemand} factors={residentialMediumFactors} />
-		<DemandSection2 title="RESIDENTIAL HIGH" value={residentialHighDemand} factors={residentialHighFactors} />
-		<DemandSection2 title="COMMERCIAL" value={commercialDemand} factors={commercialFactors} />
-		<DemandSection2 title="INDUSTRIAL" value={industrialDemand} factors={industrialFactors} />
-		<DemandSection2 title="OFFICE" value={officeDemand} factors={officeFactors} />
+	return <$Panel react={react} title="Commercial Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.25, height: window.innerHeight * 0.24 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
+		{commercialData.length === 0 ? (
+			<p>Waiting...</p>
+		) : (
+		<div style={{display: 'flex'}}>
+			<ColumnCommercialData data={commercialData} />
+			<ColumnExcludedResources resources={excludedResources} />
+		</div>
+		)}
 	</$Panel>
 };
 
