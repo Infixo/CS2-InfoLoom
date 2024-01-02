@@ -22,6 +22,8 @@ using Game;
 using Game.Simulation;
 using Game.UI;
 using Colossal.UI.Binding;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace InfoLoom;
 
@@ -126,7 +128,7 @@ public class CommercialDemandUISystem : UISystemBase
 
         public NativeArray<int> m_Results;
 
-        public NativeArray<Resource> m_ExcludedResources;
+        public NativeValue<Resource> m_ExcludedResources;
 
         public void Execute()
         {
@@ -314,18 +316,17 @@ public class CommercialDemandUISystem : UISystemBase
                 else
                 {
                     //excludedResources += (excludedResources.Length == 0 ? "" : ",") + iterator.resource.ToString();
-                    Resource excludedResources = m_ExcludedResources[0] | iterator.resource;
-                    m_ExcludedResources[0] = excludedResources;
+                    m_ExcludedResources.value |= iterator.resource;
                 }
                 num++;
                 m_ResourceDemands[resourceIndex2] = math.min(100, math.max(0, m_ResourceDemands[resourceIndex2]));
             }
             m_BuildingDemand.value = math.clamp(2 * m_BuildingDemand.value / num, 0, 100);
             // InfoLoom
-            Plugin.Log($"RESOURCES: demanded {numDemanded} excluded {m_ExcludedResources[0]:X} {m_ExcludedResources[0]}");
-            Plugin.Log($"COMPANIES: freeProperties [0]={m_Results[0]} propertyless [1]={m_Results[1]}");// companies {m_Results[2]}");
+            //Plugin.Log($"RESOURCES: demanded {numDemanded} excluded {m_ExcludedResources.value:X} {m_ExcludedResources.value}");
+            //Plugin.Log($"COMPANIES: freeProperties [0]={m_Results[0]} propertyless [1]={m_Results[1]}");// companies {m_Results[2]}");
             m_Results[2] = Mathf.RoundToInt(10f * taxRate / (float)(numStandard + numLeisure));
-            Plugin.Log($"TAX RATE: [2]={m_Results[2]} {taxRate / (float)(numStandard + numLeisure):F1}");
+            //Plugin.Log($"TAX RATE: [2]={m_Results[2]} {taxRate / (float)(numStandard + numLeisure):F1}");
             // 3 & 4 - capacity utilization rate. (available/maximum), non-leisure/leisure
             // 5 & 6 - resource efficiency (production/consumption), non-leisure/leisure
             //m_Results[3] = (numcapUtilStd / numStandard;
@@ -333,13 +334,13 @@ public class CommercialDemandUISystem : UISystemBase
             //Plugin.Log($"LEISURE: {numLeisure} {capUtilLei / (float)numLeisure} {salesCapLei / (float)numLeisure}");
             m_Results[3] = Mathf.RoundToInt(100f * capUtilStd / (float)numStandard);
             m_Results[4] = Mathf.RoundToInt(100f * capUtilLei / (float)numLeisure);
-            Plugin.Log($"SERVICE UTILIZATION: [3]={m_Results[3]} [4]={m_Results[4]} std {capUtilStd / (float)numStandard} lei {capUtilLei / (float)numLeisure}, 30% is the default threshold");
+            //Plugin.Log($"SERVICE UTILIZATION: [3]={m_Results[3]} [4]={m_Results[4]} std {capUtilStd / (float)numStandard} lei {capUtilLei / (float)numLeisure}, 30% is the default threshold");
             m_Results[5] = Mathf.RoundToInt(100f * salesCapStd / (float)numStandard);
             m_Results[6] = Mathf.RoundToInt(100f * salesCapLei / (float)numLeisure);
-            Plugin.Log($"SALES CAPACITY: [5]={m_Results[5]} [6]={m_Results[6]} std {salesCapStd / (float)numStandard} lei {salesCapLei / (float)numLeisure}, 100% means capacity = consumption");
+            //Plugin.Log($"SALES CAPACITY: [5]={m_Results[5]} [6]={m_Results[6]} std {salesCapStd / (float)numStandard} lei {salesCapLei / (float)numLeisure}, 100% means capacity = consumption");
             m_Results[7] = Mathf.RoundToInt(1000f * empCap / (float)numDemanded);
-            Plugin.Log($"EMPLOYEE CAPACITY RATIO: [7]={m_Results[7]} {100f*empCap/(float)numDemanded:F1}%, 75% is the default threshold");
-            Plugin.Log($"AVAILABLE WORKFORCE: educated [8]={m_Results[8]} uneducated [9]={m_Results[9]}");
+            //Plugin.Log($"EMPLOYEE CAPACITY RATIO: [7]={m_Results[7]} {100f*empCap/(float)numDemanded:F1}%, 75% is the default threshold");
+            //Plugin.Log($"AVAILABLE WORKFORCE: educated [8]={m_Results[8]} uneducated [9]={m_Results[9]}");
         }
     }
 
@@ -461,10 +462,10 @@ public class CommercialDemandUISystem : UISystemBase
     // InfoLoom
 
     private RawValueBinding m_uiResults;
-    private RawValueBinding m_uiStrings;
+    private RawValueBinding m_uiExResources;
 
     private NativeArray<int> m_Results;
-    private NativeArray<Resource> m_ExcludedResources;
+    private NativeValue<Resource> m_ExcludedResources;
 
     // COMMERCIAL
     // 0 - free properties
@@ -550,32 +551,26 @@ public class CommercialDemandUISystem : UISystemBase
         // InfoLoom
         SetDefaults(); // there is no serialization, so init just for safety
         m_Results = new NativeArray<int>(10, Allocator.Persistent);
-        m_ExcludedResources = new NativeArray<Resource>(1, Allocator.Persistent);
+        m_ExcludedResources = new NativeValue<Resource>(Allocator.Persistent);
 
-        AddBinding(m_uiResults = new RawValueBinding(kGroup, "ilDemandCommercial", delegate (IJsonWriter binder)
+        AddBinding(m_uiResults = new RawValueBinding(kGroup, "ilCommercial", delegate (IJsonWriter binder)
         {
-            binder.ArrayBegin(m_Results.Length+3);
+            binder.ArrayBegin(m_Results.Length);
             for (int i = 0; i < m_Results.Length; i++)
                 binder.Write(m_Results[i]);
-            //binder.PropertyName("excludedResources");
-            binder.Write(EconomyUtils.GetNames(m_ExcludedResources[0]));
-            //binder.PropertyName("taxRate");
-            binder.Write($"{(float)m_Results[2] / 10f:F1}%");
-            //binder.PropertyName("employeeCapacity");
-            binder.Write($"{(float)m_Results[7] / 10f:F1}%");
             binder.ArrayEnd();
         }));
 
-        AddBinding(m_uiStrings = new RawValueBinding(kGroup, "ilDemandComStrings", delegate (IJsonWriter writer)
+        AddBinding(m_uiExResources = new RawValueBinding(kGroup, "ilCommercialExRes", delegate (IJsonWriter binder)
         {
-            writer.TypeBegin("CommercialDemandStrings");
-            writer.PropertyName("excludedResources");
-            writer.Write(EconomyUtils.GetNames(m_ExcludedResources[0]));
-            writer.PropertyName("taxRate");
-            writer.Write($"{(float)m_Results[2]/10f:F1}%");
-            writer.PropertyName("employeeCapacity");
-            writer.Write($"{(float)m_Results[7]/10f:F1}%");
-            writer.TypeEnd();
+            List<string> resList = new List<string>();
+            for (int i = 0; i < Game.Economy.EconomyUtils.ResourceCount; i++)
+                if ((m_ExcludedResources.value & Game.Economy.EconomyUtils.GetResource(i)) != Resource.NoResource)
+                    resList.Add(Game.Economy.EconomyUtils.GetName(Game.Economy.EconomyUtils.GetResource(i)));
+            binder.ArrayBegin(resList.Count);
+            foreach(string res in resList)
+                binder.Write(res);
+            binder.ArrayEnd();
         }));
 
         Plugin.Log("CommercialDemandUISystem created.");
@@ -754,12 +749,12 @@ public class CommercialDemandUISystem : UISystemBase
         
         // Update UI
         m_uiResults.Update();
-        m_uiStrings.Update();
+        m_uiExResources.Update();
     }
 
     private void ResetResults()
     {
-        m_ExcludedResources[0] = Resource.NoResource;
+        m_ExcludedResources.value = Resource.NoResource;
         m_Results.Fill<int>(0);
         //for (int i = 0; i < m_Results.Length; i++) // there are 5 education levels + 1 for totals
         //{
