@@ -140,3 +140,15 @@ public class InfoLoom_DemandFactors : UIExtension
         this.extensionContent = this.LoadEmbeddedResource("InfoLoom.dist.demandfactors.js");
     }
 }
+
+public class InfoLoom_Commercial : UIExtension
+{
+    public new readonly string extensionID = "infoloom.commercial";
+    public new readonly string extensionContent;
+    public new readonly ExtensionType extensionType = ExtensionType.Panel;
+
+    public InfoLoom_Commercial()
+    {
+        this.extensionContent = this.LoadEmbeddedResource("InfoLoom.dist.commercial.js");
+    }
+}
