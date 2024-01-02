@@ -35,15 +35,26 @@ const RowWithTwoColumns = ({left, right}) => {
 	);
 };
 
-const RowWithThreeColumns = ({left, leftSmall, right1, right2}) => {
+const RowWithThreeColumns = ({left, leftSmall, right1, flag1, right2, flag2}) => {
+	const centerStyle = {
+		width: right2 === undefined ? '40%' : '20%',
+		justifyContent: 'center',
+	};
+	const right1text = `${right1} %`;
+	const right2text = `${right2} %`;
 	return (
 	<div class="labels_L7Q row_S2v">
 		<div class="row_S2v" style={{width: '60%', flexDirection: 'column'}}>
 			<p>{left}</p>
 			<p style={{fontSize: '80%'}}>{leftSmall}</p>
 		</div>
-		<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{right1}</div>
-		<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{right2}</div>
+		{flag1 ?
+			<div class="row_S2v negative_YWY" style={centerStyle}>{right1text}</div> :
+			<div class="row_S2v positive_zrK" style={centerStyle}>{right1text}</div>}
+		{right2 && (
+		flag2 ?
+			<div class="row_S2v negative_YWY" style={centerStyle}>{right2text}</div> :
+			<div class="row_S2v positive_zrK" style={centerStyle}>{right2text}</div>)}
 	</div>
 	);
 };
@@ -61,12 +72,18 @@ const ColumnCommercialData = ({ data }) => {
 	return (
 	<div style={{width: '70%', boxSizing: 'border-box', border: '1px solid gray'}}>
 	
-		<RowWithThreeColumns left="EMPTY BUILDINGS" right1={data[0]} />
-		<RowWithThreeColumns left="PROPERTYLESS COMPANIES" right1={data[1]} />
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '60%'}}>EMPTY BUILDINGS</div>
+			<div class="row_S2v" style={{width: '40%', justifyContent: 'center'}}>{data[0]}</div>
+		</div>
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '60%'}}>PROPERTYLESS COMPANIES</div>
+			<div class="row_S2v" style={{width: '40%', justifyContent: 'center'}}>{data[1]}</div>
+		</div>
 		
 		<DataDivider />
 		
-		<RowWithThreeColumns left="AVERAGE TAX RATE" leftSmall="10% is the neutral rate" right1={`${data[2]/10} %`} />
+		<RowWithThreeColumns left="AVERAGE TAX RATE" leftSmall="10% is the neutral rate" right1={data[2]/10} flag1={data[2]>100} />
 		
 		<DataDivider />
 
@@ -76,12 +93,12 @@ const ColumnCommercialData = ({ data }) => {
 			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>Leisure</div>
 		</div>
 		
-		<RowWithThreeColumns left="SERVICE UTILIZATION" leftSmall="30% is the neutral ratio" right1={`${data[3]} %`} right2={`${data[4]} %`} />
-		<RowWithThreeColumns left="SALES CAPACITY" leftSmall="100% when capacity = consumption" right1={`${data[5]} %`} right2={`${data[6]} %`} />
+		<RowWithThreeColumns left="SERVICE UTILIZATION" leftSmall="30% is the neutral ratio" right1={data[3]} flag1={data[3]<30} right2={data[4]} flag2={data[4]<30} />
+		<RowWithThreeColumns left="SALES CAPACITY" leftSmall="100% when capacity = consumption" right1={data[5]} flag1={data[5]>100} right2={data[6]} flag2={data[6]>100} />
 		
 		<DataDivider />
 		
-		<RowWithThreeColumns left="Employee capacity ratio" leftSmall="75% is the neutral ratio" right1={`${data[7]/10} %`} />
+		<RowWithThreeColumns left="Employee capacity ratio" leftSmall="75% is the neutral ratio" right1={data[7]/10} flag1={data[7]<750} />
 		
 		<DataDivider />
 		
