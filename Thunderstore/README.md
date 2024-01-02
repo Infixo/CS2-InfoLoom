@@ -5,6 +5,7 @@ Currently:
 - Demographics
 - Workforce structure
 - Workplaces distribution
+- Commercial data
 
 ## Features
 
@@ -42,6 +43,15 @@ Currently:
 
 ![Resources consumption](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/consumption.png)
 
+### Commercial data
+- Shows commercial data used to calculate Commercial Demand Factor.
+- Empty buildings and companies that have no property, and average tax rate.
+- Service capacity utilization and sales capacity to consumption ratio - these are crucial in calculating LocalDemand, TouristDemand and PetrolLocalDemand.
+- Actual numbers of available workforce, and employee capacity ratio.
+- Lists resources that currently are not demanded, thus the engine ignores them when calculating Commercial Demand Factors.
+
+![Commercial data](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/commercial.png)
+
 
 ## Technical
 
@@ -60,6 +70,10 @@ Currently:
 - Nothing atm.
 
 ### Changelog
+- v0.5.0 (2024-01-02)
+  - New feature: commercial data, homeless count.
+  - Population bars in Demographics window are scalable now.
+  - Fixed: Demographics now correctly shows Tourists and Commuters.
 - v0.4.1 (2023-12-22)
   - New feature: demographics.
 - v0.3.0 (2023-12-20)

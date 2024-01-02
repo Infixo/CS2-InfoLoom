@@ -315,7 +315,6 @@ public class CommercialDemandUISystem : UISystemBase
                 }
                 else
                 {
-                    //excludedResources += (excludedResources.Length == 0 ? "" : ",") + iterator.resource.ToString();
                     m_ExcludedResources.value |= iterator.resource;
                 }
                 num++;
@@ -329,7 +328,6 @@ public class CommercialDemandUISystem : UISystemBase
             //Plugin.Log($"TAX RATE: [2]={m_Results[2]} {taxRate / (float)(numStandard + numLeisure):F1}");
             // 3 & 4 - capacity utilization rate. (available/maximum), non-leisure/leisure
             // 5 & 6 - resource efficiency (production/consumption), non-leisure/leisure
-            //m_Results[3] = (numcapUtilStd / numStandard;
             //Plugin.Log($"STANDARD: {numStandard} {capUtilStd/(float)numStandard} {salesCapStd/(float)numStandard}");
             //Plugin.Log($"LEISURE: {numLeisure} {capUtilLei / (float)numLeisure} {salesCapLei / (float)numLeisure}");
             m_Results[3] = Mathf.RoundToInt(100f * capUtilStd / (float)numStandard);
