@@ -26,33 +26,11 @@ const DemandSection2 = ({title, value, factors }) => {
   );  	
 };
 
-const DemandSection1 = ({ title, value, factors }) => {
-  // this is for 2 columns
-  //<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-  return (
-    <div style={{ display: 'grid', gridTemplateRows: 'auto auto', gap: '10px' }}>
-      <div>
-        <p>{title}: <strong>{Math.round(value*100)}</strong></p>
-      </div>
-      <div>
-        <ol>
-          {factors.map((item, index) => (
-            <li key={index}>       
-			<RowWithTwoColumns left={item["weight"]} right={item["factor"]} />
-			</li>
-          ))}
-        </ol>
-      </div>
-    </div>
-  );
-};
-
-
 const RowWithTwoColumns = ({left, right}) => {
 	return (
 	<div class="labels_L7Q row_S2v">
 		<div class="row_S2v" style={{width: '60%'}}>{left}</div>
-		<div class="row_S2v" style={{width: '40%'}}>{right}</div>
+		<div class="row_S2v" style={{width: '40%', justifyContent: 'center'}}>{right}</div>
 	</div>
 	);
 };
@@ -73,7 +51,9 @@ const RowWithThreeColumns = ({left, leftSmall, right1, right2}) => {
 // simple horizontal line
 const DataDivider = () => {
 	return (
-	<div style={{height: '3rem', borderBottom: '1px solid gray'}} />
+	<div style={{display: 'flex', height: '4rem', flexDirection: 'column', justifyContent: 'center'}}>
+		<div style={{borderBottom: '1px solid gray'}}></div>
+	</div>
 	);
 };
 
@@ -81,12 +61,12 @@ const ColumnCommercialData = ({ data }) => {
 	return (
 	<div style={{width: '70%', boxSizing: 'border-box', border: '1px solid gray'}}>
 	
-		<RowWithTwoColumns left="Empty buildings" right={data[0]} />
-		<RowWithTwoColumns left="Propertyless companies" right={data[1]} />
+		<RowWithThreeColumns left="EMPTY BUILDINGS" right1={data[0]} />
+		<RowWithThreeColumns left="PROPERTYLESS COMPANIES" right1={data[1]} />
 		
 		<DataDivider />
 		
-		<RowWithTwoColumns left="Average tax rate" right={data[2]/10} />
+		<RowWithThreeColumns left="AVERAGE TAX RATE" leftSmall="10% is the neutral rate" right1={`${data[2]/10} %`} />
 		
 		<DataDivider />
 
@@ -95,34 +75,18 @@ const ColumnCommercialData = ({ data }) => {
 			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>Standard</div>
 			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>Leisure</div>
 		</div>
-		<RowWithThreeColumns left="TEST" leftSmall="testing" right1="xxx" right2="yyy" />
-
-		<div class="labels_L7Q row_S2v">
-			<div class="row_S2v" style={{width: '60%', flexDirection: 'column'}}>
-				<p>SERVICE UTILIZATION</p>
-				<p style={{fontSize: '80%'}}>30% is the default threshold</p>
-			</div>
-			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{`${data[3]}%`}</div>
-			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{`${data[4]}%`}</div>
-		</div>
-
-		<div class="labels_L7Q row_S2v">
-			<div class="row_S2v" style={{width: '60%', flexDirection: 'column'}}>
-				<p>SALES CAPACITY</p>
-				<p style={{fontSize: '80%'}}>100% when capacity = consumption</p>
-			</div>
-			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{`${data[5]}%`}</div>
-			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{`${data[6]}%`}</div>
-		</div>
+		
+		<RowWithThreeColumns left="SERVICE UTILIZATION" leftSmall="30% is the neutral ratio" right1={`${data[3]} %`} right2={`${data[4]} %`} />
+		<RowWithThreeColumns left="SALES CAPACITY" leftSmall="100% when capacity = consumption" right1={`${data[5]} %`} right2={`${data[6]} %`} />
 		
 		<DataDivider />
 		
-		<RowWithTwoColumns left="Employee capacity ratio" right={`${data[7]/10}%`} />
+		<RowWithThreeColumns left="Employee capacity ratio" leftSmall="75% is the neutral ratio" right1={`${data[7]/10} %`} />
 		
 		<DataDivider />
 		
-		<div style={{display: 'flex', boxSizing: 'border-box', border: '1px solid gray'}}>
-			<div style={{width: '60%'}}>
+		<div style={{display: 'flex'}}>
+			<div style={{width: '60%', height: '2.2em', display: 'flex', alignItems: 'center'}}>
 				AVAILABLE WORKFORCE
 			</div>
 			<div style={{width: '40%'}}>
@@ -165,7 +129,7 @@ const $Commercial = ({ react }) => {
 		window.dispatchEvent(event);
 	};
 
-	return <$Panel react={react} title="Commercial Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.25, height: window.innerHeight * 0.24 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
+	return <$Panel react={react} title="Commercial Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.25, height: window.innerHeight * 0.26 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
 		{commercialData.length === 0 ? (
 			<p>Waiting...</p>
 		) : (
