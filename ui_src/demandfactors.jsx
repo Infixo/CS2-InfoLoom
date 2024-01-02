@@ -146,6 +146,6 @@ const $DemandFactors = ({ react }) => {
 window._$hookui.registerPanel({
 	id: "infoloom.demandfactors",
 	name: "InfoLoom: Demand Factors",
-	icon: "Media/Game/Icons/CityStatistics.svg",
+	icon: "Media/Game/Icons/ZoningDemand.svg",
 	component: $DemandFactors
 });
