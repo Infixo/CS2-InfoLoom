@@ -98,7 +98,7 @@ const ColumnCommercialData = ({ data }) => {
 		
 		<DataDivider />
 		
-		<RowWithThreeColumns left="Employee capacity ratio" leftSmall="75% is the neutral ratio" right1={data[7]/10} flag1={data[7]<750} />
+		<RowWithThreeColumns left="EMPLOYEE CAPACITY RATIO" leftSmall="75% is the neutral ratio" right1={data[7]/10} flag1={data[7]<750} />
 		
 		<DataDivider />
 		
