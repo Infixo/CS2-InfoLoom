@@ -22,6 +22,7 @@ static class GamePatches
         updateSystem.UpdateAt<InfoLoom.WorkplacesInfoLoomUISystem>(SystemUpdatePhase.UIUpdate);
         updateSystem.UpdateAt<InfoLoom.WorkforceInfoLoomUISystem>(SystemUpdatePhase.UIUpdate);
         updateSystem.UpdateAt<InfoLoom.CommercialDemandUISystem>(SystemUpdatePhase.UIUpdate);
+        updateSystem.UpdateAt<InfoLoom.ResidentialDemandUISystem>(SystemUpdatePhase.UIUpdate);
     }
 
     [HarmonyPatch(typeof(Game.UI.InGame.CityInfoUISystem), "WriteDemandFactors")]

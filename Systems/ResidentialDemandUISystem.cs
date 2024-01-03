@@ -19,11 +19,15 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Scripting;
+using Game;
+using Game.Simulation;
+using Game.UI;
+using Colossal.UI.Binding;
 
-namespace Game.Simulation;
+namespace InfoLoom;
 
 [CompilerGenerated]
-public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISerializable
+public class ResidentialDemandUISystem : UISystemBase
 {
     [BurstCompile]
     private struct UpdateResidentialDemandJob : IJob
@@ -88,8 +92,14 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
 
         public NativeQueue<TriggerAction> m_TriggerQueue;
 
+        public NativeArray<int> m_Results;
+
         public void Execute()
         {
+            DemandParameterData demandParameterData = m_DemandParameters[0];
+            Plugin.Log($"Execute: happiness    neutral {demandParameterData.m_NeutralHappiness},    effect {demandParameterData.m_HappinessEffect}, minimum {demandParameterData.m_MinimumHappiness}");
+            Plugin.Log($"Execute: homelessness neutral {demandParameterData.m_NeutralHomelessness}, effect {demandParameterData.m_HomelessEffect}");
+            Plugin.Log($"Execute: unemployment neutral {demandParameterData.m_NeutralUnemployment}, effect {demandParameterData.m_UnemploymentEffect}");
             bool3 c = default(bool3);
             for (int i = 0; i < m_UnlockedZones.Length; i++)
             {
@@ -110,32 +120,40 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
                     }
                 }
             }
+			// free res properties
             int3 @int = default(int3);
+			// total res properties
             int3 int2 = default(int3);
-            DemandParameterData demandParameterData = m_DemandParameters[0];
+            //DemandParameterData demandParameterData = m_DemandParameters[0];
             int value = m_StudyPositions.value;
             int value2 = m_UnemploymentRate.value;
             Population population = m_Populations[m_City];
             int num2 = math.max(demandParameterData.m_MinimumHappiness, population.m_AverageHappiness);
             int num3 = 0;
             int num4 = 0;
+            // loop through all households, ex. Tourist, Commuter, MovingAway, Deleted and Temp
             for (int j = 0; j < m_HouseholdChunks.Length; j++)
             {
                 ArchetypeChunk archetypeChunk = m_HouseholdChunks[j];
                 if (!archetypeChunk.Has(ref m_PropertyRenterType))
                 {
+                    // not property renter => homeless
                     num3 += archetypeChunk.Count;
                 }
                 num4 += archetypeChunk.Count;
             }
             float num5 = 0f;
+            float taxRate = 0f;
             for (int k = 0; k <= 2; k++)
             {
                 num5 -= 3f * ((float)k + 1f) * ((float)TaxSystem.GetResidentialTaxRate(k, m_TaxRates) - 10f);
             }
+            taxRate = 10f - num5 / (3f * 6f);
+            Plugin.Log($".. taxes {taxRate}: {TaxSystem.GetResidentialTaxRate(0, m_TaxRates)} {TaxSystem.GetResidentialTaxRate(1, m_TaxRates)} {TaxSystem.GetResidentialTaxRate(2, m_TaxRates)}");
             float num6 = demandParameterData.m_HappinessEffect * (float)(num2 - demandParameterData.m_NeutralHappiness);
             float num7 = (0f - demandParameterData.m_HomelessEffect) * (100f * (float)num3 / (1f + (float)num4) - demandParameterData.m_NeutralHomelessness);
             float num8 = (0f - demandParameterData.m_UnemploymentEffect) * ((float)value2 - demandParameterData.m_NeutralUnemployment);
+            // value - study positions
             float num9 = math.min(math.sqrt(2f * (float)value), -1f + math.min(2.5f, math.sqrt((float)value / 300f)) + 0.5f * (num6 + num8 + num7 + num5));
             float y = num8 + num6 + num7 + num5;
             m_HouseholdDemand.value = math.min(100, math.max(0, Mathf.RoundToInt(math.max(num9, y))));
@@ -143,21 +161,26 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
             m_LowDemandFactors[8] = Mathf.RoundToInt(num7);
             m_LowDemandFactors[6] = Mathf.RoundToInt(num8);
             m_LowDemandFactors[11] = Mathf.RoundToInt(num5);
-            m_MediumDemandFactors[7] = Mathf.RoundToInt(num6);
-            m_MediumDemandFactors[8] = Mathf.RoundToInt(num7);
-            m_MediumDemandFactors[6] = Mathf.RoundToInt(num8);
-            m_MediumDemandFactors[11] = Mathf.RoundToInt(num5);
-            m_MediumDemandFactors[12] = Mathf.RoundToInt(num9);
+            m_MediumDemandFactors[7] = Mathf.RoundToInt(num6); // Happiness
+            m_MediumDemandFactors[8] = Mathf.RoundToInt(num7); // Homelessness
+            m_MediumDemandFactors[6] = Mathf.RoundToInt(num8); // Unemployment
+            m_MediumDemandFactors[11] = Mathf.RoundToInt(num5); // Taxes
+            m_MediumDemandFactors[12] = Mathf.RoundToInt(num9); // Students
             m_HighDemandFactors[7] = Mathf.RoundToInt(num6);
             m_HighDemandFactors[8] = Mathf.RoundToInt(num7);
             m_HighDemandFactors[6] = Mathf.RoundToInt(num8);
             m_HighDemandFactors[11] = Mathf.RoundToInt(num5);
             m_HighDemandFactors[12] = Mathf.RoundToInt(num9);
+            // InfoLoom
+            Plugin.Log($".. zones {c} avgHap {population.m_AverageHappiness} study {value} unemp {value2} ratio {demandParameterData.m_FreeResidentialProportion}");
+            Plugin.Log($".. hless {num3} house {num4} [ taxE {num5} hapE {num6} hlessE {num7} unemE {num8} ] = {y} {num9}");
+            // calculate empty buildings, loop through all ResidentialProperty, ex. Abandoned, Condemened, Destroyed, etc.
             for (int l = 0; l < m_ResidentialChunks.Length; l++)
             {
                 ArchetypeChunk archetypeChunk2 = m_ResidentialChunks[l];
                 NativeArray<PrefabRef> nativeArray = archetypeChunk2.GetNativeArray(ref m_PrefabType);
                 BufferAccessor<Renter> bufferAccessor = archetypeChunk2.GetBufferAccessor(ref m_RenterType);
+                // iterate through buildings
                 for (int m = 0; m < nativeArray.Length; m++)
                 {
                     Entity prefab = nativeArray[m].m_Prefab;
@@ -170,6 +193,7 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
                     }
                     BuildingPropertyData buildingPropertyData = m_BuildingPropertyDatas[prefab];
                     DynamicBuffer<Renter> dynamicBuffer = bufferAccessor[m];
+					// occupied properties
                     int num11 = 0;
                     for (int n = 0; n < dynamicBuffer.Length; n++)
                     {
@@ -180,31 +204,71 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
                     }
                     if (!zonePropertiesData.m_ScaleResidentials)
                     {
+                        // low density (not scalable, only 1 household per buildinng)
                         int2.z++;
                         @int.z += 1 - num11;
+                        m_Results[3] += num11; // low
                     }
                     else if (num10 < 1f)
                     {
+                        // medium density, scaling < 1f
                         int2.y += buildingPropertyData.m_ResidentialProperties;
                         @int.y += buildingPropertyData.m_ResidentialProperties - num11;
+                        m_Results[4] += num11; // med
                     }
                     else
                     {
+                        // high density, scaling >= 1f
                         int2.x += buildingPropertyData.m_ResidentialProperties;
                         @int.x += buildingPropertyData.m_ResidentialProperties - num11;
+                        m_Results[5] += num11; // high
                     }
                 }
             }
             int num12 = m_LowDemandFactors[7] + m_LowDemandFactors[8] + m_LowDemandFactors[6] + m_LowDemandFactors[11] + m_LowDemandFactors[12];
             int num13 = m_MediumDemandFactors[7] + m_MediumDemandFactors[8] + m_MediumDemandFactors[6] + m_MediumDemandFactors[11] + m_MediumDemandFactors[12];
             int num14 = m_HighDemandFactors[7] + m_HighDemandFactors[8] + m_HighDemandFactors[6] + m_HighDemandFactors[11] + m_HighDemandFactors[12];
+            // @float is needed free res properties (capped at min. 5)
             float3 @float = new float3(math.max(5f, 0.01f * demandParameterData.m_FreeResidentialProportion * math.max(1f, int2.x)), math.max(5f, 0.01f * demandParameterData.m_FreeResidentialProportion * math.max(1f, int2.y)), math.max(5f, 0.01f * demandParameterData.m_FreeResidentialProportion * math.max(1f, int2.z)));
+            // actual demand: (needed - current) / needed => (1 - current/needed)
+            // if current > needed => demand = 0
+            // if current = 0 => demand = 100
+            // if current < needed => demand = 0..100
             m_BuildingDemand.value = new int3((int)(100f * math.saturate((@float.x - (float)@int.x) / math.max(1f, @float.x))), (int)(100f * math.saturate((@float.y - (float)@int.y) / math.max(1f, @float.y))), (int)(100f * math.saturate((@float.z - (float)@int.z) / math.max(1f, @float.z))));
             m_BuildingDemand.value = math.select(default(int3), m_BuildingDemand.value, c);
+            Plugin.Log($".. tot {int2} needed {@float} free {@int} bulDem {m_BuildingDemand.value}");
+            // EmptyBuildings
+            // if sum of other factors is LOWER than raw building demand, then EmptyBuildings is 0
+            // if sum of other factors is HIGHER than raw building demand, then EmptyBuildings is a diff between them
+            // so, it says if CURRENT empty buildings are enough to satisfy existing demand, or MORE
+            // valuable info: how many empty buildings are needed to satisfy current demand
             m_HighDemandFactors[13] = math.min(0, m_BuildingDemand.value.x - num14);
             m_MediumDemandFactors[13] = math.min(0, m_BuildingDemand.value.y - num13);
             m_LowDemandFactors[13] = math.min(0, m_BuildingDemand.value.z - num12);
-            m_TriggerQueue.Enqueue(new TriggerAction(TriggerType.ResidentialDemand, Entity.Null, (int2.x + int2.y + int2.z > 100) ? ((float)(m_BuildingDemand.value.x + m_BuildingDemand.value.y + m_BuildingDemand.value.z) / 100f) : 0f));
+            // InfoLoom: no game effects
+            //m_TriggerQueue.Enqueue(new TriggerAction(TriggerType.ResidentialDemand, Entity.Null, (int2.x + int2.y + int2.z > 100) ? ((float)(m_BuildingDemand.value.x + m_BuildingDemand.value.y + m_BuildingDemand.value.z) / 100f) : 0f));
+            // InfoLoom
+            m_Results[0] = int2.z; // total residential properties, low
+			m_Results[1] = int2.y; // total residential properties, med
+			m_Results[2] = int2.x; // total residential properties, high
+            m_Results[6] = Mathf.RoundToInt(10f * demandParameterData.m_FreeResidentialProportion);
+            m_Results[7] = population.m_AverageHappiness;
+            m_Results[8] = demandParameterData.m_NeutralHappiness;
+            m_Results[9] = m_UnemploymentRate.value;
+            m_Results[10] = Mathf.RoundToInt(10f * demandParameterData.m_NeutralUnemployment);
+            m_Results[11] = num3; // homeless households
+            m_Results[12] = num4; // households
+            m_Results[13] = Mathf.RoundToInt(10f * demandParameterData.m_NeutralHomelessness);
+            m_Results[14] = m_StudyPositions.value;
+            m_Results[15] = Mathf.RoundToInt(10f * taxRate);
+            Plugin.Log($"TOTAL : L {m_Results[0]} M {m_Results[1]} H {m_Results[2]}");
+            Plugin.Log($"USED  : L {m_Results[3]} M {m_Results[4]} H {m_Results[5]}");
+            float mr6 = (float)m_Results[6] / 10f;
+            Plugin.Log($"FREE  : L {m_Results[0]-m_Results[3]} M {m_Results[1] - m_Results[4]} H {m_Results[2] - m_Results[5]} ratio {mr6:F1}% ");
+            Plugin.Log($"DEMAND: L {(1f - (m_Results[0] - m_Results[3]) / (0.01f * mr6 * (float)math.max(1,m_Results[0]))) * 100f:F0} " +
+                               $"M {(1f - (m_Results[1] - m_Results[4]) / (0.01f * mr6 * (float)math.max(1,m_Results[1]))) * 100f:F0} " +
+                               $"H {(1f - (m_Results[2] - m_Results[5]) / (0.01f * mr6 * (float)math.max(1,m_Results[2]))) * 100f:F0}");
+            Plugin.Log($"OTHER: hap {m_Results[7]}/{m_Results[8]} unem {m_Results[9]}/{m_Results[10]} hless {m_Results[11]}/{m_Results[12]}/{m_Results[13]}");
         }
     }
 
@@ -248,6 +312,10 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
         }
     }
 
+    private const string kGroup = "cityInfo";
+
+    private SimulationSystem m_SimulationSystem;
+
     private TaxSystem m_TaxSystem;
 
     private CountEmploymentSystem m_CountEmploymentSystem;
@@ -282,8 +350,8 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
     [DebugWatchValue]
     private NativeArray<int> m_HighDemandFactors;
 
-    [DebugWatchDeps]
-    private JobHandle m_WriteDependencies;
+    //[DebugWatchDeps]
+    //private JobHandle m_WriteDependencies;
 
     private JobHandle m_ReadDependencies;
 
@@ -299,6 +367,22 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
     [DebugWatchValue(color = "#117a65")]
     public int3 buildingDemand => m_LastBuildingDemand;
 
+    // InfoLoom
+
+    private RawValueBinding m_uiResults;
+
+    private NativeArray<int> m_Results;
+
+    // RESIDENTIAL
+    // 0,1,2 - count of residential properties, low/med/high
+    // 3,4,5 - count of occupied properties, low/med/high
+    // 6 - free residential ratio (%) * 10
+    // 7 & 8 - AverageHappiness, neutral happiness
+    // 9 & 10 - unemployment value, neutral unemployment (%) * 10
+    // 11, 12, 13 - homeless households, total households, NeutralHomelessness (%) * 10
+    // 14 - study positions
+    // 15 - tax rate (weighted)
+
     public override int GetUpdateInterval(SystemUpdatePhase phase)
     {
         return 16;
@@ -309,6 +393,7 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
         return 10;
     }
 
+    /* not used
     public NativeArray<int> GetLowDensityDemandFactors(out JobHandle deps)
     {
         deps = m_WriteDependencies;
@@ -326,6 +411,7 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
         deps = m_WriteDependencies;
         return m_HighDemandFactors;
     }
+    */
 
     public void AddReader(JobHandle reader)
     {
@@ -336,6 +422,7 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
     protected override void OnCreate()
     {
         base.OnCreate();
+        m_SimulationSystem = base.World.GetOrCreateSystemManaged<SimulationSystem>(); // TODO: use UIUpdateState eventually
         m_DemandParameterGroup = GetEntityQuery(ComponentType.ReadOnly<DemandParameterData>());
         m_AllHouseholdGroup = GetEntityQuery(ComponentType.ReadOnly<Household>(), ComponentType.Exclude<TouristHousehold>(), ComponentType.Exclude<CommuterHousehold>(), ComponentType.Exclude<MovingAway>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Temp>());
         m_AllResidentialGroup = GetEntityQuery(ComponentType.ReadOnly<ResidentialProperty>(), ComponentType.Exclude<Deleted>(), ComponentType.Exclude<Condemned>(), ComponentType.Exclude<Abandoned>(), ComponentType.Exclude<Destroyed>(), ComponentType.Exclude<Temp>());
@@ -350,6 +437,20 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
         m_LowDemandFactors = new NativeArray<int>(18, Allocator.Persistent);
         m_MediumDemandFactors = new NativeArray<int>(18, Allocator.Persistent);
         m_HighDemandFactors = new NativeArray<int>(18, Allocator.Persistent);
+
+        // InfoLoom
+        SetDefaults(); // there is no serialization, so init just for safety
+        m_Results = new NativeArray<int>(16, Allocator.Persistent);
+
+        AddBinding(m_uiResults = new RawValueBinding(kGroup, "ilResidential", delegate (IJsonWriter binder)
+        {
+            binder.ArrayBegin(m_Results.Length);
+            for (int i = 0; i < m_Results.Length; i++)
+                binder.Write(m_Results[i]);
+            binder.ArrayEnd();
+        }));
+
+        Plugin.Log("ResidentialDemandUISystem created.");
     }
 
     [Preserve]
@@ -360,10 +461,12 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
         m_LowDemandFactors.Dispose();
         m_MediumDemandFactors.Dispose();
         m_HighDemandFactors.Dispose();
+        // InfoLoom
+        m_Results.Dispose();
         base.OnDestroy();
     }
 
-    public void SetDefaults(Context context)
+    public void SetDefaults() //Context context)
     {
         m_HouseholdDemand.value = 0;
         m_BuildingDemand.value = default(int3);
@@ -374,6 +477,7 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
         m_LastBuildingDemand = default(int3);
     }
 
+    /* not used
     public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
     {
         writer.Write(m_HouseholdDemand.value);
@@ -385,7 +489,9 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
         writer.Write(m_LastHouseholdDemand);
         writer.Write(m_LastBuildingDemand);
     }
+    */
 
+    /* not used
     public void Deserialize<TReader>(TReader reader) where TReader : IReader
     {
         reader.Read(out int value);
@@ -439,10 +545,17 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
             reader.Read(out m_LastBuildingDemand);
         }
     }
+    */
 
     [Preserve]
     protected override void OnUpdate()
     {
+        if (m_SimulationSystem.frameIndex % 128 != 11)
+            return;
+        Plugin.Log($"OnUpdate: {m_SimulationSystem.frameIndex}");
+        base.OnUpdate();
+        ResetResults();
+
         if (!m_DemandParameterGroup.IsEmptyIgnoreFilter)
         {
             m_LastHouseholdDemand = m_HouseholdDemand.value;
@@ -478,14 +591,23 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
             updateResidentialDemandJob.m_MediumDemandFactors = m_MediumDemandFactors;
             updateResidentialDemandJob.m_HighDemandFactors = m_HighDemandFactors;
             updateResidentialDemandJob.m_TriggerQueue = m_TriggerSystem.CreateActionBuffer();
+            updateResidentialDemandJob.m_Results = m_Results;
             UpdateResidentialDemandJob jobData = updateResidentialDemandJob;
-            base.Dependency = IJobExtensions.Schedule(jobData, JobUtils.CombineDependencies(base.Dependency, m_ReadDependencies, outJobHandle, outJobHandle2, outJobHandle3, deps, deps2));
-            m_WriteDependencies = base.Dependency;
-            m_CountEmploymentSystem.AddReader(base.Dependency);
-            m_CountStudyPositionsSystem.AddReader(base.Dependency);
-            m_TaxSystem.AddReader(base.Dependency);
-            m_TriggerSystem.AddActionBufferWriter(base.Dependency);
+            IJobExtensions.Schedule(jobData, JobUtils.CombineDependencies(base.Dependency, m_ReadDependencies, outJobHandle, outJobHandle2, outJobHandle3, deps, deps2)).Complete();
+            // since this is a copy of an actual simulation system but for UI purposes, then noone will read from us or wait for us
+            //m_WriteDependencies = base.Dependency;
+            //m_CountEmploymentSystem.AddReader(base.Dependency);
+            //m_CountStudyPositionsSystem.AddReader(base.Dependency);
+            //m_TaxSystem.AddReader(base.Dependency);
+            //m_TriggerSystem.AddActionBufferWriter(base.Dependency);
         }
+        // Update UI
+        m_uiResults.Update();
+    }
+
+    private void ResetResults()
+    {
+        m_Results.Fill<int>(0);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -501,7 +623,7 @@ public class ResidentialDemandSystem : GameSystemBase, IDefaultSerializable, ISe
     }
 
     [Preserve]
-    public ResidentialDemandSystem()
+    public ResidentialDemandUISystem()
     {
     }
 }
