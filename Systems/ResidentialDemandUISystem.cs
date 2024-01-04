@@ -97,9 +97,9 @@ public class ResidentialDemandUISystem : UISystemBase
         public void Execute()
         {
             DemandParameterData demandParameterData = m_DemandParameters[0];
-            Plugin.Log($"Execute: happiness    neutral {demandParameterData.m_NeutralHappiness},    effect {demandParameterData.m_HappinessEffect}, minimum {demandParameterData.m_MinimumHappiness}");
-            Plugin.Log($"Execute: homelessness neutral {demandParameterData.m_NeutralHomelessness}, effect {demandParameterData.m_HomelessEffect}");
-            Plugin.Log($"Execute: unemployment neutral {demandParameterData.m_NeutralUnemployment}, effect {demandParameterData.m_UnemploymentEffect}");
+            //Plugin.Log($"Execute: happiness    neutral {demandParameterData.m_NeutralHappiness},    effect {demandParameterData.m_HappinessEffect}, minimum {demandParameterData.m_MinimumHappiness}");
+            //Plugin.Log($"Execute: homelessness neutral {demandParameterData.m_NeutralHomelessness}, effect {demandParameterData.m_HomelessEffect}");
+            //Plugin.Log($"Execute: unemployment neutral {demandParameterData.m_NeutralUnemployment}, effect {demandParameterData.m_UnemploymentEffect}");
             bool3 c = default(bool3);
             for (int i = 0; i < m_UnlockedZones.Length; i++)
             {
@@ -143,13 +143,12 @@ public class ResidentialDemandUISystem : UISystemBase
                 num4 += archetypeChunk.Count;
             }
             float num5 = 0f;
-            float taxRate = 0f;
             for (int k = 0; k <= 2; k++)
             {
                 num5 -= 3f * ((float)k + 1f) * ((float)TaxSystem.GetResidentialTaxRate(k, m_TaxRates) - 10f);
             }
-            taxRate = 10f - num5 / (3f * 6f);
-            Plugin.Log($".. taxes {taxRate}: {TaxSystem.GetResidentialTaxRate(0, m_TaxRates)} {TaxSystem.GetResidentialTaxRate(1, m_TaxRates)} {TaxSystem.GetResidentialTaxRate(2, m_TaxRates)}");
+            float taxRate = 10f - num5 / (3f * 6f);
+            //Plugin.Log($".. taxes {taxRate}: {TaxSystem.GetResidentialTaxRate(0, m_TaxRates)} {TaxSystem.GetResidentialTaxRate(1, m_TaxRates)} {TaxSystem.GetResidentialTaxRate(2, m_TaxRates)}");
             float num6 = demandParameterData.m_HappinessEffect * (float)(num2 - demandParameterData.m_NeutralHappiness);
             float num7 = (0f - demandParameterData.m_HomelessEffect) * (100f * (float)num3 / (1f + (float)num4) - demandParameterData.m_NeutralHomelessness);
             float num8 = (0f - demandParameterData.m_UnemploymentEffect) * ((float)value2 - demandParameterData.m_NeutralUnemployment);
@@ -172,8 +171,8 @@ public class ResidentialDemandUISystem : UISystemBase
             m_HighDemandFactors[11] = Mathf.RoundToInt(num5);
             m_HighDemandFactors[12] = Mathf.RoundToInt(num9);
             // InfoLoom
-            Plugin.Log($".. zones {c} avgHap {population.m_AverageHappiness} study {value} unemp {value2} ratio {demandParameterData.m_FreeResidentialProportion}");
-            Plugin.Log($".. hless {num3} house {num4} [ taxE {num5} hapE {num6} hlessE {num7} unemE {num8} ] = {y} {num9}");
+            //Plugin.Log($".. zones {c} avgHap {population.m_AverageHappiness} study {value} unemp {value2} ratio {demandParameterData.m_FreeResidentialProportion}");
+            //Plugin.Log($".. hless {num3} house {num4} [ taxE {num5} hapE {num6} hlessE {num7} unemE {num8} ] = {y} {num9}");
             // calculate empty buildings, loop through all ResidentialProperty, ex. Abandoned, Condemened, Destroyed, etc.
             for (int l = 0; l < m_ResidentialChunks.Length; l++)
             {
@@ -236,7 +235,7 @@ public class ResidentialDemandUISystem : UISystemBase
             // if current < needed => demand = 0..100
             m_BuildingDemand.value = new int3((int)(100f * math.saturate((@float.x - (float)@int.x) / math.max(1f, @float.x))), (int)(100f * math.saturate((@float.y - (float)@int.y) / math.max(1f, @float.y))), (int)(100f * math.saturate((@float.z - (float)@int.z) / math.max(1f, @float.z))));
             m_BuildingDemand.value = math.select(default(int3), m_BuildingDemand.value, c);
-            Plugin.Log($".. tot {int2} needed {@float} free {@int} bulDem {m_BuildingDemand.value}");
+            //Plugin.Log($".. tot {int2} needed {@float} free {@int} bulDem {m_BuildingDemand.value}");
             // EmptyBuildings
             // if sum of other factors is LOWER than raw building demand, then EmptyBuildings is 0
             // if sum of other factors is HIGHER than raw building demand, then EmptyBuildings is a diff between them
@@ -261,14 +260,14 @@ public class ResidentialDemandUISystem : UISystemBase
             m_Results[13] = Mathf.RoundToInt(10f * demandParameterData.m_NeutralHomelessness);
             m_Results[14] = m_StudyPositions.value;
             m_Results[15] = Mathf.RoundToInt(10f * taxRate);
-            Plugin.Log($"TOTAL : L {m_Results[0]} M {m_Results[1]} H {m_Results[2]}");
-            Plugin.Log($"USED  : L {m_Results[3]} M {m_Results[4]} H {m_Results[5]}");
-            float mr6 = (float)m_Results[6] / 10f;
-            Plugin.Log($"FREE  : L {m_Results[0]-m_Results[3]} M {m_Results[1] - m_Results[4]} H {m_Results[2] - m_Results[5]} ratio {mr6:F1}% ");
-            Plugin.Log($"DEMAND: L {(1f - (m_Results[0] - m_Results[3]) / (0.01f * mr6 * (float)math.max(1,m_Results[0]))) * 100f:F0} " +
-                               $"M {(1f - (m_Results[1] - m_Results[4]) / (0.01f * mr6 * (float)math.max(1,m_Results[1]))) * 100f:F0} " +
-                               $"H {(1f - (m_Results[2] - m_Results[5]) / (0.01f * mr6 * (float)math.max(1,m_Results[2]))) * 100f:F0}");
-            Plugin.Log($"OTHER: hap {m_Results[7]}/{m_Results[8]} unem {m_Results[9]}/{m_Results[10]} hless {m_Results[11]}/{m_Results[12]}/{m_Results[13]}");
+            //Plugin.Log($"TOTAL : L {m_Results[0]} M {m_Results[1]} H {m_Results[2]}");
+            //Plugin.Log($"USED  : L {m_Results[3]} M {m_Results[4]} H {m_Results[5]}");
+            //float mr6 = (float)m_Results[6] / 10f;
+            //Plugin.Log($"FREE  : L {m_Results[0]-m_Results[3]} M {m_Results[1] - m_Results[4]} H {m_Results[2] - m_Results[5]} ratio {mr6:F1}% ");
+            //Plugin.Log($"DEMAND: L {(1f - (m_Results[0] - m_Results[3]) / (0.01f * mr6 * (float)math.max(1,m_Results[0]))) * 100f:F0} " +
+                               //$"M {(1f - (m_Results[1] - m_Results[4]) / (0.01f * mr6 * (float)math.max(1,m_Results[1]))) * 100f:F0} " +
+                               //$"H {(1f - (m_Results[2] - m_Results[5]) / (0.01f * mr6 * (float)math.max(1,m_Results[2]))) * 100f:F0}");
+            //Plugin.Log($"OTHER: hap {m_Results[7]}/{m_Results[8]} unem {m_Results[9]}/{m_Results[10]} hless {m_Results[11]}/{m_Results[12]}/{m_Results[13]}");
         }
     }
 
@@ -552,7 +551,7 @@ public class ResidentialDemandUISystem : UISystemBase
     {
         if (m_SimulationSystem.frameIndex % 128 != 11)
             return;
-        Plugin.Log($"OnUpdate: {m_SimulationSystem.frameIndex}");
+        //Plugin.Log($"OnUpdate: {m_SimulationSystem.frameIndex}");
         base.OnUpdate();
         ResetResults();
 

@@ -161,7 +161,7 @@ const $Commercial = ({ react }) => {
 // Registering the panel with HookUI so it shows up in the menu
 window._$hookui.registerPanel({
 	id: "infoloom.commercial",
-	name: "InfoLoom: Commercial",
+	name: "InfoLoom: Commercial Data",
 	icon: "Media/Game/Icons/ZoneCommercial.svg",
 	component: $Commercial
 });

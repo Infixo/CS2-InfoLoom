@@ -130,7 +130,19 @@ const ColumnExcludedResources = ({ resources }) => {
 	);
 };
 
+const BuildingDemandSection = ({ data }) => {
+	return (
+	<div style={{width: '30%', boxSizing: 'border-box', border: '1px solid gray'}}>
+		<div class="row_S2v">BUILDING DEMAND</div>
+	</div>
+	);
+};
+
 const $Residential = ({ react }) => {
+	
+	// residential data
+	const [residentialData, setResidentialData] = react.useState([])
+	useDataUpdate(react, 'cityInfo.ilResidential', setResidentialData)
 	
 	// commercial data
 	const [commercialData, setCommercialData] = react.useState([])
@@ -146,13 +158,40 @@ const $Residential = ({ react }) => {
 		window.dispatchEvent(event);
 	};
 
-	return <$Panel react={react} title="Residential Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.25, height: window.innerHeight * 0.26 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
+	return <$Panel react={react} title="Residential Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.3, height: window.innerHeight * 0.4 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
 		{commercialData.length === 0 ? (
 			<p>Waiting...</p>
 		) : (
+		<div>
+			<BuildingDemandSection data={residentialData} />
+			{/* OTHER DATA SECTION */}
+			<div style={{display: 'flex'}}>
+				<div style={{width: '50%', boxSizing: 'border-box', border: '1px solid gray'}}>
+					<RowWithThreeColumns left="HAPPINESS" leftSmall={`${residentialData[8]} is neutral`} right1={residentialData[7]} flag1={residentialData[7]<residentialData[8]} />
+					<RowWithThreeColumns left="UNEMPLOYMENT" leftSmall={`${residentialData[10]/10}% is neutral`} right1={residentialData[9]} flag1={residentialData[9]>residentialData[10]/10} />
+					<RowWithThreeColumns left="TAX RATE (weighted)" leftSmall="10% is neutral" right1={residentialData[15]/10} flag1={residentialData[15]>100} />
+				</div>
+				<div style={{width: '50%', boxSizing: 'border-box', border: '1px solid gray'}}>
+				COLUMN_B
+					<RowWithTwoColumns left="HOUSEHOLDS" right={residentialData[12]} />
+					<RowWithTwoColumns left="STUDY POSITIONS" right={residentialData[14]} />
+				</div>
+			</div>
 		<div style={{display: 'flex'}}>
 			<ColumnCommercialData data={commercialData} />
 			<ColumnExcludedResources resources={excludedResources} />
+		</div>
+		<div>
+			{/*RAW DATA*/}
+			<p>Total properties: {residentialData[0]} {residentialData[1]} {residentialData[2]}</p>
+			<p>Occupied properties: {residentialData[3]} {residentialData[4]} {residentialData[5]}</p>
+			<p>Free ratio: {residentialData[6]}</p>
+			<p>Happiness: {residentialData[7]} / {residentialData[8]}</p>
+			<p>Unemployment: {residentialData[9]} / {residentialData[10]}</p>
+			<p>Homeless households: {residentialData[11]} / {residentialData[12]} / {residentialData[13]}</p>
+			<p>Study positions: {residentialData[14]}</p>
+			<p>Tax rate (weighted): {residentialData[15]}</p>
+		</div>
 		</div>
 		)}
 	</$Panel>
