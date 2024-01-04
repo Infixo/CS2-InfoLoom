@@ -1,11 +1,13 @@
 # InfoLoom
-InfoLoom is a Cities Skylines 2 mod that adds new UI windows with extra information.
+InfoLoom is a Cities Skylines II mod that adds several new UI windows with extra information.
 Currently:
-- Demand factors
 - Demographics
 - Workforce structure
 - Workplaces distribution
+- Residential data
 - Commercial data
+- Demand factors
+- Resources consumption (optional)
 
 ## Features
 
@@ -14,14 +16,6 @@ Currently:
 - Age distribution histogram that also shows cims' activity structure.
 
 ![Demographics](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/demographics.png)
-
-### Demand factors
-- Shows individual demand factor VALUES for each demand type. Helpful to learn actual importance of each factor.
-- Enables showing all demand factors, not only 5. Useful for industrial demand which is the only one that utilizes up yo 7 factors.
-- Additional section shows directly building demand for each zone type and STORAGE demand. Please note that the "main" demand factor is actually a building demand, however UI shows it as moving. In fact it doesn't move, it is just a visualization.
-- Also, industrial demand is a higher value from the two: industrial building demand and storage demand.
-
-![Demand factors](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/demandfactors.png)
 
 ### Workforce structure
 - Shows workforce structure by education level.
@@ -36,12 +30,13 @@ Currently:
 
 ![Workforce and Workplaces](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/worforce_jobs.png)
 
-### Resources consumption
-- This feature is disabled by default because it changes the data shown on the vanilla UI. Enable it in the config file by setting SeparateConsumption to true.
-- Instead of showing surplus and deficit, the production UI will show commercial consumption and industrial consumption. It is imho much more informative than just surplus/deficit, because it also tells what causes said surplus or deficit.
-- Disclaimer. I don't yet how to change existing UI, so the titles "Surplus" and "Deficit" will still be there. Sorry.
+### Residential data
+- Shows residential data used to calculate REsidential Demand Factors.
+- Residential properties by density: total count, occupied, free.
+- Total households and homeless households.
+- Average happiness, weighted tax rate, open study positions.
 
-![Resources consumption](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/consumption.png)
+![Residential data](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/residential.png)
 
 ### Commercial data
 - Shows commercial data used to calculate Commercial Demand Factor.
@@ -52,6 +47,20 @@ Currently:
 
 ![Commercial data](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/commercial.png)
 
+### Demand factors
+- Shows individual demand factor VALUES for each demand type. Helpful to learn actual importance of each factor.
+- Enables showing all demand factors, not only 5. Useful for industrial demand which is the only one that utilizes up yo 7 factors.
+- Additional section shows directly building demand for each zone type and STORAGE demand. Please note that the "main" demand factor is actually a building demand, however UI shows it as moving. In fact it doesn't move, it is just a visualization.
+- Also, industrial demand is a higher value from the two: industrial building demand and storage demand.
+
+![Demand factors](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/demandfactors.png)
+
+### Resources consumption
+- This feature is disabled by default because it changes the data shown on the vanilla UI. Enable it in the config file by setting SeparateConsumption to true.
+- Instead of showing surplus and deficit, the production UI will show commercial consumption and industrial consumption. It is imho much more informative than just surplus/deficit, because it also tells what causes said surplus or deficit.
+- Disclaimer. I don't yet how to change existing UI, so the titles "Surplus" and "Deficit" will still be there. Sorry.
+
+![Resources consumption](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/consumption.png)
 
 ## Technical
 
@@ -70,6 +79,8 @@ Currently:
 - Nothing atm.
 
 ### Changelog
+- v0.6.0 (2024-01-04)
+  - New feature: residential data.
 - v0.5.0 (2024-01-02)
   - New feature: commercial data, homeless count.
   - Population bars in Demographics window are scalable now.
@@ -87,5 +98,3 @@ Currently:
 ### Support
 - Please report bugs and issues on [GitHub](https://github.com/Infixo/CS2-InfoLoom).
 - You may also leave comments on [Discord1](https://discord.com/channels/1169011184557637825/1185664314401632306) or [Discord2](https://discord.com/channels/1024242828114673724/1185672922212347944).
-
-## Disclaimers and Notes
