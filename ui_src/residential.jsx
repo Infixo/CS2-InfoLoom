@@ -115,25 +115,73 @@ const ColumnCommercialData = ({ data }) => {
 	);
 };
 
-const ColumnExcludedResources = ({ resources }) => {
+// centered value, if flag exists then uses colors for negative/positive
+// width is 20% by default
+const SingleValue = ({ value, flag, width }) => {
+	const centerStyle = {
+		width: width === undefined ? '20%' : width,
+		justifyContent: 'center',
+	};
 	return (
-	<div style={{width: '30%', boxSizing: 'border-box', border: '1px solid gray'}}>
-		<div class="row_S2v">No demand for:</div>
-        <ul>
-          {resources.map((item, index) => (
-            <li key={index}>
-				<div class="row_S2v small_ExK">{item}</div>
-			</li>
-          ))}
-        </ul>
-	</div>
+		flag === undefined ? (
+			<div class="row_S2v"              style={centerStyle}>{value}</div>
+		) : (
+		flag ?
+			<div class="row_S2v negative_YWY" style={centerStyle}>{value}</div> :
+			<div class="row_S2v positive_zrK" style={centerStyle}>{value}</div>)
 	);
 };
 
 const BuildingDemandSection = ({ data }) => {
+	const freeL = data[0]-data[3];
+	const freeM = data[1]-data[4];
+	const freeH = data[2]-data[5];
+	const ratio = data[6]/10;
+	const ratioString = `$No demand at {ratio}%`;
+	const needL = Math.floor(ratio * Math.max(1,data[0]) / 100);
+	const needM = Math.floor(ratio * Math.max(1,data[1]) / 100);
+	const needH = Math.floor(ratio * Math.max(1,data[2]) / 100);
+	const demandL = Math.floor((1 - freeL / needL) * 100);
+	const demandM = Math.floor((1 - freeM / needM) * 100);
+	const demandH = Math.floor((1 - freeH / needH) * 100);
 	return (
-	<div style={{width: '30%', boxSizing: 'border-box', border: '1px solid gray'}}>
-		<div class="row_S2v">BUILDING DEMAND</div>
+	<div style={{boxSizing: 'border-box', border: '1px solid gray'}}>
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '40%'}}></div>
+			<SingleValue value="LOW" />
+			<SingleValue value="MEDIUM" />
+			<SingleValue value="HIGH" />
+		</div>
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '40%'}}>Total properties</div>
+			<SingleValue value={data[0]} />
+			<SingleValue value={data[1]} />
+			<SingleValue value={data[2]} />
+		</div>
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '40%'}}>- Occupied properties</div>
+			<SingleValue value={data[3]} />
+			<SingleValue value={data[4]} />
+			<SingleValue value={data[5]} />
+		</div>
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '40%'}}>= Empty properties</div>
+			<SingleValue value={freeL} />
+			<SingleValue value={freeM} />
+			<SingleValue value={freeH} />
+		</div>
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '40%'}}>{"No demand level (" + ratio + "%)"}</div>
+			<SingleValue value={needL} />
+			<SingleValue value={needM} />
+			<SingleValue value={needH} />
+		</div>
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '40%'}}>BUILDING DEMAND</div>
+			<SingleValue value={demandL} />
+			<SingleValue value={demandM} />
+			<SingleValue value={demandH} />
+		</div>
 	</div>
 	);
 };
@@ -157,6 +205,8 @@ const $Residential = ({ react }) => {
 		const event = new CustomEvent('hookui', { detail: data });
 		window.dispatchEvent(event);
 	};
+	
+	const homelessThreshold = Math.round(residentialData[12] * residentialData[13] / 1000);
 
 	return <$Panel react={react} title="Residential Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.3, height: window.innerHeight * 0.4 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
 		{commercialData.length === 0 ? (
@@ -167,19 +217,18 @@ const $Residential = ({ react }) => {
 			{/* OTHER DATA SECTION */}
 			<div style={{display: 'flex'}}>
 				<div style={{width: '50%', boxSizing: 'border-box', border: '1px solid gray'}}>
+					<RowWithTwoColumns left="STUDY POSITIONS" right={residentialData[14]} />
 					<RowWithThreeColumns left="HAPPINESS" leftSmall={`${residentialData[8]} is neutral`} right1={residentialData[7]} flag1={residentialData[7]<residentialData[8]} />
 					<RowWithThreeColumns left="UNEMPLOYMENT" leftSmall={`${residentialData[10]/10}% is neutral`} right1={residentialData[9]} flag1={residentialData[9]>residentialData[10]/10} />
-					<RowWithThreeColumns left="TAX RATE (weighted)" leftSmall="10% is neutral" right1={residentialData[15]/10} flag1={residentialData[15]>100} />
 				</div>
 				<div style={{width: '50%', boxSizing: 'border-box', border: '1px solid gray'}}>
-				COLUMN_B
 					<RowWithTwoColumns left="HOUSEHOLDS" right={residentialData[12]} />
-					<RowWithTwoColumns left="STUDY POSITIONS" right={residentialData[14]} />
+					<RowWithThreeColumns left="HOMELESS" leftSmall={`${homelessThreshold} is neutral`} right1={residentialData[11]} flag1={residentialData[11]>homelessThreshold} />
+					<RowWithThreeColumns left="TAX RATE (weighted)" leftSmall="10% is neutral" right1={residentialData[15]/10} flag1={residentialData[15]>100} />
 				</div>
 			</div>
 		<div style={{display: 'flex'}}>
 			<ColumnCommercialData data={commercialData} />
-			<ColumnExcludedResources resources={excludedResources} />
 		</div>
 		<div>
 			{/*RAW DATA*/}
