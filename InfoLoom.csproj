@@ -53,6 +53,7 @@
 	  <EmbeddedResource Include="dist/workplaces.js" />
 	  <EmbeddedResource Include="dist/demandfactors.js" />
 	  <EmbeddedResource Include="dist/commercial.js" />
+	  <EmbeddedResource Include="dist/residential.js" />
 	</ItemGroup>
 
 	<!--

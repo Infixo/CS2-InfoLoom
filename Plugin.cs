@@ -152,3 +152,15 @@ public class InfoLoom_Commercial : UIExtension
         this.extensionContent = this.LoadEmbeddedResource("InfoLoom.dist.commercial.js");
     }
 }
+
+public class InfoLoom_Residential : UIExtension
+{
+    public new readonly string extensionID = "infoloom.residential";
+    public new readonly string extensionContent;
+    public new readonly ExtensionType extensionType = ExtensionType.Panel;
+
+    public InfoLoom_Residential()
+    {
+        this.extensionContent = this.LoadEmbeddedResource("InfoLoom.dist.residential.js");
+    }
+}
