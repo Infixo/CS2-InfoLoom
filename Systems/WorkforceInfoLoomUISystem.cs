@@ -436,22 +436,22 @@ public class WorkforceInfoLoomUISystem : UISystemBase
 
     private EntityQuery m_AllAdultGroup;
 
-    [DebugWatchValue]
+    //[DebugWatchValue]
     private NativeValue<int> m_Workers;
 
-    [DebugWatchValue]
+    //[DebugWatchValue]
     private NativeValue<int> m_Adults;
 
-    [DebugWatchValue]
+    //[DebugWatchValue]
     private NativeValue<int> m_Unemployed;
 
-    [DebugWatchValue]
+    //[DebugWatchValue]
     private NativeArray<int> m_EmployableByEducation;
 
-    [DebugWatchValue]
+    //[DebugWatchValue]
     private NativeValue<int> m_Unemployment;
 
-    [DebugWatchValue]
+    //[DebugWatchValue]
     private NativeArray<int> m_UnemploymentByEducation;
 
     private NativeArray<int> m_PotentialWorkersByEducation;

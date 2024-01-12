@@ -90,7 +90,7 @@ public class ResidentialDemandUISystem : UISystemBase
 
         public NativeArray<int> m_HighDemandFactors;
 
-        public NativeQueue<TriggerAction> m_TriggerQueue;
+        //public NativeQueue<TriggerAction> m_TriggerQueue;
 
         public NativeArray<int> m_Results;
 
@@ -323,7 +323,7 @@ public class ResidentialDemandUISystem : UISystemBase
 
     private CitySystem m_CitySystem;
 
-    private TriggerSystem m_TriggerSystem;
+    //private TriggerSystem m_TriggerSystem;
 
     private EntityQuery m_DemandParameterGroup;
 
@@ -337,16 +337,16 @@ public class ResidentialDemandUISystem : UISystemBase
 
     private NativeValue<int3> m_BuildingDemand;
 
-    [EnumArray(typeof(DemandFactor))]
-    [DebugWatchValue]
+    //[EnumArray(typeof(DemandFactor))]
+    //[DebugWatchValue]
     private NativeArray<int> m_LowDemandFactors;
 
-    [EnumArray(typeof(DemandFactor))]
-    [DebugWatchValue]
+    //[EnumArray(typeof(DemandFactor))]
+    //[DebugWatchValue]
     private NativeArray<int> m_MediumDemandFactors;
 
-    [EnumArray(typeof(DemandFactor))]
-    [DebugWatchValue]
+    //[EnumArray(typeof(DemandFactor))]
+    //[DebugWatchValue]
     private NativeArray<int> m_HighDemandFactors;
 
     //[DebugWatchDeps]
@@ -360,10 +360,10 @@ public class ResidentialDemandUISystem : UISystemBase
 
     private TypeHandle __TypeHandle;
 
-    [DebugWatchValue(color = "#27ae60")]
+    //[DebugWatchValue(color = "#27ae60")]
     public int householdDemand => m_LastHouseholdDemand;
 
-    [DebugWatchValue(color = "#117a65")]
+    //[DebugWatchValue(color = "#117a65")]
     public int3 buildingDemand => m_LastBuildingDemand;
 
     // InfoLoom
@@ -430,7 +430,7 @@ public class ResidentialDemandUISystem : UISystemBase
         m_TaxSystem = base.World.GetOrCreateSystemManaged<TaxSystem>();
         m_CountEmploymentSystem = base.World.GetOrCreateSystemManaged<CountEmploymentSystem>();
         m_CountStudyPositionsSystem = base.World.GetOrCreateSystemManaged<CountStudyPositionsSystem>();
-        m_TriggerSystem = base.World.GetOrCreateSystemManaged<TriggerSystem>();
+        //m_TriggerSystem = base.World.GetOrCreateSystemManaged<TriggerSystem>();
         m_HouseholdDemand = new NativeValue<int>(Allocator.Persistent);
         m_BuildingDemand = new NativeValue<int3>(Allocator.Persistent);
         m_LowDemandFactors = new NativeArray<int>(18, Allocator.Persistent);
@@ -589,7 +589,7 @@ public class ResidentialDemandUISystem : UISystemBase
             updateResidentialDemandJob.m_LowDemandFactors = m_LowDemandFactors;
             updateResidentialDemandJob.m_MediumDemandFactors = m_MediumDemandFactors;
             updateResidentialDemandJob.m_HighDemandFactors = m_HighDemandFactors;
-            updateResidentialDemandJob.m_TriggerQueue = m_TriggerSystem.CreateActionBuffer();
+            //updateResidentialDemandJob.m_TriggerQueue = m_TriggerSystem.CreateActionBuffer();
             updateResidentialDemandJob.m_Results = m_Results;
             UpdateResidentialDemandJob jobData = updateResidentialDemandJob;
             IJobExtensions.Schedule(jobData, JobUtils.CombineDependencies(base.Dependency, m_ReadDependencies, outJobHandle, outJobHandle2, outJobHandle3, deps, deps2)).Complete();

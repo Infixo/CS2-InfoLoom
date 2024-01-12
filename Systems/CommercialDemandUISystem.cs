@@ -420,24 +420,24 @@ public class CommercialDemandUISystem : UISystemBase
 
     private NativeValue<int> m_BuildingDemand;
 
-    [EnumArray(typeof(DemandFactor))]
-    [DebugWatchValue]
+    //[EnumArray(typeof(DemandFactor))]
+    //[DebugWatchValue]
     private NativeArray<int> m_DemandFactors;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_ResourceDemands;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_BuildingDemands;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_Consumption;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_FreeProperties;
 
     //[DebugWatchDeps]
