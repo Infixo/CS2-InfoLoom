@@ -112,6 +112,9 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         [ReadOnly]
         public ComponentLookup<SpawnableBuildingData> m_SpawnableBuildingFromEntity;
 
+        [ReadOnly]
+        public ComponentLookup<IndustrialProcessData> m_IndustrialProcessDataFromEntity;
+
         //[ReadOnly]
         //public ComponentLookup<ResourceData> m_ResourceDatas; // TODO: this is for future use to access resource prefab data
 
@@ -165,25 +168,29 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                 //m_EmploymentDataResults[0] += workplacesData;
                 //m_EmploymentDataResults[1] += employeesData;
 
-                // Office detection
-                // This is a bit hacky approach based on produced resource
-                // The game uses resource weight to distinguish Office companies from Industrial ones
-                // It is however retrieved from Resource Prefab (ResourceData.m_Weight)
-                // Here I am doing 2 simplifications until I'll learn a better way to do it
-                // a) I am assuming that the last resource in the buffer is the one produced; Idk if this holds always
-                // b) I don't retrieve prefab, just check for Software, Media, Telecom and Financial; there won't be new resources any time soon, so...
-                DynamicBuffer<Resources> resources = bufferResources[i];
-                bool isOffice = false;
-                bool isMoney = false;
-                Resource lastRes = Resource.NoResource;
-                if (resources.Length > 0)
-                {
-                    lastRes = resources[resources.Length - 1].m_Resource;
-                    isOffice = (lastRes == Resource.Software || lastRes == Resource.Telecom || lastRes == Resource.Financial || lastRes == Resource.Media);
-                    isMoney = lastRes == Resource.Money;
-                }
                 //Plugin.Log($"company {isCommercial}/{isMoney}/{isIndustrial}/{isExtractor}/{isOffice}:{lastRes} " +
                 //    $"{workplacesData.uneducated} {workplacesData.poorlyEducated} {workplacesData.educated} {workplacesData.wellEducated} {workplacesData.highlyEducated}");
+
+                // 240124, fix for incorrect counting of Leisure and Offices
+                // Previous version with resource analysis was incorrect - last resource could also be an Upkeep resource like Timber or Petrochemicals
+                // This approach uses IndustrialProcessData and checks Output resource
+                bool isOffice = false;
+                bool isLeisure = false;
+                //string processTxt = ""; // debug
+                if (m_IndustrialProcessDataFromEntity.HasComponent(prefabRef.m_Prefab))
+                {
+                    IndustrialProcessData process = m_IndustrialProcessDataFromEntity[prefabRef.m_Prefab];
+                    Resource outputRes = process.m_Output.m_Resource;
+                    isLeisure = (outputRes & (Resource.Meals | Resource.Entertainment | Resource.Recreation | Resource.Lodging)) != Resource.NoResource;
+                    isOffice = (outputRes & (Resource.Software | Resource.Telecom | Resource.Financial | Resource.Media)) != Resource.NoResource;
+                    //processTxt = $"{process.m_Input1.m_Resource}+{process.m_Input2.m_Resource}={process.m_Output.m_Resource}"; // debug
+                }
+
+                // debug
+                //string resTxt = "";
+                //for (int r = 0; r < resources.Length; r++)
+                    //resTxt += resources[r].m_Resource + "|";
+                //Plugin.Log($"[{processTxt}] {resTxt} off {isOffice} lei {isLeisure}");
 
                 // Work with a local variable to avoid CS0206 error
                 WorkplacesAtLevelInfo ProcessLevel(WorkplacesAtLevelInfo info, int workplaces, int employees)
@@ -192,8 +199,8 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                     if (isService) info.Service += workplaces;
                     if (isCommercial)
                     {
-                        if (isMoney) info.Commercial += workplaces;
-                        else info.Leisure += workplaces;
+                        if (isLeisure) info.Leisure += workplaces;
+                        else info.Commercial += workplaces;
                     }
                     if (isIndustrial)
                     {
@@ -263,6 +270,9 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         [ReadOnly]
         public ComponentLookup<SpawnableBuildingData> __Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup;
 
+        [ReadOnly]
+        public ComponentLookup<IndustrialProcessData> __Game_Prefabs_IndustrialProcessData_RO_ComponentLookup;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void __AssignHandles(ref SystemState state)
         {
@@ -278,6 +288,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
             __Game_Prefabs_PrefabRef_RO_ComponentLookup = state.GetComponentLookup<PrefabRef>(isReadOnly: true);
             __Game_Prefabs_WorkplaceData_RO_ComponentLookup = state.GetComponentLookup<WorkplaceData>(isReadOnly: true);
             __Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup = state.GetComponentLookup<SpawnableBuildingData>(isReadOnly: true);
+            __Game_Prefabs_IndustrialProcessData_RO_ComponentLookup = state.GetComponentLookup<IndustrialProcessData>(isReadOnly: true);
         }
     }
 
@@ -406,6 +417,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
 
         // update handles
         __TypeHandle.__Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup.Update(ref base.CheckedStateRef);
+        __TypeHandle.__Game_Prefabs_IndustrialProcessData_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Prefabs_WorkplaceData_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
@@ -432,6 +444,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         jobData.m_PrefabRefFromEntity = __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentLookup;
         jobData.m_WorkplaceDataFromEntity = __TypeHandle.__Game_Prefabs_WorkplaceData_RO_ComponentLookup;
         jobData.m_SpawnableBuildingFromEntity = __TypeHandle.__Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup;
+        jobData.m_IndustrialProcessDataFromEntity = __TypeHandle.__Game_Prefabs_IndustrialProcessData_RO_ComponentLookup;
         //jobData.m_IntResults = m_IntResults;
         //jobData.m_EmploymentDataResults = m_EmploymentDataResults;
         jobData.m_Results = m_Results;
