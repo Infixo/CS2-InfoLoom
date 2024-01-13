@@ -15,6 +15,7 @@ using Game.UI;
 using Game.Simulation; // TODO: use UIUpdateState and Advance() eventully...
 using Game.UI.InGame; // EmploymentData TODO: remove when not used
 using Game.Economy; // Resources
+using Game.Citizens;
 
 namespace InfoLoom;
 
@@ -35,6 +36,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         public int Office; // jobs in office zones
         public int Employee; // employees
         public int Open; // open positions
+        public int Commuter; // commuters
         public WorkplacesAtLevelInfo(int _level) { Level = _level; }
     }
 
@@ -61,6 +63,8 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         writer.Write(info.Employee);
         writer.PropertyName("open");
         writer.Write(info.Open);
+        writer.PropertyName("commuter");
+        writer.Write(info.Commuter);
         writer.TypeEnd();
     }
 
@@ -114,6 +118,9 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
 
         [ReadOnly]
         public ComponentLookup<IndustrialProcessData> m_IndustrialProcessDataFromEntity;
+
+        [ReadOnly]
+        public ComponentLookup<Citizen> m_CitizenFromEntity;
 
         //[ReadOnly]
         //public ComponentLookup<ResourceData> m_ResourceDatas; // TODO: this is for future use to access resource prefab data
@@ -171,7 +178,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                 //Plugin.Log($"company {isCommercial}/{isMoney}/{isIndustrial}/{isExtractor}/{isOffice}:{lastRes} " +
                 //    $"{workplacesData.uneducated} {workplacesData.poorlyEducated} {workplacesData.educated} {workplacesData.wellEducated} {workplacesData.highlyEducated}");
 
-                // 240124, fix for incorrect counting of Leisure and Offices
+                // 240112, fix for incorrect counting of Leisure and Offices
                 // Previous version with resource analysis was incorrect - last resource could also be an Upkeep resource like Timber or Petrochemicals
                 // This approach uses IndustrialProcessData and checks Output resource
                 bool isOffice = false;
@@ -186,14 +193,27 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                     //processTxt = $"{process.m_Input1.m_Resource}+{process.m_Input2.m_Resource}={process.m_Output.m_Resource}"; // debug
                 }
 
+                // 240113 Count Commuters among Employees
+                int[] commuters = new int[5]; // by level
+                for (int k = 0; k < employees.Length; k++)
+                {
+                    Entity worker = employees[k].m_Worker;
+                    if (m_CitizenFromEntity.HasComponent(worker))
+                    {
+                        Citizen citizen = m_CitizenFromEntity[worker];
+                        if ((citizen.m_State & CitizenFlags.Commuter) != CitizenFlags.None)
+                            commuters[employees[k].m_Level]++;
+                    }
+                }
+
                 // debug
                 //string resTxt = "";
                 //for (int r = 0; r < resources.Length; r++)
-                    //resTxt += resources[r].m_Resource + "|";
+                //resTxt += resources[r].m_Resource + "|";
                 //Plugin.Log($"[{processTxt}] {resTxt} off {isOffice} lei {isLeisure}");
 
                 // Work with a local variable to avoid CS0206 error
-                WorkplacesAtLevelInfo ProcessLevel(WorkplacesAtLevelInfo info, int workplaces, int employees)
+                WorkplacesAtLevelInfo ProcessLevel(WorkplacesAtLevelInfo info, int workplaces, int employees, int commuters)
                 {
                     info.Total += workplaces;
                     if (isService) info.Service += workplaces;
@@ -210,19 +230,20 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                     }
                     info.Employee += employees;
                     info.Open += workplaces - employees;
+                    info.Commuter += commuters;
                     return info;
                 }
 
                 // uneducated
-                m_Results[0] = ProcessLevel(m_Results[0], workplacesData.uneducated, employeesData.uneducated);
+                m_Results[0] = ProcessLevel(m_Results[0], workplacesData.uneducated, employeesData.uneducated, commuters[0]);
                 // poorlyEducated
-                m_Results[1] = ProcessLevel(m_Results[1], workplacesData.poorlyEducated, employeesData.poorlyEducated);
+                m_Results[1] = ProcessLevel(m_Results[1], workplacesData.poorlyEducated, employeesData.poorlyEducated, commuters[1]);
                 // educated
-                m_Results[2] = ProcessLevel(m_Results[2], workplacesData.educated, employeesData.educated);
+                m_Results[2] = ProcessLevel(m_Results[2], workplacesData.educated, employeesData.educated, commuters[2]);
                 // wellEducated
-                m_Results[3] = ProcessLevel(m_Results[3], workplacesData.wellEducated, employeesData.wellEducated);
+                m_Results[3] = ProcessLevel(m_Results[3], workplacesData.wellEducated, employeesData.wellEducated, commuters[3]);
                 // highlyEducated
-                m_Results[4] = ProcessLevel(m_Results[4], workplacesData.highlyEducated, employeesData.highlyEducated);
+                m_Results[4] = ProcessLevel(m_Results[4], workplacesData.highlyEducated, employeesData.highlyEducated, commuters[4]);
             }
         }
 
@@ -273,6 +294,9 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         [ReadOnly]
         public ComponentLookup<IndustrialProcessData> __Game_Prefabs_IndustrialProcessData_RO_ComponentLookup;
 
+        [ReadOnly]
+        public ComponentLookup<Citizen> __Game_Citizens_Citizen_RO_ComponentLookup;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void __AssignHandles(ref SystemState state)
         {
@@ -289,6 +313,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
             __Game_Prefabs_WorkplaceData_RO_ComponentLookup = state.GetComponentLookup<WorkplaceData>(isReadOnly: true);
             __Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup = state.GetComponentLookup<SpawnableBuildingData>(isReadOnly: true);
             __Game_Prefabs_IndustrialProcessData_RO_ComponentLookup = state.GetComponentLookup<IndustrialProcessData>(isReadOnly: true);
+            __Game_Citizens_Citizen_RO_ComponentLookup = state.GetComponentLookup<Citizen>(isReadOnly: true);
         }
     }
 
@@ -418,6 +443,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         // update handles
         __TypeHandle.__Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Prefabs_IndustrialProcessData_RO_ComponentLookup.Update(ref base.CheckedStateRef);
+        __TypeHandle.__Game_Citizens_Citizen_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Prefabs_WorkplaceData_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentLookup.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
@@ -445,6 +471,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         jobData.m_WorkplaceDataFromEntity = __TypeHandle.__Game_Prefabs_WorkplaceData_RO_ComponentLookup;
         jobData.m_SpawnableBuildingFromEntity = __TypeHandle.__Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup;
         jobData.m_IndustrialProcessDataFromEntity = __TypeHandle.__Game_Prefabs_IndustrialProcessData_RO_ComponentLookup;
+        jobData.m_CitizenFromEntity = __TypeHandle.__Game_Citizens_Citizen_RO_ComponentLookup;
         //jobData.m_IntResults = m_IntResults;
         //jobData.m_EmploymentDataResults = m_EmploymentDataResults;
         jobData.m_Results = m_Results;
@@ -463,6 +490,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
             totals.Industrial += m_Results[i].Industrial;
             totals.Office += m_Results[i].Office;
             totals.Employee += m_Results[i].Employee;
+            totals.Commuter += m_Results[i].Commuter;
             totals.Open += m_Results[i].Open;
         }
         m_Results[5] = totals;
