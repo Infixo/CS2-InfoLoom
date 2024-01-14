@@ -34,7 +34,7 @@ Currently:
 ![Workforce and Workplaces](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/workforce_jobs.png)
 
 ### Residential data
-- Shows residential data used to calculate REsidential Demand Factors.
+- Shows residential data used to calculate Residential Demand Factors.
 - Residential properties by density: total count, occupied, free.
 - Total households and homeless households.
 - Average happiness, weighted tax rate, open study positions.
@@ -42,7 +42,7 @@ Currently:
 ![Residential data](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/residential.png)
 
 ### Commercial data
-- Shows commercial data used to calculate Commercial Demand Factor.
+- Shows commercial data used to calculate Commercial Demand Factors.
 - Empty buildings and companies that have no property, and average tax rate.
 - Service capacity utilization and sales capacity to consumption ratio - these are crucial in calculating LocalDemand, TouristDemand and PetrolLocalDemand.
 - Actual numbers of available workforce, and employee capacity ratio.

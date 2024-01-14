@@ -19,19 +19,22 @@ Currently:
 
 ### Workforce structure
 - Shows workforce structure by education level.
-- Total: all potential workers, i.e. teens and adults, excluding students, that are moved in and moving away.
+- Total: all potential workers, i.e. teens and adults, that are moved in and not moving away, excluding students.
+- Unemployment by education level and structure also shown as percentage.
 - Under: cims working on positions below their education level.
 - Outside: cims working outside of the city.
 - Homeless: unemployed cims with no home.
 
 ### Workplaces distribution
 - Shows available workplaces split into: city services, commercial sales, commercial leisure, industry extractors, industry manufacturing, and office.
-- Leisure are commercial companies selling immaterial resurces.
+- Leisure are commercial companies selling immaterial resources.
+- Commute are cims employed from outside of the city, they commute to work.
+- Shows number of companies in each category.
 
-![Workforce and Workplaces](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/worforce_jobs.png)
+![Workforce and Workplaces](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/workforce_jobs.png)
 
 ### Residential data
-- Shows residential data used to calculate REsidential Demand Factors.
+- Shows residential data used to calculate Residential Demand Factors.
 - Residential properties by density: total count, occupied, free.
 - Total households and homeless households.
 - Average happiness, weighted tax rate, open study positions.
@@ -39,7 +42,7 @@ Currently:
 ![Residential data](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/residential.png)
 
 ### Commercial data
-- Shows commercial data used to calculate Commercial Demand Factor.
+- Shows commercial data used to calculate Commercial Demand Factors.
 - Empty buildings and companies that have no property, and average tax rate.
 - Service capacity utilization and sales capacity to consumption ratio - these are crucial in calculating LocalDemand, TouristDemand and PetrolLocalDemand.
 - Actual numbers of available workforce, and employee capacity ratio.
@@ -79,6 +82,10 @@ Currently:
 - Nothing atm.
 
 ### Changelog
+- v0.7.0 (2023-01-14)
+  - New features: number of commuters as employees, unemployment and structures as percentages, number of companies.
+  - Fixed: Incorrect counting of Office and Leisure jobs.
+  - Fixed: Issue with Asset Editor.
 - v0.6.0 (2024-01-04)
   - New feature: residential data.
 - v0.5.0 (2024-01-02)
