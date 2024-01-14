@@ -56,23 +56,26 @@ const tableStyles = {
 };
 
 
-const WorkforceLevel = ({levelColor, levelName, levelValues}) => {
+const WorkforceLevel = ({levelColor, levelName, levelValues, total}) => {
   //console.log(levelColor); console.log(levelName); console.log(levelValues);
   // <div class="legend_fqG" style={{justifyContent: 'spaceEvenly'}}>
+  const percent = ( total > 0 ? (100*levelValues.total/total).toFixed(1)+"%" : "");
+  const unemployment = ( levelValues.total > 0 ? (100*levelValues.unemployed/levelValues.total).toFixed(1)+"%" : "");
   return (
-
-    <div class="labels_L7Q row_S2v" style={{width: '95%', paddingTop: '1rem', paddingBottom: '1rem'}}>
+    <div class="labels_L7Q row_S2v" style={{width: '99%', paddingTop: '1rem', paddingBottom: '1rem'}}>
 		<div style={{width: '1%'}}></div>
-		<div style={{ display: 'flex', alignItems: 'center', width: '25%' }}>
+		<div style={{ display: 'flex', alignItems: 'center', width: '22%' }}>
 			<div class="symbol_aAH" style={{backgroundColor: levelColor }}></div>
 			<div>{levelName}</div>
 		</div>
-		  <div class="row_S2v"           style={{width: '14%', justifyContent: 'center'}}>{levelValues["total"]}</div>
-		  <div class="row_S2v"           style={{width: '14%', justifyContent: 'center'}}>{levelValues["worker"]}</div>
-		  <div class="row_S2v"           style={{width: '14%', justifyContent: 'center'}}>{levelValues["unemployed"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '11%', justifyContent: 'center'}}>{levelValues["under"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '11%', justifyContent: 'center'}}>{levelValues["outside"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '11%', justifyContent: 'center'}}>{levelValues["homeless"]}</div>
+		  <div class="row_S2v"           style={{width: '11%', justifyContent: 'center'}}>{levelValues["total"]}</div>
+		  <div class="row_S2v"           style={{width: '8%', justifyContent: 'center'}}>{percent}</div>
+		  <div class="row_S2v"           style={{width: '11%', justifyContent: 'center'}}>{levelValues["worker"]}</div>
+		  <div class="row_S2v"           style={{width: '12%', justifyContent: 'center'}}>{levelValues["unemployed"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '8%', justifyContent: 'center'}}>{unemployment}</div>
+		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["under"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["outside"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["homeless"]}</div>
 	</div>
   );
 };
@@ -105,21 +108,21 @@ const $Workforce = ({react}) => {
 //		console.log("workplaces has 0 elements");
 //	}
 
-	return <$Panel react={react} title="Workforce Structure" onClose={onClose} initialSize={{ width: window.innerWidth * 0.29, height: window.innerHeight * 0.20 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
+	return <$Panel react={react} title="Workforce Structure" onClose={onClose} initialSize={{ width: window.innerWidth * 0.33, height: window.innerHeight * 0.20 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
 		{workforce.length === 0 ? (
 			<p>Waiting...</p>
 		) : (
 		<div>
 	  <div style={{height: '10rem'}}></div>
-	  <WorkforceLevel                      levelName='Education' levelValues={headers} />
+	  <WorkforceLevel                      levelName='Education' levelValues={headers} total={0} />
 	  <div style={{height: '5rem'}}></div>
-	  <WorkforceLevel levelColor='#808080' levelName='Uneducated' levelValues={workforce[0]} />
-	  <WorkforceLevel levelColor='#B09868' levelName='Poorly Educated' levelValues={workforce[1]} />
-	  <WorkforceLevel levelColor='#368A2E' levelName='Educated' levelValues={workforce[2]} />
-	  <WorkforceLevel levelColor='#B981C0' levelName='Well Educated' levelValues={workforce[3]} />
-	  <WorkforceLevel levelColor='#5796D1' levelName='Highly Educated' levelValues={workforce[4]} />
+	  <WorkforceLevel levelColor='#808080' levelName='Uneducated' levelValues={workforce[0]} total={workforce[5].total}/>
+	  <WorkforceLevel levelColor='#B09868' levelName='Poorly Educated' levelValues={workforce[1]} total={workforce[5].total}/>
+	  <WorkforceLevel levelColor='#368A2E' levelName='Educated' levelValues={workforce[2]} total={workforce[5].total}/>
+	  <WorkforceLevel levelColor='#B981C0' levelName='Well Educated' levelValues={workforce[3]} total={workforce[5].total}/>
+	  <WorkforceLevel levelColor='#5796D1' levelName='Highly Educated' levelValues={workforce[4]} total={workforce[5].total}/>
 	  <div style={{height: '5rem'}}></div>
-	  <WorkforceLevel                      levelName='TOTAL' levelValues={workforce[5]} />
+	  <WorkforceLevel                      levelName='TOTAL' levelValues={workforce[5]} total={0} />
 	  </div>
 		)}
 	</$Panel>
