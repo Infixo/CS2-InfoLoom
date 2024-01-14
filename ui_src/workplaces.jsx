@@ -56,13 +56,12 @@ const tableStyles = {
 };
 
 
-const WorkforceLevel = ({levelColor, levelName, levelValues, total}) => {
+const WorkforceLevel = ({levelColor, levelName, levelValues, total, showAll}) => {
   //console.log(levelColor); console.log(levelName); console.log(levelValues);
   // <div class="legend_fqG" style={{justifyContent: 'spaceEvenly'}}>
   const percent = ( total > 0 ? (100*levelValues.total/total).toFixed(1)+"%" : "");
   return (
-
-    <div class="labels_L7Q row_S2v" style={{width: '98%', paddingTop: '1rem', paddingBottom: '1rem'}}>
+    <div class="labels_L7Q row_S2v" style={{width: '99%', paddingTop: '1rem', paddingBottom: '1rem'}}>
 		<div style={{width: '1%'}}></div>
 		<div style={{ display: 'flex', alignItems: 'center', width: '20%' }}>
 			<div class="symbol_aAH" style={{backgroundColor: levelColor }}></div>
@@ -76,40 +75,20 @@ const WorkforceLevel = ({levelColor, levelName, levelValues, total}) => {
 		  <div class="row_S2v small_ExK" style={{width: '7%', justifyContent: 'center'}}>{levelValues["extractor"]}</div>
 		  <div class="row_S2v small_ExK" style={{width: '8%', justifyContent: 'center'}}>{levelValues["industry"]}</div>
 		  <div class="row_S2v small_ExK" style={{width: '6%', justifyContent: 'center'}}>{levelValues["office"]}</div>
-		  <div class="row_S2v"           style={{width: '10%', justifyContent: 'center'}}>{levelValues["employee"]}</div>
-		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{levelValues["commuter"]}</div>
-		  <div class="row_S2v"           style={{width: '7%', justifyContent: 'center'}}>{levelValues["open"]}</div>
+		  <div class="row_S2v"           style={{width: '10%', justifyContent: 'center'}}>{showAll ?? levelValues["employee"]}</div>
+		  <div class="row_S2v small_ExK" style={{width: '9%', justifyContent: 'center'}}>{showAll ?? levelValues["commuter"]}</div>
+		  <div class="row_S2v"           style={{width: '7%', justifyContent: 'center'}}>{showAll ?? levelValues["open"]}</div>
 	</div>
   );
 };
 
 const $Workplaces = ({react}) => {
 	
-    //const [oldestCim, setOldestCim] = react.useState(0)
-    //useDataUpdate(react, 'populationInfo.oldest_citizen', setOldestCim)
-	
-    // 0 - num citizens in the city 0 = 1+2+3
-    // 1 - num locals
-    // 2 - num tourists
-    // 3 - num commuters
-    // 4 - num students (in locals) 4 <= 1
-    // 5 - num workers (in locals) 5 <= 1
-    // 6 - oldest cim
+    // 0..4 - data by education levels
+    // 5 - totals
+    // 6 - companies
 	const [workplaces, setWorkplaces] = react.useState([])
 	useDataUpdate(react, 'workplaces.ilWorkplaces', setWorkplaces)
-
-	//const [details, setDetails] = react.useState([])
-	//useDataUpdate(react, 'populationInfo.structureDetails', setDetails)
-
-
-	// TEST
-	//const numbers = Array.from({ length: 20 }, (_, index) => index + 1)
-
-	//const lines = [];
-	//for (let i = 0; i < numbers.length; i++) {
-		//lines.push(<HorizontalLine key={i} length={numbers[i]*50} />);
-	//}
-	//paragraphs.push( <HorizontalLine key={i} length={totals[i]/100} /> );
 	
 	const onClose = () => {
 		const data = { type: "toggle_visibility", id: 'infoloom.workplaces' };
@@ -142,7 +121,7 @@ const $Workplaces = ({react}) => {
 	<p>TEST</p>
 	</$Panel>
 	*/
-	return <$Panel react={react} title="Workplace Distribution" onClose={onClose} initialSize={{ width: window.innerWidth * 0.38, height: window.innerHeight * 0.20 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
+	return <$Panel react={react} title="Workplace Distribution" onClose={onClose} initialSize={{ width: window.innerWidth * 0.38, height: window.innerHeight * 0.22 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
 		{workplaces.length === 0 ? (
 			<p>Waiting...</p>
 		) : (
@@ -157,6 +136,7 @@ const $Workplaces = ({react}) => {
 	  <WorkforceLevel levelColor='#5796D1' levelName='Highly Educated' levelValues={workplaces[4]} total={workplaces[5].total} />
 	  <div style={{height: '5rem'}}></div>
 	  <WorkforceLevel                      levelName='TOTAL' levelValues={workplaces[5]} total={0} />
+	  <WorkforceLevel                      levelName='Companies' levelValues={workplaces[6]} total={0} showAll={false}/>
 	  </div>
 		)}
 	</$Panel>

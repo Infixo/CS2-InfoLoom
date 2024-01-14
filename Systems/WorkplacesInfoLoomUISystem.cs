@@ -150,6 +150,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
             bool isIndustrial = chunk.Has(ref m_IndustrialCompanyHandle);
             bool isCommercial = chunk.Has(ref m_CommercialCompanyHandle);
             bool isService = !(isIndustrial || isCommercial);
+            WorkplacesAtLevelInfo count = m_Results[6];
             for (int i = 0; i < nativeArray.Length; i++)
             {
                 int buildingLevel = 1;
@@ -244,6 +245,22 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
                 m_Results[3] = ProcessLevel(m_Results[3], workplacesData.wellEducated, employeesData.wellEducated, commuters[3]);
                 // highlyEducated
                 m_Results[4] = ProcessLevel(m_Results[4], workplacesData.highlyEducated, employeesData.highlyEducated, commuters[4]);
+
+                // 240114 Count work providers
+                count.Total++;
+                if (isService) count.Service++;
+                if (isCommercial)
+                {
+                    if (isLeisure) count.Leisure++;
+                    else count.Commercial++;
+                }
+                if (isIndustrial)
+                {
+                    if (isExtractor) count.Extractor++;
+                    else if (isOffice) count.Office++;
+                    else count.Industrial++;
+                }
+                m_Results[6] = count;
             }
         }
 
@@ -341,6 +358,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
 
     //private NativeArray<EmploymentData> m_EmploymentDataResults;
 
+    // 0-4: education levels, 5: totals, 6: number of work providers (mostly companies)
     private NativeArray<WorkplacesAtLevelInfo> m_Results;
 
     private TypeHandle __TypeHandle;
@@ -406,7 +424,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         m_EmploymentDataResults = new NativeArray<EmploymentData>(2, Allocator.Persistent);
         */
 
-        m_Results = new NativeArray<WorkplacesAtLevelInfo>(6, Allocator.Persistent); // there are 5 education levels + 1 for totals
+        m_Results = new NativeArray<WorkplacesAtLevelInfo>(7, Allocator.Persistent); // there are 5 education levels + 1 for totals + 1 for companies
 
         //AddBinding(m_WorkplacesData = new GetterValueBinding<EmploymentData>(kGroup, "ilWorkplacesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[0], new ValueWriter<EmploymentData>()));
         //AddBinding(m_EmployeesData = new GetterValueBinding<EmploymentData>(kGroup, "ilEmployeesData", () => (!m_EmploymentDataResults.IsCreated || m_EmploymentDataResults.Length != 2) ? default(EmploymentData) : m_EmploymentDataResults[1], new ValueWriter<EmploymentData>()));
@@ -517,6 +535,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         {
             m_Results[i] = new WorkplacesAtLevelInfo(i);
         }
+        m_Results[6] = new WorkplacesAtLevelInfo(-2);
     }
 
     /* not used
