@@ -117,7 +117,9 @@ const $Demographics = ({react}) => {
   
 	// find the largest bar and scale it to fit the window properly
 	const largestBar = details.length > 0 ? Math.max(...details.map(info => info.total)) : 0;
-	const barBase = largestBar < 50 ? 50 : (largestBar < 500 ? 500 :  (largestBar < 5000 ? 5000 : 50000));
+	const divisor = Math.pow(10, Math.round(Math.log10(Math.max(largestBar, 50)/5)));
+	const barBase = largestBar < 50 ? 50 : ( 5 * Math.round((largestBar/4.5)/divisor)*divisor ); // this is basically Excel round(num;places)
+	//console.log(largestBar, divisor, barBase);
 
 	return <$Panel react={react} title="Demographics" onClose={onClose} initialSize={{ width: panWidth, height: panHeight }} initialPosition={{ top: window.innerHeight * 0.009, left: window.innerWidth * 0.053 }}>
 	
