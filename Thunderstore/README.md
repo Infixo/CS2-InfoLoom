@@ -82,7 +82,9 @@ Currently:
 - Nothing atm.
 
 ### Changelog
-- v0.7.0 (2023-01-14)
+- v0.7.1 (2024-02-03)
+  - Changed reference link to point to a new HookUI version.
+- v0.7.0 (2024-01-14)
   - New features: number of commuters as employees, unemployment and structures as percentages, number of companies.
   - Fixed: Incorrect counting of Office and Leisure jobs.
   - Fixed: Issue with Asset Editor.
@@ -104,4 +106,7 @@ Currently:
 
 ### Support
 - Please report bugs and issues on [GitHub](https://github.com/Infixo/CS2-InfoLoom).
-- You may also leave comments on [Discord1](https://discord.com/channels/1169011184557637825/1185664314401632306) or [Discord2](https://discord.com/channels/1024242828114673724/1185672922212347944).
+- You may also leave comments on [Discord1](https://discord.com/channels/1169011184557637825/1198627819475976263) or [Discord2](https://discord.com/channels/1024242828114673724/1185672922212347944).
+
+
+
