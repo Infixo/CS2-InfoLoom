@@ -306,7 +306,7 @@ public class IndustrialDemandUISystem : UISystemBase
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Concrete)] += Mathf.RoundToInt(num3);
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Petrochemicals)] += Mathf.RoundToInt(num4);
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Wood)] += Mathf.RoundToInt(num5);
-            Plugin.Log($"Spawnable demand: Timber {num2} Concrete {num3} Petrochem {num4} Wood {num5}");
+            Plugin.Log($"Spawnable demand: Timber {num2:F0} Concrete {num3:F0} Petrochem {num4:F0} Wood {num5:F0}");
             // Add industrial demand for some specific resources
             int num10 = 0;
             int num11 = 0;
@@ -395,15 +395,20 @@ public class IndustrialDemandUISystem : UISystemBase
                         }
                     }
                     // InfoLoom
-                    if (buildingPropertyData2.m_AllowedManufactured != Resource.NoResource)
+                    if ((buildingPropertyData2.m_AllowedManufactured & kIndustryResources) != Resource.NoResource)
                     {
-                        // TODO: COUNT m_FreeProperties[resourceIndex3]++;
                         Plugin.Log($"Free industry: {buildingPropertyData2.m_AllowedManufactured}");
+                        m_Results[0]++;
+                    }
+                    if ((buildingPropertyData2.m_AllowedManufactured & kOfficeResources) != Resource.NoResource)
+                    {
+                        Plugin.Log($"Free office: {buildingPropertyData2.m_AllowedManufactured}");
+                        m_Results[10]++;
                     }
                     if (buildingPropertyData2.m_AllowedStored != Resource.NoResource)
                     {
-                        // TODO: COUNT m_FreeStorages[resourceIndex3]++;
-                        Plugin.Log($"Free storage : {buildingPropertyData2.m_AllowedStored}");
+                        Plugin.Log($"Free storage: {buildingPropertyData2.m_AllowedStored}");
+                        m_Results[20]++;
                     }
                 }
             }
@@ -419,6 +424,21 @@ public class IndustrialDemandUISystem : UISystemBase
             m_OfficeBuildingDemand.value = 0;
             int num18 = 0; // counts all office resources
             int num19 = 0; // counts all indutry resources
+
+            // InfoLoom: resources
+            int numDemanded = 0;
+            // InfoLoom: available workforce
+            for (int m = 0; m < 5; m++)
+            {
+                int employable = math.max(0, m_EmployableByEducation[m] - m_FreeWorkplaces[m]);
+                if (m >= 2) m_Results[8] += employable;
+                else m_Results[9] += employable;
+            }
+            // InfoLoom: capacity utilization, sales efficiency
+            int numStandard = 0, numLeisure = 0; // number of resources that are included in calculations
+            float capUtilStd = 0f, capUtilLei = 0f, salesCapStd = 0f, salesCapLei = 0f;
+            float taxRate = 0f, empCap = 0f;
+
             iterator = ResourceIterator.GetIterator();
             while (iterator.Next())
             {
@@ -447,7 +467,16 @@ public class IndustrialDemandUISystem : UISystemBase
                     }
                     m_StorageCompanyDemand.value += m_StorageCompanyDemands[resourceIndex4];
                     m_StorageBuildingDemand.value += m_StorageBuildingDemands[resourceIndex4];
-                    m_DemandFactors[17] += math.max(0, m_StorageBuildingDemands[resourceIndex4]);
+                    m_DemandFactors[17] += math.max(0, m_StorageBuildingDemands[resourceIndex4]); // LocalStorage
+                    // InfoLoom
+                    //if (m_FreeStorages[resourceIndex4] > 0) // more buildings than companies
+                    //{
+                        //m_Results[20] += m_FreeStorages[resourceIndex4];
+                    //}
+                    if (m_FreeStorages[resourceIndex4] < 0) // more companies than buildings
+                    {
+                        m_Results[21] -= m_FreeStorages[resourceIndex4]; // we subtract because it is a negative value
+                    }
                 }
                 if (!isProduceable)
                 {
@@ -533,6 +562,7 @@ public class IndustrialDemandUISystem : UISystemBase
                 {
                     m_IndustrialDemands[resourceIndex4] = Mathf.RoundToInt(100f * (num24 + num27 + num29));
                 }
+                Plugin.Log($"{iterator.resource} ({resourceIndex4}): value {value} num21 {num21} num24 {num24} num27 {num27} num29 {num29} num30 {num30} raw demand {m_IndustrialDemands[resourceIndex4]}");
                 m_IndustrialDemands[resourceIndex4] = math.min(100, math.max(0, m_IndustrialDemands[resourceIndex4]));
                 if (flag4) // weight == 0
                 {
@@ -577,13 +607,37 @@ public class IndustrialDemandUISystem : UISystemBase
                             m_IndustrialBuildingDemand.value += ((m_IndustrialBuildingDemands[resourceIndex4] > 0) ? m_IndustrialZoningDemands[resourceIndex4] : 0);
                         }
                     }
+                    //Plugin.Log($"Com {iterator.resource}: noprop {m_Propertyless[resourceIndex2]} comp {m_Companies[resourceIndex2]} free {m_FreeProperties[resourceIndex2]} resdem {num8}");
+                    m_Results[1] += m_Propertyless[resourceIndex4];
+                    //m_Results[2] += m_Companies[resourceIndex2];
                 }
                 if (isMaterial)
                 {
                     continue;
                 }
+                // HERE EXTRACTORS ARE GONE
+
+                //Plugin.Log($"Res {iterator.resource} ({num}): free {m_FreeProperties[resourceIndex2]} buldem {m_BuildingDemands[resourceIndex2]} wrkdem {num2} [ edu {num3:F2} wrk {num4:F2} cap {num5:F2} rat {num6:F2} tax {num7:F2} ] resdem {num8}");
+                // InfoLoom gather data
+                float capUtil = 0;// ((m_TotalMaximums[resourceIndex2] == 0) ? 0.3f : (1f - (float)m_TotalAvailables[resourceIndex2] / (float)m_TotalMaximums[resourceIndex2])); // 0.3f is the threshold
+                float salesCapacity = 0;// (float)m_Productions[resourceIndex2] / (m_DemandParameters.m_CommercialBaseDemand * math.max(100f, (float)m_Consumptions[resourceIndex2]));
+                if (flag4) // weight == 0, aka Office
+                {
+                    numLeisure++;
+                    capUtilLei += capUtil;
+                    salesCapLei += salesCapacity;
+                }
+                else
+                {
+                    // Non-Leisure resources
+                    numStandard++;
+                    capUtilStd += capUtil;
+                    salesCapStd += salesCapacity;
+                }
+                taxRate += (float)TaxSystem.GetCommercialTaxRate(iterator.resource, m_TaxRates);
+
                 // InfoLoom, summary
-                Plugin.Log($"{iterator.resource} ({resourceIndex4}): office {flag4} bldg {m_IndustrialBuildingDemands[resourceIndex4]} zone {m_IndustrialZoningDemands[resourceIndex4]}");
+                Plugin.Log($"{iterator.resource} ({resourceIndex4}): office {flag4} companies {m_Companies[resourceIndex4]} propLess {m_Propertyless[resourceIndex4]} freeProp {m_FreeProperties[resourceIndex4]} bldg {m_IndustrialBuildingDemands[resourceIndex4]} zone {m_IndustrialZoningDemands[resourceIndex4]}");
                 Plugin.Log($"{iterator.resource} ({resourceIndex4}): work [1] {num24} edu [2] {num27} tax [11] {num29}");
                 Plugin.Log($"{iterator.resource} ({resourceIndex4}): base {value} local [4] {num21} inputs [10] {num30}");
                 if (flag4) // weight == 0
@@ -599,11 +653,15 @@ public class IndustrialDemandUISystem : UISystemBase
                         m_OfficeDemandFactors[1] += demandFactorEffect2; // UneducatedWorkforce 
                         m_OfficeDemandFactors[11] += demandFactorEffect3; // Taxes 
                         m_OfficeDemandFactors[13] += math.min(0, num38 - num39); // EmptyBuildings 
+                        // InfoLoom - demand exists
+                        empCap += ((float)m_TotalCurrentWorkers[resourceIndex4] + 1f) / ((float)m_TotalMaxWorkers[resourceIndex4] + 1f);
+                        numDemanded++;
                     }
                     // InfoLoom - no demand, TODO COUNT
                     else
                     {
                         Plugin.Log($"No office demand for: {iterator.resource}");
+                        m_ExcludedResources.value |= iterator.resource;
                     }
                 }
                 else if ((!flag && !flag3) || (m_IndustrialBuildingDemands[resourceIndex4] > 0 && m_IndustrialZoningDemands[resourceIndex4] > 0)) // weight > 0
@@ -621,13 +679,23 @@ public class IndustrialDemandUISystem : UISystemBase
                     m_DemandFactors[10] += demandFactorEffect7; // LocalInputs 
                     m_DemandFactors[11] += demandFactorEffect8; // Taxes 
                     m_DemandFactors[13] += math.min(0, num40 - num41); // EmptyBuildings 
+                    // InfoLoom - demand exists
+                    empCap += ((float)m_TotalCurrentWorkers[resourceIndex4] + 1f) / ((float)m_TotalMaxWorkers[resourceIndex4] + 1f);
+                    numDemanded++;
                 }
                 // InfoLoom - no demand, TODO COUNT
                 else
                 {
                     Plugin.Log($"No industry demand for: {iterator.resource}");
+                    m_ExcludedResources.value |= iterator.resource;
                 }
             }
+
+            // InfoLoom, storage section
+            //m_Results[28] = m_StorageBuildingDemand.value; // basically says number of resources that need storage
+            m_Results[28] = m_StorageCompanyDemand.value; // basically says number of resources where storage capacities don't meet demand
+            Plugin.Log($"STORAGE: free [20] {m_Results[20]} propLess/demand [21] {m_Results[21]} companies [28] {m_Results[28]}");
+
             Plugin.Log($"Native  values building/company/numres: IND {m_IndustrialBuildingDemand.value}/{m_IndustrialCompanyDemand.value}/{num19} " +
                 $"STO {m_StorageBuildingDemand.value}/{m_StorageCompanyDemand.value} OFF {m_OfficeBuildingDemand.value}/{m_OfficeCompanyDemand.value}/{num18} ");
             m_StorageBuildingDemand.value = Mathf.CeilToInt(math.pow(20f * (float)m_StorageBuildingDemand.value, 0.75f));
@@ -638,6 +706,23 @@ public class IndustrialDemandUISystem : UISystemBase
             Plugin.Log($"Clamped values building/company/numres: IND {m_IndustrialBuildingDemand.value}/{m_IndustrialCompanyDemand.value}/{num19} " +
                 $"STO {m_StorageBuildingDemand.value}/{m_StorageCompanyDemand.value} OFF {m_OfficeBuildingDemand.value}/{m_OfficeCompanyDemand.value}/{num18} ");
             // InfoLoom
+            Plugin.Log($"RESOURCES: demanded {numDemanded} excluded {m_ExcludedResources.value:X} {m_ExcludedResources.value}");
+            Plugin.Log($"COMPANIES: freeProperties [0]={m_Results[0]} propertyless [1]={m_Results[1]}");// companies {m_Results[2]}");
+            m_Results[2] = Mathf.RoundToInt(10f * taxRate / (float)(numStandard + numLeisure));
+            Plugin.Log($"TAX RATE: [2]={m_Results[2]} {taxRate / (float)(numStandard + numLeisure):F1}");
+            // 3 & 4 - capacity utilization rate. (available/maximum), non-leisure/leisure
+            // 5 & 6 - resource efficiency (production/consumption), non-leisure/leisure
+            Plugin.Log($"STANDARD: {numStandard} {capUtilStd/(float)numStandard} {salesCapStd/(float)numStandard}");
+            Plugin.Log($"LEISURE: {numLeisure} {capUtilLei / (float)numLeisure} {salesCapLei / (float)numLeisure}");
+            m_Results[3] = Mathf.RoundToInt(100f * capUtilStd / (float)numStandard);
+            m_Results[4] = Mathf.RoundToInt(100f * capUtilLei / (float)numLeisure);
+            Plugin.Log($"SERVICE UTILIZATION: [3]={m_Results[3]} [4]={m_Results[4]} std {capUtilStd / (float)numStandard} lei {capUtilLei / (float)numLeisure}, 30% is the default threshold");
+            m_Results[5] = Mathf.RoundToInt(100f * salesCapStd / (float)numStandard);
+            m_Results[6] = Mathf.RoundToInt(100f * salesCapLei / (float)numLeisure);
+            Plugin.Log($"SALES CAPACITY: [5]={m_Results[5]} [6]={m_Results[6]} std {salesCapStd / (float)numStandard} lei {salesCapLei / (float)numLeisure}, 100% means capacity = consumption");
+            m_Results[7] = Mathf.RoundToInt(1000f * empCap / (float)numDemanded);
+            Plugin.Log($"EMPLOYEE CAPACITY RATIO: [7]={m_Results[7]} {100f*empCap/(float)numDemanded:F1}%, 75% is the default threshold");
+            Plugin.Log($"AVAILABLE WORKFORCE: educated [8]={m_Results[8]} uneducated [9]={m_Results[9]}");
         }
     }
 
@@ -732,6 +817,28 @@ public class IndustrialDemandUISystem : UISystemBase
             __Game_Companies_TradeCost_RO_BufferLookup = state.GetBufferLookup<TradeCost>(isReadOnly: true);
         }
     }
+
+    private const Resource kOfficeResources = Resource.Software | Resource.Media | Resource.Telecom | Resource.Financial;
+
+    private const Resource kIndustryResources = 
+        Resource.ConvenienceFood |
+        Resource.Food |
+        Resource.Timber |
+        Resource.Paper |
+        Resource.Furniture |
+        Resource.Vehicles |
+        Resource.Petrochemicals |
+        Resource.Plastics |
+        Resource.Metals |
+        Resource.Electronics |
+        Resource.Steel |
+        Resource.Minerals |
+        Resource.Concrete |
+        Resource.Machinery |
+        Resource.Chemicals |
+        Resource.Pharmaceuticals |
+        Resource.Beverages |
+        Resource.Textiles;
 
     private const string kGroup = "cityInfo";
 
@@ -874,7 +981,7 @@ public class IndustrialDemandUISystem : UISystemBase
     private NativeArray<int> m_Results;
     private NativeValue<Resource> m_ExcludedResources;
 
-    // INDUSTRIAL & OFFICE
+    // INDUSTRIAL (0..7), OFFICE (10..19), STORAGE (20..29)
     // 0 - free properties, 1 - propertyless companies
     // 2 - tax rate
     // 3 & 4 - service utilization rate (available/maximum), non-leisure/leisure
@@ -991,7 +1098,7 @@ public class IndustrialDemandUISystem : UISystemBase
 
         // InfoLoom
         SetDefaults(); // there is no serialization, so init just for safety
-        m_Results = new NativeArray<int>(10, Allocator.Persistent);
+        m_Results = new NativeArray<int>(30, Allocator.Persistent);
         m_ExcludedResources = new NativeValue<Resource>(Allocator.Persistent);
 
         AddBinding(m_uiResults = new RawValueBinding(kGroup, "ilIndustrial", delegate (IJsonWriter binder)

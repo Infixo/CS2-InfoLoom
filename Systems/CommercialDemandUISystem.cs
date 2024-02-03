@@ -206,7 +206,6 @@ public class CommercialDemandUISystem : UISystemBase
             int num = 0;
             // InfoLoom: resources
             int numDemanded = 0;
-            //string excludedResources = ""; // TODO: change string into Native...
             // InfoLoom: available workforce
             for (int m = 0; m < 5; m++)
             {
