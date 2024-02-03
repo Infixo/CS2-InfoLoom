@@ -655,7 +655,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
     [Preserve]
     protected override void OnUpdate()
     {
-        if (m_SimulationSystem.frameIndex % 128 != 77)
+        if (m_SimulationSystem.frameIndex % 128 != 33)
             return;
 
         //Plugin.Log($"Update at frame {m_SimulationSystem.frameIndex}");

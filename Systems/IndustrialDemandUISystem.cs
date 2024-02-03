@@ -19,11 +19,16 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Scripting;
+using Game;
+using Game.Simulation;
+using Game.UI;
+using Colossal.UI.Binding;
+using System.Collections.Generic;
 
-namespace Game.Simulation;
+namespace InfoLoom;
 
 [CompilerGenerated]
-public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISerializable
+public class IndustrialDemandUISystem : UISystemBase
 {
     [BurstCompile]
     private struct UpdateIndustrialDemandJob : IJob
@@ -185,6 +190,10 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
 
         public NativeArray<int> m_CachedDemands;
 
+        public NativeArray<int> m_Results; // InfoLoom
+
+        public NativeValue<Resource> m_ExcludedResources; // InfoLoom
+
         public void Execute()
         {
             DynamicBuffer<CityModifier> modifiers = m_CityModifiers[m_City];
@@ -201,6 +210,9 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
                 m_Storages[resourceIndex] = 0;
                 m_FreeStorages[resourceIndex] = 0;
                 m_StorageCapacities[resourceIndex] = 0;
+                // Infixo: uncomment to see consumption per citizen (useful for balancing purposes)
+                int population2 = (population.m_Population + population.m_PopulationWithMoveIn) / 2;
+                Plugin.Log($"Per cim {iterator.resource}: est consumption {(float)y/(float)population2:F2}, demand {m_Demands[resourceIndex]/(float)population2:F2}");
             }
             for (int i = 0; i < m_DemandFactors.Length; i++)
             {
@@ -210,6 +222,7 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
             {
                 m_OfficeDemandFactors[j] = 0;
             }
+            // Add city services upkeep
             for (int k = 0; k < m_CityServiceChunks.Length; k++)
             {
                 ArchetypeChunk archetypeChunk = m_CityServiceChunks[k];
@@ -261,6 +274,7 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
                     }
                 }
             }
+            // Add spawnable buildings demand for Timber, Concrete, Petrochemicals and Wood
             float num2 = 0f;
             float num3 = 0f;
             float num4 = 0f;
@@ -292,6 +306,8 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Concrete)] += Mathf.RoundToInt(num3);
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Petrochemicals)] += Mathf.RoundToInt(num4);
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Wood)] += Mathf.RoundToInt(num5);
+            Plugin.Log($"Spawnable demand: Timber {num2} Concrete {num3} Petrochem {num4} Wood {num5}");
+            // Add industrial demand for some specific resources
             int num10 = 0;
             int num11 = 0;
             for (int num12 = 0; num12 < m_Productions.Length; num12++)
@@ -317,6 +333,8 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Software)] += num13 / 2000;
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Financial)] += num13 / 2000;
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Telecom)] += num13 / 2000;
+            Plugin.Log($"Industrial demand: Machinery {num10/2000} Paper {num11/4000} Furniture {num11/4000} Software {num13/2000} Financial {num13/2000} Telecom {num13/2000}");
+            // Count storage capacities
             for (int num14 = 0; num14 < m_StorageCompanyChunks.Length; num14++)
             {
                 ArchetypeChunk archetypeChunk2 = m_StorageCompanyChunks[num14];
@@ -345,6 +363,7 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
                     }
                 }
             }
+            // Count free properties and free storages
             for (int num16 = 0; num16 < m_FreePropertyChunks.Length; num16++)
             {
                 ArchetypeChunk archetypeChunk3 = m_FreePropertyChunks[num16];
@@ -375,8 +394,20 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
                             m_FreeStorages[resourceIndex3]++;
                         }
                     }
+                    // InfoLoom
+                    if (buildingPropertyData2.m_AllowedManufactured != Resource.NoResource)
+                    {
+                        // TODO: COUNT m_FreeProperties[resourceIndex3]++;
+                        Plugin.Log($"Free industry: {buildingPropertyData2.m_AllowedManufactured}");
+                    }
+                    if (buildingPropertyData2.m_AllowedStored != Resource.NoResource)
+                    {
+                        // TODO: COUNT m_FreeStorages[resourceIndex3]++;
+                        Plugin.Log($"Free storage : {buildingPropertyData2.m_AllowedStored}");
+                    }
                 }
             }
+            // MAIN LOOP, demand calculation per resource
             bool flag = m_IndustrialBuildingDemand.value > 0;
             bool flag2 = m_OfficeBuildingDemand.value > 0;
             bool flag3 = m_StorageBuildingDemand.value > 0;
@@ -386,8 +417,8 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
             m_StorageBuildingDemand.value = 0;
             m_OfficeCompanyDemand.value = 0;
             m_OfficeBuildingDemand.value = 0;
-            int num18 = 0;
-            int num19 = 0;
+            int num18 = 0; // counts all office resources
+            int num19 = 0; // counts all indutry resources
             iterator = ResourceIterator.GetIterator();
             while (iterator.Next())
             {
@@ -400,7 +431,7 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
                 bool isProduceable = resourceData2.m_IsProduceable;
                 bool isMaterial = resourceData2.m_IsMaterial;
                 bool isTradable = resourceData2.m_IsTradable;
-                bool flag4 = resourceData2.m_Weight == 0f;
+                bool flag4 = resourceData2.m_Weight == 0f; // IMMATERIAL RESOURCE
                 if (isTradable && !flag4)
                 {
                     int num20 = m_CachedDemands[resourceIndex4];
@@ -449,7 +480,7 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
                 int num28 = (flag4 ? TaxSystem.GetOfficeTaxRate(iterator.resource, m_TaxRates) : TaxSystem.GetIndustrialTaxRate(iterator.resource, m_TaxRates));
                 float num29 = -0.1f * ((float)num28 - 10f);
                 float num30 = 0f;
-                if (!flag4)
+                if (!flag4) // weight > 0
                 {
                     m_IndustrialDemands[resourceIndex4] = Mathf.RoundToInt(100f * (math.max(-1f, value * num21) + num24 + num27 + num29));
                     if (!isMaterial)
@@ -498,17 +529,17 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
                         m_IndustrialDemands[resourceIndex4] += Mathf.RoundToInt(100f * num30);
                     }
                 }
-                else
+                else // weight == 0
                 {
                     m_IndustrialDemands[resourceIndex4] = Mathf.RoundToInt(100f * (num24 + num27 + num29));
                 }
                 m_IndustrialDemands[resourceIndex4] = math.min(100, math.max(0, m_IndustrialDemands[resourceIndex4]));
-                if (flag4)
+                if (flag4) // weight == 0
                 {
                     m_OfficeCompanyDemand.value += Mathf.RoundToInt(m_IndustrialDemands[resourceIndex4]);
                     num18++;
                 }
-                else
+                else // weight > 0
                 {
                     m_IndustrialCompanyDemand.value += Mathf.RoundToInt(m_IndustrialDemands[resourceIndex4]);
                     if (!isMaterial)
@@ -537,11 +568,11 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
                     }
                     if (m_IndustrialBuildingDemands[resourceIndex4] > 0)
                     {
-                        if (flag4)
+                        if (flag4) // weight == 0
                         {
                             m_OfficeBuildingDemand.value += ((m_IndustrialBuildingDemands[resourceIndex4] > 0) ? m_IndustrialZoningDemands[resourceIndex4] : 0);
                         }
-                        else if (!isMaterial)
+                        else if (!isMaterial) // weight > 0
                         {
                             m_IndustrialBuildingDemand.value += ((m_IndustrialBuildingDemands[resourceIndex4] > 0) ? m_IndustrialZoningDemands[resourceIndex4] : 0);
                         }
@@ -551,7 +582,11 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
                 {
                     continue;
                 }
-                if (flag4)
+                // InfoLoom, summary
+                Plugin.Log($"{iterator.resource} ({resourceIndex4}): office {flag4} bldg {m_IndustrialBuildingDemands[resourceIndex4]} zone {m_IndustrialZoningDemands[resourceIndex4]}");
+                Plugin.Log($"{iterator.resource} ({resourceIndex4}): work [1] {num24} edu [2] {num27} tax [11] {num29}");
+                Plugin.Log($"{iterator.resource} ({resourceIndex4}): base {value} local [4] {num21} inputs [10] {num30}");
+                if (flag4) // weight == 0
                 {
                     if (!flag2 || (m_IndustrialBuildingDemands[resourceIndex4] > 0 && m_IndustrialZoningDemands[resourceIndex4] > 0))
                     {
@@ -560,13 +595,18 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
                         int demandFactorEffect2 = DemandUtils.GetDemandFactorEffect(m_IndustrialDemands[resourceIndex4], num24);
                         int demandFactorEffect3 = DemandUtils.GetDemandFactorEffect(m_IndustrialDemands[resourceIndex4], num29);
                         int num39 = demandFactorEffect + demandFactorEffect2 + demandFactorEffect3;
-                        m_OfficeDemandFactors[2] += demandFactorEffect;
-                        m_OfficeDemandFactors[1] += demandFactorEffect2;
-                        m_OfficeDemandFactors[11] += demandFactorEffect3;
-                        m_OfficeDemandFactors[13] += math.min(0, num38 - num39);
+                        m_OfficeDemandFactors[2] += demandFactorEffect; // EducatedWorkforce 
+                        m_OfficeDemandFactors[1] += demandFactorEffect2; // UneducatedWorkforce 
+                        m_OfficeDemandFactors[11] += demandFactorEffect3; // Taxes 
+                        m_OfficeDemandFactors[13] += math.min(0, num38 - num39); // EmptyBuildings 
+                    }
+                    // InfoLoom - no demand, TODO COUNT
+                    else
+                    {
+                        Plugin.Log($"No office demand for: {iterator.resource}");
                     }
                 }
-                else if ((!flag && !flag3) || (m_IndustrialBuildingDemands[resourceIndex4] > 0 && m_IndustrialZoningDemands[resourceIndex4] > 0))
+                else if ((!flag && !flag3) || (m_IndustrialBuildingDemands[resourceIndex4] > 0 && m_IndustrialZoningDemands[resourceIndex4] > 0)) // weight > 0
                 {
                     int num40 = ((m_IndustrialBuildingDemands[resourceIndex4] > 0) ? m_IndustrialZoningDemands[resourceIndex4] : 0);
                     int demandFactorEffect4 = DemandUtils.GetDemandFactorEffect(m_IndustrialDemands[resourceIndex4], num27);
@@ -575,19 +615,29 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
                     int demandFactorEffect7 = DemandUtils.GetDemandFactorEffect(m_IndustrialDemands[resourceIndex4], num30);
                     int demandFactorEffect8 = DemandUtils.GetDemandFactorEffect(m_IndustrialDemands[resourceIndex4], num29);
                     int num41 = demandFactorEffect4 + demandFactorEffect5 + demandFactorEffect6 + demandFactorEffect7 + demandFactorEffect8;
-                    m_DemandFactors[2] += demandFactorEffect4;
-                    m_DemandFactors[1] += demandFactorEffect5;
-                    m_DemandFactors[4] += demandFactorEffect6;
-                    m_DemandFactors[10] += demandFactorEffect7;
-                    m_DemandFactors[11] += demandFactorEffect8;
-                    m_DemandFactors[13] += math.min(0, num40 - num41);
+                    m_DemandFactors[2] += demandFactorEffect4; // EducatedWorkforce 
+                    m_DemandFactors[1] += demandFactorEffect5; // UneducatedWorkforce 
+                    m_DemandFactors[4] += demandFactorEffect6; // LocalDemand 
+                    m_DemandFactors[10] += demandFactorEffect7; // LocalInputs 
+                    m_DemandFactors[11] += demandFactorEffect8; // Taxes 
+                    m_DemandFactors[13] += math.min(0, num40 - num41); // EmptyBuildings 
+                }
+                // InfoLoom - no demand, TODO COUNT
+                else
+                {
+                    Plugin.Log($"No industry demand for: {iterator.resource}");
                 }
             }
+            Plugin.Log($"Native  values building/company/numres: IND {m_IndustrialBuildingDemand.value}/{m_IndustrialCompanyDemand.value}/{num19} " +
+                $"STO {m_StorageBuildingDemand.value}/{m_StorageCompanyDemand.value} OFF {m_OfficeBuildingDemand.value}/{m_OfficeCompanyDemand.value}/{num18} ");
             m_StorageBuildingDemand.value = Mathf.CeilToInt(math.pow(20f * (float)m_StorageBuildingDemand.value, 0.75f));
-            m_IndustrialBuildingDemand.value = 2 * m_IndustrialBuildingDemand.value / num19;
-            m_OfficeCompanyDemand.value *= 2 * m_OfficeCompanyDemand.value / num18;
+            m_IndustrialBuildingDemand.value = 2 * m_IndustrialBuildingDemand.value / num19; // Infixo: THIS IS ERROR
+            m_OfficeCompanyDemand.value *= 2 * m_OfficeCompanyDemand.value / num18; // Infixo: THIS IS ERROR
             m_IndustrialBuildingDemand.value = math.clamp(m_IndustrialBuildingDemand.value, 0, 100);
             m_OfficeBuildingDemand.value = math.clamp(m_OfficeBuildingDemand.value, 0, 100);
+            Plugin.Log($"Clamped values building/company/numres: IND {m_IndustrialBuildingDemand.value}/{m_IndustrialCompanyDemand.value}/{num19} " +
+                $"STO {m_StorageBuildingDemand.value}/{m_StorageCompanyDemand.value} OFF {m_OfficeBuildingDemand.value}/{m_OfficeCompanyDemand.value}/{num18} ");
+            // InfoLoom
         }
     }
 
@@ -683,6 +733,10 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
         }
     }
 
+    private const string kGroup = "cityInfo";
+
+    private SimulationSystem m_SimulationSystem;
+
     private static readonly int kStorageProductionDemand = 20000;
 
     private static readonly int kStorageCompanyEstimateLimit = 864000;
@@ -727,56 +781,56 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
 
     private NativeValue<int> m_OfficeBuildingDemand;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_CachedDemands;
 
-    [EnumArray(typeof(DemandFactor))]
-    [DebugWatchValue]
+    //[EnumArray(typeof(DemandFactor))]
+    //[DebugWatchValue]
     private NativeArray<int> m_IndustrialDemandFactors;
 
-    [EnumArray(typeof(DemandFactor))]
-    [DebugWatchValue]
+    //[EnumArray(typeof(DemandFactor))]
+    //[DebugWatchValue]
     private NativeArray<int> m_OfficeDemandFactors;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_ResourceDemands;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_IndustrialZoningDemands;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_IndustrialBuildingDemands;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_StorageBuildingDemands;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_StorageCompanyDemands;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_FreeProperties;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_FreeStorages;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_Storages;
 
-    [ResourceArray]
-    [DebugWatchValue]
+    //[ResourceArray]
+    //[DebugWatchValue]
     private NativeArray<int> m_StorageCapacities;
 
-    [DebugWatchDeps]
-    private JobHandle m_WriteDependencies;
+    //[DebugWatchDeps]
+    //private JobHandle m_WriteDependencies;
 
     private JobHandle m_ReadDependencies;
 
@@ -794,23 +848,39 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
 
     private TypeHandle __TypeHandle;
 
-    [DebugWatchValue(color = "#f7dc6f")]
+    //[DebugWatchValue(color = "#f7dc6f")]
     public int industrialCompanyDemand => m_LastIndustrialCompanyDemand;
 
-    [DebugWatchValue(color = "#b7950b")]
+    //[DebugWatchValue(color = "#b7950b")]
     public int industrialBuildingDemand => m_LastIndustrialBuildingDemand;
 
-    [DebugWatchValue(color = "#cccccc")]
+    //[DebugWatchValue(color = "#cccccc")]
     public int storageCompanyDemand => m_LastStorageCompanyDemand;
 
-    [DebugWatchValue(color = "#999999")]
+    //[DebugWatchValue(color = "#999999")]
     public int storageBuildingDemand => m_LastStorageBuildingDemand;
 
-    [DebugWatchValue(color = "#af7ac5")]
+    //[DebugWatchValue(color = "#af7ac5")]
     public int officeCompanyDemand => m_LastOfficeCompanyDemand;
 
-    [DebugWatchValue(color = "#6c3483")]
+    //[DebugWatchValue(color = "#6c3483")]
     public int officeBuildingDemand => m_LastOfficeBuildingDemand;
+
+    // InfoLoom
+
+    private RawValueBinding m_uiResults;
+    private RawValueBinding m_uiExResources;
+
+    private NativeArray<int> m_Results;
+    private NativeValue<Resource> m_ExcludedResources;
+
+    // INDUSTRIAL & OFFICE
+    // 0 - free properties, 1 - propertyless companies
+    // 2 - tax rate
+    // 3 & 4 - service utilization rate (available/maximum), non-leisure/leisure
+    // 5 & 6 - sales efficiency (sales capacity/consumption), non-leisure/leisure // how effectively a shop is utilizing its sales capacity by comparing the actual sales to the maximum sales potential
+    // 7 - employee capacity ratio // how efficiently the company is utilizing its workforce by comparing the actual number of employees to the maximum number it could employ
+    // 8 & 9 - educated & uneducated workforce
 
     public override int GetUpdateInterval(SystemUpdatePhase phase)
     {
@@ -822,6 +892,7 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
         return 7;
     }
 
+    /*
     public NativeArray<int> GetConsumption(out JobHandle deps)
     {
         deps = m_WriteDependencies;
@@ -869,6 +940,7 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
         deps = m_WriteDependencies;
         return m_IndustrialZoningDemands;
     }
+    */
 
     public void AddReader(JobHandle reader)
     {
@@ -879,6 +951,7 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
     protected override void OnCreate()
     {
         base.OnCreate();
+        m_SimulationSystem = base.World.GetOrCreateSystemManaged<SimulationSystem>(); // TODO: use UIUpdateState eventually
         m_ResourceSystem = base.World.GetOrCreateSystemManaged<ResourceSystem>();
         m_CitySystem = base.World.GetOrCreateSystemManaged<CitySystem>();
         m_ClimateSystem = base.World.GetOrCreateSystemManaged<ClimateSystem>();
@@ -915,6 +988,33 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
         RequireForUpdate(m_EconomyParameterQuery);
         RequireForUpdate(m_DemandParameterQuery);
         RequireForUpdate(m_ProcessDataQuery);
+
+        // InfoLoom
+        SetDefaults(); // there is no serialization, so init just for safety
+        m_Results = new NativeArray<int>(10, Allocator.Persistent);
+        m_ExcludedResources = new NativeValue<Resource>(Allocator.Persistent);
+
+        AddBinding(m_uiResults = new RawValueBinding(kGroup, "ilIndustrial", delegate (IJsonWriter binder)
+        {
+            binder.ArrayBegin(m_Results.Length);
+            for (int i = 0; i < m_Results.Length; i++)
+                binder.Write(m_Results[i]);
+            binder.ArrayEnd();
+        }));
+
+        AddBinding(m_uiExResources = new RawValueBinding(kGroup, "ilIndustrialExRes", delegate (IJsonWriter binder)
+        {
+            List<string> resList = new List<string>();
+            for (int i = 0; i < Game.Economy.EconomyUtils.ResourceCount; i++)
+                if ((m_ExcludedResources.value & Game.Economy.EconomyUtils.GetResource(i)) != Resource.NoResource)
+                    resList.Add(Game.Economy.EconomyUtils.GetName(Game.Economy.EconomyUtils.GetResource(i)));
+            binder.ArrayBegin(resList.Count);
+            foreach (string res in resList)
+                binder.Write(res);
+            binder.ArrayEnd();
+        }));
+
+        Plugin.Log("IndustrialDemandUISystem created.");
     }
 
     [Preserve]
@@ -941,7 +1041,7 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
         base.OnDestroy();
     }
 
-    public void SetDefaults(Context context)
+    public void SetDefaults() //Context context)
     {
         m_IndustrialCompanyDemand.value = 0;
         m_IndustrialBuildingDemand.value = 0;
@@ -967,6 +1067,7 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
         m_LastOfficeBuildingDemand = 0;
     }
 
+    /* not used
     public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
     {
         writer.Write(m_IndustrialCompanyDemand.value);
@@ -1063,10 +1164,17 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
         reader.Read(out m_LastOfficeCompanyDemand);
         reader.Read(out m_LastOfficeBuildingDemand);
     }
+    */
 
     [Preserve]
     protected override void OnUpdate()
     {
+        if (m_SimulationSystem.frameIndex % 128 != 66)
+            return;
+        //Plugin.Log($"OnUpdate: {m_SimulationSystem.frameIndex}");
+        base.OnUpdate();
+        ResetResults();
+
         if (!m_DemandParameterQuery.IsEmptyIgnoreFilter && !m_EconomyParameterQuery.IsEmptyIgnoreFilter)
         {
             m_LastIndustrialCompanyDemand = m_IndustrialCompanyDemand.value;
@@ -1159,15 +1267,29 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
             updateIndustrialDemandJob.m_DemandFactors = m_IndustrialDemandFactors;
             updateIndustrialDemandJob.m_OfficeDemandFactors = m_OfficeDemandFactors;
             updateIndustrialDemandJob.m_CachedDemands = m_CachedDemands;
+            updateIndustrialDemandJob.m_Results = m_Results;
+            updateIndustrialDemandJob.m_ExcludedResources = m_ExcludedResources;
             UpdateIndustrialDemandJob jobData = updateIndustrialDemandJob;
             base.Dependency = IJobExtensions.Schedule(jobData, JobUtils.CombineDependencies(base.Dependency, m_ReadDependencies, outJobHandle, deps, outJobHandle2, outJobHandle3, outJobHandle4, outJobHandle5, deps2, deps3));
-            m_WriteDependencies = base.Dependency;
-            m_CountCompanyDataSystem.AddReader(base.Dependency);
-            m_ResourceSystem.AddPrefabsReader(base.Dependency);
-            m_CountEmploymentSystem.AddReader(base.Dependency);
-            m_CountFreeWorkplacesSystem.AddReader(base.Dependency);
-            m_TaxSystem.AddReader(base.Dependency);
+            // since this is a copy of an actual simulation system but for UI purposes, then noone will read from us or wait for us
+            base.Dependency.Complete();
+            //m_WriteDependencies = base.Dependency;
+            //m_CountCompanyDataSystem.AddReader(base.Dependency);
+            //m_ResourceSystem.AddPrefabsReader(base.Dependency);
+            //m_CountEmploymentSystem.AddReader(base.Dependency);
+            //m_CountFreeWorkplacesSystem.AddReader(base.Dependency);
+            //m_TaxSystem.AddReader(base.Dependency);
+
+            // Update UI
+            m_uiResults.Update();
+            m_uiExResources.Update();
         }
+    }
+
+    private void ResetResults()
+    {
+        m_ExcludedResources.value = Resource.NoResource;
+        m_Results.Fill<int>(0);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1183,7 +1305,7 @@ public class IndustrialDemandSystem : GameSystemBase, IDefaultSerializable, ISer
     }
 
     [Preserve]
-    public IndustrialDemandSystem()
+    public IndustrialDemandUISystem()
     {
     }
 }

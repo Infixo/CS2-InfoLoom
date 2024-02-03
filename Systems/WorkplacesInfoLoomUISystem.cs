@@ -453,7 +453,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
 
     protected override void OnUpdate() // original: PerformUpdate()
     {
-        if (m_SimulationSystem.frameIndex % 128 != 77)
+        if (m_SimulationSystem.frameIndex % 128 != 22)
             return;
 
         ResetResults();
