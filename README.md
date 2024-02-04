@@ -6,6 +6,7 @@ Currently:
 - Workplaces distribution
 - Residential data
 - Commercial data
+- Industrial and Office data
 - Demand factors
 - Resources consumption (optional)
 
@@ -38,6 +39,8 @@ Currently:
 - Residential properties by density: total count, occupied, free.
 - Total households and homeless households.
 - Average happiness, weighted tax rate, open study positions.
+- Household demand which is hidden in the game, it controls if new households spawn.
+- For new households, a chance that a Student Household will spawn.
 
 ![Residential data](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/residential.png)
 
@@ -49,6 +52,16 @@ Currently:
 - Lists resources that currently are not demanded, thus the engine ignores them when calculating Commercial Demand Factors.
 
 ![Commercial data](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/commercial.png)
+
+### Industrial and Office data
+- Shows industrial and office data used to calculate Industrial and Office Demand Factors.
+- Empty buildings and companies that have no property, and average tax rate.
+- Local Demand (which is production capacity in fact) and Input Utilization (which tells if resources are available as input).
+- Actual numbers of available workforce, and employee capacity ratio.
+- Lists resources that currently are not demanded, thus the engine ignores them when calculating Industrial and Office Factors.
+- Storage Demand section, which shows Storage Demand which controls if new warehouses are spawned.
+
+![Industrial and Office data](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/industrial.png)
 
 ### Demand factors
 - Shows individual demand factor VALUES for each demand type. Helpful to learn actual importance of each factor.
@@ -68,9 +81,9 @@ Currently:
 ## Technical
 
 ### Requirements and Compatibility
-- Cities Skylines II v1.0.18f1 or later; check GitHub or Discord if the mod is compatible with the latest game version.
+- Cities Skylines II v1.0.19f1 or later; check GitHub or Discord if the mod is compatible with the latest game version.
 - BepInEx 5.
-- HookUI v0.3.5 or later.
+- HookUI v0.3.9 or later.
 - The mod does NOT modify savefiles.
 - The mod does NOT modify any game systems.
 
@@ -82,7 +95,11 @@ Currently:
 - Nothing atm.
 
 ### Changelog
-- v0.7.0 (2023-01-14)
+- v0.8.0 (2024-02-04)
+  - New feature: industrial and office data.
+  - New feature: household demand and student chance.
+  - Fixed: demographics proper scaling.
+- v0.7.0 (2024-01-14)
   - New features: number of commuters as employees, unemployment and structures as percentages, number of companies.
   - Fixed: Incorrect counting of Office and Leisure jobs.
   - Fixed: Issue with Asset Editor.
@@ -104,4 +121,4 @@ Currently:
 
 ### Support
 - Please report bugs and issues on [GitHub](https://github.com/Infixo/CS2-InfoLoom).
-- You may also leave comments on [Discord1](https://discord.com/channels/1169011184557637825/1185664314401632306) or [Discord2](https://discord.com/channels/1024242828114673724/1185672922212347944).
+- You may also leave comments on [Discord1](https://discord.com/channels/1169011184557637825/1198627819475976263) or [Discord2](https://discord.com/channels/1024242828114673724/1185672922212347944).
