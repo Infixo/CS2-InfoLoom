@@ -54,6 +54,7 @@
 	  <EmbeddedResource Include="dist/demandfactors.js" />
 	  <EmbeddedResource Include="dist/commercial.js" />
 	  <EmbeddedResource Include="dist/residential.js" />
+	  <EmbeddedResource Include="dist/industrial.js" />
 	</ItemGroup>
 
 	<!--

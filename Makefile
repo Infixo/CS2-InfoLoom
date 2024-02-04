@@ -15,6 +15,7 @@ build-ui:
 	@npx esbuild ui_src/workplaces.jsx --bundle --outfile=dist/workplaces.js
 	@npx esbuild ui_src/commercial.jsx --bundle --outfile=dist/commercial.js
 	@npx esbuild ui_src/residential.jsx --bundle --outfile=dist/residential.js
+	@npx esbuild ui_src/industrial.jsx --bundle --outfile=dist/industrial.js
 
 copy-ui:
 	copy dist\demographics.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.demographics.js"
@@ -23,6 +24,7 @@ copy-ui:
 	copy dist\workplaces.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.workplaces.js"
 	copy dist\commercial.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.commercial.js"
 	copy dist\residential.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.residential.js"
+	copy dist\industrial.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.industrial.js"
 
 build: clean restore build-ui
 	@dotnet build /p:BepInExVersion=$(BEPINEX_VERSION)
@@ -50,6 +52,10 @@ dev-comm:
 dev-res:
 	@npx esbuild ui_src/residential.jsx --bundle --outfile=dist/residential.js
 	copy dist\residential.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.residential.js"
+	
+dev-ind:
+	@npx esbuild ui_src/industrial.jsx --bundle --outfile=dist/industrial.js
+	copy dist\industrial.js "C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\StreamingAssets\~UI~\HookUI\Extensions\panel.infoloom.industrial.js"
 
 package-win:
 	@-mkdir dist
