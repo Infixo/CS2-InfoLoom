@@ -482,7 +482,9 @@ public class IndustrialDemandUISystem : UISystemBase
                 TradeCost tradeCost = EconomyUtils.GetTradeCost(EconomyUtils.GetResource(resourceIndex4), costs);
                 float num22 = (0.05f + tradeCost.m_SellCost) / resourceData2.m_Price;
                 float num23 = (0.05f + tradeCost.m_BuyCost) / resourceData2.m_Price;
+                float refCost = 0.05f / resourceData2.m_Price;
                 num21 *= ((m_Productions[resourceIndex4] > m_CachedDemands[resourceIndex4]) ? (10f * num22) : (10f * num23));
+                Plugin.Log($"{iterator.resource} ({resourceIndex4}): price {resourceData2.m_Price} sellCost {tradeCost.m_SellCost} buyCost {tradeCost.m_BuyCost} refCost {refCost} num22 {num22} ({num22/refCost}) num23 {num23} ({num23/refCost})");
                 if (iterator.resource == Resource.Electronics)
                 {
                     CityUtils.ApplyModifier(ref value, modifiers, CityModifierType.IndustrialElectronicsDemand);
@@ -562,7 +564,7 @@ public class IndustrialDemandUISystem : UISystemBase
                 {
                     m_IndustrialDemands[resourceIndex4] = Mathf.RoundToInt(100f * (num24 + num27 + num29));
                 }
-                Plugin.Log($"{iterator.resource} ({resourceIndex4}): value {value} num21 {num21} num24 {num24} num27 {num27} num29 {num29} num30 {num30} raw demand {m_IndustrialDemands[resourceIndex4]}");
+                Plugin.Log($"{iterator.resource} ({resourceIndex4}): rawdemand {m_IndustrialDemands[resourceIndex4]} value {value} num21 {num21} valuenum21 {100f*value*num21:F1} num24 {100*num24:F1} num27 {100f*num27:F1} num29 {100*num29:F1} num30 {100f*num30:F1}");
                 m_IndustrialDemands[resourceIndex4] = math.min(100, math.max(0, m_IndustrialDemands[resourceIndex4]));
                 if (flag4) // weight == 0
                 {
@@ -636,8 +638,8 @@ public class IndustrialDemandUISystem : UISystemBase
 
                 // InfoLoom, summary
                 Plugin.Log($"{iterator.resource} ({resourceIndex4}): office {flag4} companies {m_Companies[resourceIndex4]} propLess {m_Propertyless[resourceIndex4]} freeProp {m_FreeProperties[resourceIndex4]} bldg {m_IndustrialBuildingDemands[resourceIndex4]} zone {m_IndustrialZoningDemands[resourceIndex4]}");
-                Plugin.Log($"{iterator.resource} ({resourceIndex4}): work [1] {num24} edu [2] {num27} tax [11] {num29}");
-                Plugin.Log($"{iterator.resource} ({resourceIndex4}): base {value} local [4] {num21} prodCap {productionCapacity} inputs [10] {num30}");
+                Plugin.Log($"{iterator.resource} ({resourceIndex4}): work [1] {num24} edu [2] {num27} tax [11] {num29} inputs [10] {num30}");
+                Plugin.Log($"{iterator.resource} ({resourceIndex4}): base {value} local [4] {num21} prodCap {productionCapacity} sell {num22} buy {num23}");
 
                 if (flag4) // weight == 0
                 {
