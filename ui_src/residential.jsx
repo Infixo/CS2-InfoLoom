@@ -136,7 +136,7 @@ const $Residential = ({ react }) => {
 	
 	const homelessThreshold = Math.round(residentialData[12] * residentialData[13] / 1000);
 
-	return <$Panel react={react} title="Residential Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.2, height: window.innerHeight * 0.243 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
+	return <$Panel react={react} title="Residential Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.22, height: window.innerHeight * 0.26 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
 		{residentialData.length === 0 ? (
 			<p>Waiting...</p>
 		) : (
@@ -151,6 +151,8 @@ const $Residential = ({ react }) => {
 					<RowWithThreeColumns left="HAPPINESS" leftSmall={`${residentialData[8]} is neutral`} right1={residentialData[7]} flag1={residentialData[7]<residentialData[8]} />
 					<DataDivider />
 					<RowWithThreeColumns left="UNEMPLOYMENT" leftSmall={`${residentialData[10]/10}% is neutral`} right1={residentialData[9]} flag1={residentialData[9]>residentialData[10]/10} />
+					<DataDivider />
+					<RowWithThreeColumns left="HOUSEHOLD DEMAND" right1={residentialData[16]} flag1={residentialData[16]<0} />
 					<div class="space_uKL" style={{height: '3rem'}}></div>
 				</div>
 				<div style={{width: '50%', boxSizing: 'border-box', border: '1px solid gray'}}>
@@ -160,6 +162,8 @@ const $Residential = ({ react }) => {
 					<RowWithThreeColumns left="HOMELESS" leftSmall={`${homelessThreshold} is neutral`} right1={residentialData[11]} flag1={residentialData[11]>homelessThreshold} />
 					<DataDivider />
 					<RowWithThreeColumns left="TAX RATE (weighted)" leftSmall="10% is neutral" right1={residentialData[15]/10} flag1={residentialData[15]>100} />
+					<DataDivider />
+					<RowWithTwoColumns left="STUDENT CHANCE" right={`${residentialData[17]} %`} />
 					<div class="space_uKL" style={{height: '3rem'}}></div>
 				</div>
 			</div>

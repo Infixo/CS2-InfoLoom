@@ -156,6 +156,7 @@ public class ResidentialDemandUISystem : UISystemBase
             float num9 = math.min(math.sqrt(2f * (float)value), -1f + math.min(2.5f, math.sqrt((float)value / 300f)) + 0.5f * (num6 + num8 + num7 + num5));
             float y = num8 + num6 + num7 + num5;
             m_HouseholdDemand.value = math.min(100, math.max(0, Mathf.RoundToInt(math.max(num9, y))));
+            m_Results[16] = Mathf.RoundToInt(math.max(num9, y)); // 220204 household demand
             m_LowDemandFactors[7] = Mathf.RoundToInt(num6);
             m_LowDemandFactors[8] = Mathf.RoundToInt(num7);
             m_LowDemandFactors[6] = Mathf.RoundToInt(num8);
@@ -265,9 +266,13 @@ public class ResidentialDemandUISystem : UISystemBase
             //float mr6 = (float)m_Results[6] / 10f;
             //Plugin.Log($"FREE  : L {m_Results[0]-m_Results[3]} M {m_Results[1] - m_Results[4]} H {m_Results[2] - m_Results[5]} ratio {mr6:F1}% ");
             //Plugin.Log($"DEMAND: L {(1f - (m_Results[0] - m_Results[3]) / (0.01f * mr6 * (float)math.max(1,m_Results[0]))) * 100f:F0} " +
-                               //$"M {(1f - (m_Results[1] - m_Results[4]) / (0.01f * mr6 * (float)math.max(1,m_Results[1]))) * 100f:F0} " +
-                               //$"H {(1f - (m_Results[2] - m_Results[5]) / (0.01f * mr6 * (float)math.max(1,m_Results[2]))) * 100f:F0}");
+            //$"M {(1f - (m_Results[1] - m_Results[4]) / (0.01f * mr6 * (float)math.max(1,m_Results[1]))) * 100f:F0} " +
+            //$"H {(1f - (m_Results[2] - m_Results[5]) / (0.01f * mr6 * (float)math.max(1,m_Results[2]))) * 100f:F0}");
             //Plugin.Log($"OTHER: hap {m_Results[7]}/{m_Results[8]} unem {m_Results[9]}/{m_Results[10]} hless {m_Results[11]}/{m_Results[12]}/{m_Results[13]}");
+            // 240204 student ratio for new households, from HouseholdSpawnSystem
+            int fact6 = math.max(0, m_LowDemandFactors[6] + m_MediumDemandFactors[6] + m_HighDemandFactors[6]); // unemployment
+            int fact12 = math.max(0, m_LowDemandFactors[12] + m_MediumDemandFactors[12] + m_HighDemandFactors[12]); // students
+            m_Results[17] = Mathf.RoundToInt(100f * (float)fact12 / (float)(fact12 + fact6));
         }
     }
 
@@ -439,7 +444,7 @@ public class ResidentialDemandUISystem : UISystemBase
 
         // InfoLoom
         SetDefaults(); // there is no serialization, so init just for safety
-        m_Results = new NativeArray<int>(16, Allocator.Persistent);
+        m_Results = new NativeArray<int>(18, Allocator.Persistent);
 
         AddBinding(m_uiResults = new RawValueBinding(kGroup, "ilResidential", delegate (IJsonWriter binder)
         {
