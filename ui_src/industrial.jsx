@@ -13,14 +13,14 @@ const RowWithTwoColumns = ({left, right}) => {
 
 const RowWithThreeColumns = ({left, leftSmall, right1, flag1, right2, flag2}) => {
 	const centerStyle = {
-		width: right2 === undefined ? '30%' : '15%',
+		width: right2 === undefined ? '40%' : '20%',
 		justifyContent: 'center',
 	};
 	const right1text = `${right1}`;
 	const right2text = `${right2}`;
 	return (
 	<div class="labels_L7Q row_S2v">
-		<div class="row_S2v" style={{width: '70%', flexDirection: 'column'}}>
+		<div class="row_S2v" style={{width: '60%', flexDirection: 'column'}}>
 			<p>{left}</p>
 			<p style={{fontSize: '80%'}}>{leftSmall}</p>
 		</div>
@@ -122,47 +122,105 @@ const BuildingDemandSection = ({ data }) => {
 	);
 };
 
-const $Industrial = ({ react }) => {
+const ColumnIndustrialData = ({ data }) => {
+	return (
+	<div style={{width: '70%', boxSizing: 'border-box', border: '1px solid gray'}}>
 	
-	// residential data
-	const [residentialData, setResidentialData] = react.useState([])
-	useDataUpdate(react, 'cityInfo.ilResidential', setResidentialData)
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '60%'}}></div>
+			<SingleValue value="INDUSTRIAL" />
+			<SingleValue value="OFFICE" />
+		</div>
+		
+		<RowWithThreeColumns left="EMPTY BUILDINGS" right1={data[0]} right2={data[10]} />
+		<RowWithThreeColumns left="PROPERTYLESS COMPANIES" right1={data[1]} right2={data[11]} />
+		
+		<DataDivider />
+		
+		<RowWithThreeColumns left="AVERAGE TAX RATE" leftSmall="10% is the neutral rate" right1={data[2]/10} flag1={data[2]>100} right2={data[12]/10} flag2={data[12]>100} />
+		
+		<DataDivider />
+		
+		<RowWithThreeColumns left="LOCAL DEMAND" leftSmall="100% when production = demand" right1={data[3]} flag1={data[3]>100} right2={data[13]} flag2={data[13]>100} />
+		<RowWithThreeColumns left="INPUT UTILIZATION" leftSmall="110% is the neutral ratio" right1={data[7]} flag1={data[7]>100} />
+
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '60%'}} />
+			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>Standard</div>
+			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>Leisure</div>
+		</div>
+		
+		<DataDivider />
+		
+		<RowWithThreeColumns left="EMPLOYEE CAPACITY RATIO" leftSmall="72% is the neutral ratio" right1={data[4]/10} flag1={data[4]<720} right2={data[14]/10} flag2={data[14]<750} />
+		
+		<DataDivider />
+		
+		<div style={{display: 'flex'}}>
+			<div style={{width: '60%', height: '2.2em', display: 'flex', alignItems: 'center'}}>
+				AVAILABLE WORKFORCE
+			</div>
+			<div style={{width: '40%'}}>
+				<RowWithTwoColumns left="Educated" right={data[8]} />
+				<RowWithTwoColumns left="Uneducated" right={data[9]} />
+			</div>
+		</div>
+		
+		<DataDivider />
+		
+		<div style={{display: 'flex'}}>
+			<div style={{width: '60%', height: '2.2em', display: 'flex', alignItems: 'center'}}>
+				STORAGE
+			</div>
+			<div style={{width: '40%'}}>
+				<RowWithTwoColumns left="Free buildings" right={data[5]} />
+				<RowWithTwoColumns left="Propertyless companies" right={data[6]} />
+				<RowWithTwoColumns left="Demanded types" right={data[15]} />
+			</div>
+		</div>
+		
+	</div>
+	);
+};
+
+const ColumnExcludedResources = ({ resources }) => {
+	return (
+	<div style={{width: '30%', boxSizing: 'border-box', border: '1px solid gray'}}>
+		<div class="row_S2v">No demand for:</div>
+        <ul>
+          {resources.map((item, index) => (
+            <li key={index}>
+				<div class="row_S2v small_ExK">{item}</div>
+			</li>
+          ))}
+        </ul>
+	</div>
+	);
+};
+
+const $Industrial = ({ react }) => {
+
+	// commercial data
+	const [industrialData, setIndustrialData] = react.useState([])
+	useDataUpdate(react, 'cityInfo.ilIndustrial', setIndustrialData)
+	
+	// excluded resources
+	const [excludedResources, setExcludedResources] = react.useState([])
+	useDataUpdate(react, 'cityInfo.ilIndustrialExRes', setExcludedResources)
 
 	const onClose = () => {
 		const data = { type: "toggle_visibility", id: 'infoloom.industrial' };
 		const event = new CustomEvent('hookui', { detail: data });
 		window.dispatchEvent(event);
 	};
-	
-	const homelessThreshold = Math.round(residentialData[12] * residentialData[13] / 1000);
 
-	return <$Panel react={react} title="Residential Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.2, height: window.innerHeight * 0.243 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
-		{residentialData.length === 0 ? (
+	return <$Panel react={react} title="Industrial and Office Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.4, height: window.innerHeight * 0.4 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
+		{industrialData.length === 0 ? (
 			<p>Waiting...</p>
 		) : (
-		<div>
-			<BuildingDemandSection data={residentialData} />
-			{/* OTHER DATA, two columns */}
-			<div style={{display: 'flex'}}>
-				<div style={{width: '50%', boxSizing: 'border-box', border: '1px solid gray'}}>
-					<div class="space_uKL" style={{height: '3rem'}}></div>
-					<RowWithTwoColumns left="STUDY POSITIONS" right={residentialData[14]} />
-					<DataDivider />
-					<RowWithThreeColumns left="HAPPINESS" leftSmall={`${residentialData[8]} is neutral`} right1={residentialData[7]} flag1={residentialData[7]<residentialData[8]} />
-					<DataDivider />
-					<RowWithThreeColumns left="UNEMPLOYMENT" leftSmall={`${residentialData[10]/10}% is neutral`} right1={residentialData[9]} flag1={residentialData[9]>residentialData[10]/10} />
-					<div class="space_uKL" style={{height: '3rem'}}></div>
-				</div>
-				<div style={{width: '50%', boxSizing: 'border-box', border: '1px solid gray'}}>
-					<div class="space_uKL" style={{height: '3rem'}}></div>
-					<RowWithTwoColumns left="HOUSEHOLDS" right={residentialData[12]} />
-					<DataDivider />
-					<RowWithThreeColumns left="HOMELESS" leftSmall={`${homelessThreshold} is neutral`} right1={residentialData[11]} flag1={residentialData[11]>homelessThreshold} />
-					<DataDivider />
-					<RowWithThreeColumns left="TAX RATE (weighted)" leftSmall="10% is neutral" right1={residentialData[15]/10} flag1={residentialData[15]>100} />
-					<div class="space_uKL" style={{height: '3rem'}}></div>
-				</div>
-			</div>
+		<div style={{display: 'flex'}}>
+			<ColumnIndustrialData data={industrialData} />
+			<ColumnExcludedResources resources={excludedResources} />
 		</div>
 		)}
 	</$Panel>

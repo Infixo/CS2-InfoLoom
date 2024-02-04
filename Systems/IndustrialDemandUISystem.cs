@@ -532,7 +532,7 @@ public class IndustrialDemandUISystem : UISystemBase
                                         float num35 = EconomyUtils.GetTradeCost(industrialProcessData.m_Input1.m_Resource, costs).m_BuyCost / resourceData3.m_Price;
                                         num33 += 10f * num35 * (num34 + 0.1f);
                                         flag5 = true;
-                                        inputUtil += (float)m_CachedDemands[resourceIndex5] / ((float)m_Productions[resourceIndex5] + 1f);
+                                        inputUtil += math.min(4, (float)m_CachedDemands[resourceIndex5] / ((float)m_Productions[resourceIndex5] + 1f));
                                         numInputs++;
                                         Plugin.Log($"{iterator.resource} IPD1: {industrialProcessData.m_Input1.m_Resource} inputUtil {num34} tradeCost {num35} => {10f * num35 * (num34 + 0.1f)}");
                                     }
@@ -546,7 +546,7 @@ public class IndustrialDemandUISystem : UISystemBase
                                         float num37 = EconomyUtils.GetTradeCost(industrialProcessData.m_Input2.m_Resource, costs).m_BuyCost / resourceData4.m_Price;
                                         num33 += 10f * num37 * (num36 + 0.1f);
                                         flag5 = true;
-                                        inputUtil += (float)m_CachedDemands[resourceIndex6] / ((float)m_Productions[resourceIndex6] + 1f);
+                                        inputUtil += math.min(4, (float)m_CachedDemands[resourceIndex6] / ((float)m_Productions[resourceIndex6] + 1f));
                                         numInputs++;
                                         Plugin.Log($"{iterator.resource} IPD2: {industrialProcessData.m_Input2.m_Resource} inputUtil {num36} tradeCost {num37} => {10f * num37 * (num36 + 0.1f)}");
                                     }
