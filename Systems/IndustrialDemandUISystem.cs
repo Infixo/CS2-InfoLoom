@@ -477,7 +477,7 @@ public class IndustrialDemandUISystem : UISystemBase
                 }
                 float value = (isMaterial ? m_DemandParameters.m_ExtractorBaseDemand : m_DemandParameters.m_IndustrialBaseDemand);
                 float num21 = (1f + (float)m_CachedDemands[resourceIndex4] - (float)m_Productions[resourceIndex4]) / ((float)m_CachedDemands[resourceIndex4] + 1f);
-                float productionCapacity = (1f + (float)m_Productions[resourceIndex4]) / ((float)m_CachedDemands[resourceIndex4] + 1f); // InfoLoom
+                float productionCapacity = math.min(4, (float)m_Productions[resourceIndex4] / ((float)m_CachedDemands[resourceIndex4] + 1f)); // InfoLoom, capped at 400%
                 //_ = resourceData2.m_Price / resourceData2.m_Weight;
                 TradeCost tradeCost = EconomyUtils.GetTradeCost(EconomyUtils.GetResource(resourceIndex4), costs);
                 float num22 = (0.05f + tradeCost.m_SellCost) / resourceData2.m_Price;

@@ -1,7 +1,7 @@
 {
     "name": "Info_Loom",
     "description": "Adds new UI screens with some extra information.",
-    "version_number": "0.7.1",
+    "version_number": "0.8.0",
     "dependencies": [
       "BepInEx-BepInExPack-5.4.2100",
       "Cities2Modding-HookUI-0.3.9"

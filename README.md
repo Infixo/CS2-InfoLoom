@@ -59,7 +59,7 @@ Currently:
 - Local Demand (which is production capacity in fact) and Input Utilization (which tells if resources are available as input).
 - Actual numbers of available workforce, and employee capacity ratio.
 - Lists resources that currently are not demanded, thus the engine ignores them when calculating Industrial and Office Factors.
-- Storage Demand section, which shows Storage Demand which controls if new warehouses are spawned.
+- Storage section that shows Demanded Types info which controls if new warehouses are spawned.
 
 ![Industrial and Office data](https://raw.githubusercontent.com/infixo/cs2-infoloom/main/docs/industrial.png)
 
