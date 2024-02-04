@@ -16,8 +16,8 @@ const RowWithThreeColumns = ({left, leftSmall, right1, flag1, right2, flag2}) =>
 		width: right2 === undefined ? '40%' : '20%',
 		justifyContent: 'center',
 	};
-	const right1text = `${right1}`;
-	const right2text = `${right2}`;
+	const right1text = `${right1} %`;
+	const right2text = `${right2} %`;
 	return (
 	<div class="labels_L7Q row_S2v">
 		<div class="row_S2v" style={{width: '60%', flexDirection: 'column'}}>
@@ -62,69 +62,9 @@ const SingleValue = ({ value, flag, width, small }) => {
 	);
 };
 
-const BuildingDemandSection = ({ data }) => {
-	const freeL = data[0]-data[3];
-	const freeM = data[1]-data[4];
-	const freeH = data[2]-data[5];
-	const ratio = data[6]/10;
-	const ratioString = `$No demand at {ratio}%`;
-	const needL = Math.max(1, Math.floor(ratio * data[0] / 100));
-	const needM = Math.max(1, Math.floor(ratio * data[1] / 100));
-	const needH = Math.max(1, Math.floor(ratio * data[2] / 100));
-	const demandL = Math.floor((1 - freeL / needL) * 100);
-	const demandM = Math.floor((1 - freeM / needM) * 100);
-	const demandH = Math.floor((1 - freeH / needH) * 100);
-	return (
-	<div style={{boxSizing: 'border-box', border: '1px solid gray'}}>
-		<div class="labels_L7Q row_S2v">
-			<div class="row_S2v" style={{width: '40%'}}></div>
-			<SingleValue value="LOW" />
-			<SingleValue value="MEDIUM" />
-			<SingleValue value="HIGH" />
-		</div>
-		<div class="labels_L7Q row_S2v">
-			<div class="row_S2v" style={{width: '2%'}}></div>
-			<div class="row_S2v" style={{width: '38%'}}>Total properties</div>
-			<SingleValue value={data[0]} />
-			<SingleValue value={data[1]} />
-			<SingleValue value={data[2]} />
-		</div>
-		<div class="labels_L7Q row_S2v">
-			<div class="row_S2v small_ExK" style={{width: '2%'}}></div>
-			<div class="row_S2v small_ExK" style={{width: '38%'}}>- Occupied properties</div>
-			<SingleValue value={data[3]} small={true} />
-			<SingleValue value={data[4]} small={true} />
-			<SingleValue value={data[5]} small={true} />
-		</div>
-		<div class="labels_L7Q row_S2v">
-			<div class="row_S2v" style={{width: '2%'}}></div>
-			<div class="row_S2v" style={{width: '38%'}}>= Empty properties</div>
-			<SingleValue value={freeL} flag={freeL>needL} />
-			<SingleValue value={freeM} flag={freeM>needM} />
-			<SingleValue value={freeH} flag={freeH>needH} />
-		</div>
-		<div class="labels_L7Q row_S2v">
-			<div class="row_S2v small_ExK" style={{width: '2%'}}></div>
-			<div class="row_S2v small_ExK" style={{width: '38%'}}>{"No demand at " + ratio + "%"}</div>
-			<SingleValue value={needL} small={true} />
-			<SingleValue value={needM} small={true} />
-			<SingleValue value={needH} small={true} />
-		</div>
-		<div class="labels_L7Q row_S2v">
-			<div class="row_S2v" style={{width: '2%'}}></div>
-			<div class="row_S2v" style={{width: '38%'}}>BUILDING DEMAND</div>
-			<SingleValue value={demandL} flag={demandL<0} />
-			<SingleValue value={demandM} flag={demandM<0} />
-			<SingleValue value={demandH} flag={demandH<0} />
-		</div>
-	    <div class="space_uKL" style={{height: '3rem'}}></div>
-	</div>
-	);
-};
-
 const ColumnIndustrialData = ({ data }) => {
 	return (
-	<div style={{width: '70%', boxSizing: 'border-box', border: '1px solid gray'}}>
+	<div style={{width: '75%', boxSizing: 'border-box', border: '1px solid gray'}}>
 	
 		<div class="labels_L7Q row_S2v">
 			<div class="row_S2v" style={{width: '60%'}}></div>
@@ -132,8 +72,16 @@ const ColumnIndustrialData = ({ data }) => {
 			<SingleValue value="OFFICE" />
 		</div>
 		
-		<RowWithThreeColumns left="EMPTY BUILDINGS" right1={data[0]} right2={data[10]} />
-		<RowWithThreeColumns left="PROPERTYLESS COMPANIES" right1={data[1]} right2={data[11]} />
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '60%'}}>EMPTY BUILDINGS</div>
+			<SingleValue value={data[0]} />
+			<SingleValue value={data[10]} />
+		</div>
+		<div class="labels_L7Q row_S2v">
+			<div class="row_S2v" style={{width: '60%'}}>PROPERTYLESS COMPANIES</div>
+			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{data[1]}</div>
+			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>{data[11]}</div>
+		</div>
 		
 		<DataDivider />
 		
@@ -141,14 +89,8 @@ const ColumnIndustrialData = ({ data }) => {
 		
 		<DataDivider />
 		
-		<RowWithThreeColumns left="LOCAL DEMAND" leftSmall="100% when production = demand" right1={data[3]} flag1={data[3]>100} right2={data[13]} flag2={data[13]>100} />
-		<RowWithThreeColumns left="INPUT UTILIZATION" leftSmall="110% is the neutral ratio" right1={data[7]} flag1={data[7]>100} />
-
-		<div class="labels_L7Q row_S2v">
-			<div class="row_S2v" style={{width: '60%'}} />
-			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>Standard</div>
-			<div class="row_S2v" style={{width: '20%', justifyContent: 'center'}}>Leisure</div>
-		</div>
+		<RowWithThreeColumns left="LOCAL DEMAND (ind)" leftSmall="100% when production = demand" right1={data[3]} flag1={data[3]>100} />
+		<RowWithThreeColumns left="INPUT UTILIZATION (ind)" leftSmall="110% is the neutral ratio, capped at 400%" right1={data[7]} flag1={data[7]>100} />
 		
 		<DataDivider />
 		
@@ -169,13 +111,14 @@ const ColumnIndustrialData = ({ data }) => {
 		<DataDivider />
 		
 		<div style={{display: 'flex'}}>
-			<div style={{width: '60%', height: '2.2em', display: 'flex', alignItems: 'center'}}>
-				STORAGE
+			<div style={{width: '50%', height: '2.2em', display: 'flex', flexDirection: 'column'}}>
+				<p>STORAGE</p>
+				<p style={{fontSize: '80%'}}>The game will spawn warehouses when DEMANDED TYPES exist.</p>
 			</div>
-			<div style={{width: '40%'}}>
-				<RowWithTwoColumns left="Free buildings" right={data[5]} />
+			<div style={{width: '50%'}}>
+				<RowWithTwoColumns left="Empty buildings" right={data[5]} />
 				<RowWithTwoColumns left="Propertyless companies" right={data[6]} />
-				<RowWithTwoColumns left="Demanded types" right={data[15]} />
+				<RowWithTwoColumns left="DEMANDED TYPES" right={data[15]} />
 			</div>
 		</div>
 		
@@ -185,7 +128,7 @@ const ColumnIndustrialData = ({ data }) => {
 
 const ColumnExcludedResources = ({ resources }) => {
 	return (
-	<div style={{width: '30%', boxSizing: 'border-box', border: '1px solid gray'}}>
+	<div style={{width: '25%', boxSizing: 'border-box', border: '1px solid gray'}}>
 		<div class="row_S2v">No demand for:</div>
         <ul>
           {resources.map((item, index) => (
@@ -214,7 +157,7 @@ const $Industrial = ({ react }) => {
 		window.dispatchEvent(event);
 	};
 
-	return <$Panel react={react} title="Industrial and Office Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.4, height: window.innerHeight * 0.4 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
+	return <$Panel react={react} title="Industrial and Office Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.30, height: window.innerHeight * 0.32 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
 		{industrialData.length === 0 ? (
 			<p>Waiting...</p>
 		) : (

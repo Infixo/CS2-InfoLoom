@@ -397,17 +397,17 @@ public class IndustrialDemandUISystem : UISystemBase
                     // InfoLoom
                     if ((buildingPropertyData2.m_AllowedManufactured & kIndustryResources) != Resource.NoResource)
                     {
-                        Plugin.Log($"Free industry: {buildingPropertyData2.m_AllowedManufactured}");
+                        //Plugin.Log($"Free industry: {buildingPropertyData2.m_AllowedManufactured}");
                         m_Results[0]++;
                     }
                     if ((buildingPropertyData2.m_AllowedManufactured & kOfficeResources) != Resource.NoResource)
                     {
-                        Plugin.Log($"Free office: {buildingPropertyData2.m_AllowedManufactured}");
+                        //Plugin.Log($"Free office: {buildingPropertyData2.m_AllowedManufactured}");
                         m_Results[10]++;
                     }
                     if (buildingPropertyData2.m_AllowedStored != Resource.NoResource)
                     {
-                        Plugin.Log($"Free storage: {buildingPropertyData2.m_AllowedStored}");
+                        //Plugin.Log($"Free storage: {buildingPropertyData2.m_AllowedStored}");
                         m_Results[5]++;
                     }
                 }
@@ -484,7 +484,7 @@ public class IndustrialDemandUISystem : UISystemBase
                 float num23 = (0.05f + tradeCost.m_BuyCost) / resourceData2.m_Price;
                 float refCost = 0.05f / resourceData2.m_Price;
                 num21 *= ((m_Productions[resourceIndex4] > m_CachedDemands[resourceIndex4]) ? (10f * num22) : (10f * num23));
-                Plugin.Log($"{iterator.resource} ({resourceIndex4}): price {resourceData2.m_Price} sellCost {tradeCost.m_SellCost} buyCost {tradeCost.m_BuyCost} refCost {refCost} num22 {num22} ({num22/refCost}) num23 {num23} ({num23/refCost})");
+                //Plugin.Log($"{iterator.resource} ({resourceIndex4}): price {resourceData2.m_Price} sellCost {tradeCost.m_SellCost} buyCost {tradeCost.m_BuyCost} refCost {refCost} num22 {num22} ({num22/refCost}) num23 {num23} ({num23/refCost})");
                 if (iterator.resource == Resource.Electronics)
                 {
                     CityUtils.ApplyModifier(ref value, modifiers, CityModifierType.IndustrialElectronicsDemand);
@@ -534,7 +534,7 @@ public class IndustrialDemandUISystem : UISystemBase
                                         flag5 = true;
                                         inputUtil += math.min(4, (float)m_CachedDemands[resourceIndex5] / ((float)m_Productions[resourceIndex5] + 1f));
                                         numInputs++;
-                                        Plugin.Log($"{iterator.resource} IPD1: {industrialProcessData.m_Input1.m_Resource} inputUtil {num34} tradeCost {num35} => {10f * num35 * (num34 + 0.1f)}");
+                                        //Plugin.Log($"{iterator.resource} IPD1: {industrialProcessData.m_Input1.m_Resource} inputUtil {num34} tradeCost {num35} => {10f * num35 * (num34 + 0.1f)}");
                                     }
                                     if (industrialProcessData.m_Input2.m_Amount != 0)
                                     {
@@ -548,7 +548,7 @@ public class IndustrialDemandUISystem : UISystemBase
                                         flag5 = true;
                                         inputUtil += math.min(4, (float)m_CachedDemands[resourceIndex6] / ((float)m_Productions[resourceIndex6] + 1f));
                                         numInputs++;
-                                        Plugin.Log($"{iterator.resource} IPD2: {industrialProcessData.m_Input2.m_Resource} inputUtil {num36} tradeCost {num37} => {10f * num37 * (num36 + 0.1f)}");
+                                        //Plugin.Log($"{iterator.resource} IPD2: {industrialProcessData.m_Input2.m_Resource} inputUtil {num36} tradeCost {num37} => {10f * num37 * (num36 + 0.1f)}");
                                     }
                                     if (flag5)
                                     {
@@ -564,7 +564,7 @@ public class IndustrialDemandUISystem : UISystemBase
                 {
                     m_IndustrialDemands[resourceIndex4] = Mathf.RoundToInt(100f * (num24 + num27 + num29));
                 }
-                Plugin.Log($"{iterator.resource} ({resourceIndex4}): rawdemand {m_IndustrialDemands[resourceIndex4]} value {value} num21 {num21} valuenum21 {100f*value*num21:F1} num24 {100*num24:F1} num27 {100f*num27:F1} num29 {100*num29:F1} num30 {100f*num30:F1}");
+                //Plugin.Log($"{iterator.resource} ({resourceIndex4}): rawdemand {m_IndustrialDemands[resourceIndex4]} value {value} num21 {num21} valuenum21 {100f*value*num21:F1} num24 {100*num24:F1} num27 {100f*num27:F1} num29 {100*num29:F1} num30 {100f*num30:F1}");
                 m_IndustrialDemands[resourceIndex4] = math.min(100, math.max(0, m_IndustrialDemands[resourceIndex4]));
                 if (flag4) // weight == 0
                 {
@@ -637,9 +637,9 @@ public class IndustrialDemandUISystem : UISystemBase
                 }
 
                 // InfoLoom, summary
-                Plugin.Log($"{iterator.resource} ({resourceIndex4}): office {flag4} companies {m_Companies[resourceIndex4]} propLess {m_Propertyless[resourceIndex4]} freeProp {m_FreeProperties[resourceIndex4]} bldg {m_IndustrialBuildingDemands[resourceIndex4]} zone {m_IndustrialZoningDemands[resourceIndex4]}");
-                Plugin.Log($"{iterator.resource} ({resourceIndex4}): work [1] {num24} edu [2] {num27} tax [11] {num29} inputs [10] {num30}");
-                Plugin.Log($"{iterator.resource} ({resourceIndex4}): base {value} local [4] {num21} prodCap {productionCapacity} sell {num22} buy {num23}");
+                //Plugin.Log($"{iterator.resource} ({resourceIndex4}): office {flag4} companies {m_Companies[resourceIndex4]} propLess {m_Propertyless[resourceIndex4]} freeProp {m_FreeProperties[resourceIndex4]} bldg {m_IndustrialBuildingDemands[resourceIndex4]} zone {m_IndustrialZoningDemands[resourceIndex4]}");
+                //Plugin.Log($"{iterator.resource} ({resourceIndex4}): work [1] {num24} edu [2] {num27} tax [11] {num29} inputs [10] {num30}");
+                //Plugin.Log($"{iterator.resource} ({resourceIndex4}): base {value} local [4] {num21} prodCap {productionCapacity} sell {num22} buy {num23}");
 
                 if (flag4) // weight == 0
                 {
@@ -658,7 +658,7 @@ public class IndustrialDemandUISystem : UISystemBase
                     // InfoLoom - no demand
                     else
                     {
-                        Plugin.Log($"No office demand for: {iterator.resource}");
+                        //Plugin.Log($"No office demand for: {iterator.resource}");
                         m_ExcludedResources.value |= iterator.resource;
                     }
                 }
@@ -681,7 +681,7 @@ public class IndustrialDemandUISystem : UISystemBase
                 // InfoLoom - no demand, TODO COUNT
                 else
                 {
-                    Plugin.Log($"No industry demand for: {iterator.resource}");
+                    //Plugin.Log($"No industry demand for: {iterator.resource}");
                     m_ExcludedResources.value |= iterator.resource;
                 }
             }
@@ -689,41 +689,41 @@ public class IndustrialDemandUISystem : UISystemBase
             // InfoLoom, storage section
             //m_Results[28] = m_StorageBuildingDemand.value; // basically says number of resources that need storage
             m_Results[15] = m_StorageCompanyDemand.value; // basically says number of resources where storage capacities don't meet demand
-            Plugin.Log($"STORAGE: free [5] {m_Results[5]} propLess/demand [6] {m_Results[6]} companies [15] {m_Results[15]}");
+            //Plugin.Log($"STORAGE: free [5] {m_Results[5]} propLess/demand [6] {m_Results[6]} companies [15] {m_Results[15]}");
 
-            Plugin.Log($"Native  values building/company/numres: IND {m_IndustrialBuildingDemand.value}/{m_IndustrialCompanyDemand.value}/{num19} " +
-                $"STO {m_StorageBuildingDemand.value}/{m_StorageCompanyDemand.value} OFF {m_OfficeBuildingDemand.value}/{m_OfficeCompanyDemand.value}/{num18} ");
+            //Plugin.Log($"Native  values building/company/numres: IND {m_IndustrialBuildingDemand.value}/{m_IndustrialCompanyDemand.value}/{num19} " +
+            //    $"STO {m_StorageBuildingDemand.value}/{m_StorageCompanyDemand.value} OFF {m_OfficeBuildingDemand.value}/{m_OfficeCompanyDemand.value}/{num18} ");
             m_StorageBuildingDemand.value = Mathf.CeilToInt(math.pow(20f * (float)m_StorageBuildingDemand.value, 0.75f));
             m_IndustrialBuildingDemand.value = 2 * m_IndustrialBuildingDemand.value / num19; // Infixo: THIS IS ERROR
             m_OfficeCompanyDemand.value *= 2 * m_OfficeCompanyDemand.value / num18; // Infixo: THIS IS ERROR
             m_IndustrialBuildingDemand.value = math.clamp(m_IndustrialBuildingDemand.value, 0, 100);
             m_OfficeBuildingDemand.value = math.clamp(m_OfficeBuildingDemand.value, 0, 100);
-            Plugin.Log($"Clamped values building/company/numres: IND {m_IndustrialBuildingDemand.value}/{m_IndustrialCompanyDemand.value}/{num19} " +
-                $"STO {m_StorageBuildingDemand.value}/{m_StorageCompanyDemand.value} OFF {m_OfficeBuildingDemand.value}/{m_OfficeCompanyDemand.value}/{num18} ");
+            //Plugin.Log($"Clamped values building/company/numres: IND {m_IndustrialBuildingDemand.value}/{m_IndustrialCompanyDemand.value}/{num19} " +
+            //    $"STO {m_StorageBuildingDemand.value}/{m_StorageCompanyDemand.value} OFF {m_OfficeBuildingDemand.value}/{m_OfficeCompanyDemand.value}/{num18} ");
             // InfoLoom
-            Plugin.Log($"RESOURCES: ind {num19} off {num18} excluded {EconomyUtils.GetNames(m_ExcludedResources.value)}");
-            Plugin.Log($"INDUSTRY: freeProperties [0]={m_Results[0]} propertyless [1]={m_Results[1]}");
-            Plugin.Log($"OFFICE: freeProperties [10]={m_Results[10]} propertyless [11]={m_Results[11]}");
+            //Plugin.Log($"RESOURCES: ind {num19} off {num18} excluded {EconomyUtils.GetNames(m_ExcludedResources.value)}");
+            //Plugin.Log($"INDUSTRY: freeProperties [0]={m_Results[0]} propertyless [1]={m_Results[1]}");
+            //Plugin.Log($"OFFICE: freeProperties [10]={m_Results[10]} propertyless [11]={m_Results[11]}");
 
             // InfoLoom, tax section
             m_Results[2]  = Mathf.RoundToInt(10f * taxRateInd / (float)num19);
             m_Results[12] = Mathf.RoundToInt(10f * taxRateOff / (float)num18);
-            Plugin.Log($"TAX RATE: [2]={m_Results[2]} {taxRateInd / (float)num19:F1} [12]={m_Results[12]} {taxRateOff / (float)num18:F1}");
+            //Plugin.Log($"TAX RATE: [2]={m_Results[2]} {taxRateInd / (float)num19:F1} [12]={m_Results[12]} {taxRateOff / (float)num18:F1}");
 
             // InfoLoom, input utilization, only for industry
             m_Results[7] = Mathf.RoundToInt(100f * inputUtil / (float)numInputs);
-            Plugin.Log($"INPUT UTILIZATION: [7]={m_Results[7]} raw {inputUtil} num {numInputs}, 110% is the default threshold");
+            //Plugin.Log($"INPUT UTILIZATION: [7]={m_Results[7]} raw {inputUtil} num {numInputs}, 110% is the default threshold");
 
             // InfoLoom, production capacity => local demand
             m_Results[3] = Mathf.RoundToInt(100f * prodCapInd / (float)num19);
             m_Results[13] = Mathf.RoundToInt(100f * prodCapOff / (float)num18);
-            Plugin.Log($"LOCAL DEMAND: [3]={m_Results[3]} ({prodCapInd / (float)num19}) [13]={m_Results[13]} ({prodCapOff / (float)num18}), 100% means production = demand");
+            //Plugin.Log($"LOCAL DEMAND: [3]={m_Results[3]} ({prodCapInd / (float)num19}) [13]={m_Results[13]} ({prodCapOff / (float)num18}), 100% means production = demand");
 
             // InfoLoom, employment section
             m_Results[4] = Mathf.RoundToInt(1000f * empCapInd / (float)num19);
             m_Results[14] = Mathf.RoundToInt(1000f * empCapOff / (float)num18);
-            Plugin.Log($"EMPLOYEE CAPACITY RATIO: [4]={m_Results[4]} ({empCapInd}) [14]={m_Results[14]} ({empCapOff}), 72% is the default threshold");
-            Plugin.Log($"AVAILABLE WORKFORCE: educated [8]={m_Results[8]} uneducated [9]={m_Results[9]}");
+            //Plugin.Log($"EMPLOYEE CAPACITY RATIO: [4]={m_Results[4]} ({empCapInd}) [14]={m_Results[14]} ({empCapOff}), 72% is the default threshold");
+            //Plugin.Log($"AVAILABLE WORKFORCE: educated [8]={m_Results[8]} uneducated [9]={m_Results[9]}");
         }
     }
 
