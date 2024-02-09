@@ -505,6 +505,9 @@ public class WorkforceInfoLoomUISystem : UISystemBase
 
     private NativeArray<WorkforceAtLevelInfo> m_Results;
 
+    // 240209 Set gameMode to avoid errors in the Editor
+    public override GameMode gameMode => GameMode.Game;
+
     /* not used
     public override int GetUpdateInterval(SystemUpdatePhase phase)
     {

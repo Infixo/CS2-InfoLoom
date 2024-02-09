@@ -1,4 +1,5 @@
 ﻿using Colossal.UI.Binding;
+using Game;
 using Game.Simulation;
 using Game.UI;
 using System;
@@ -45,6 +46,9 @@ public class BuildingDemandUISystem : UISystemBase
     // 5 - storage (IndustrialDemandSystem.m_StorageCompanyDemand)
     // 6 - office (IndustrialDemandSystem.m_OfficeCompanyDemand)
     */
+
+    // 240209 Set gameMode to avoid errors in the Editor
+    public override GameMode gameMode => GameMode.Game;
 
     [Preserve]
     protected override void OnCreate()

@@ -473,15 +473,8 @@ public class CommercialDemandUISystem : UISystemBase
     // 7 - employee capacity ratio // how efficiently the company is utilizing its workforce by comparing the actual number of employees to the maximum number it could employ
     // 8 & 9 - educated & uneducated workforce
 
-    public override int GetUpdateInterval(SystemUpdatePhase phase)
-    {
-        return 16;
-    }
-
-    public override int GetUpdateOffset(SystemUpdatePhase phase)
-    {
-        return 4;
-    }
+    // 240209 Set gameMode to avoid errors in the Editor
+    public override GameMode gameMode => GameMode.Game;
 
     /*
     public NativeArray<int> GetDemandFactors(out JobHandle deps)

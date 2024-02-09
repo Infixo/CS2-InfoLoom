@@ -387,15 +387,8 @@ public class ResidentialDemandUISystem : UISystemBase
     // 14 - study positions
     // 15 - tax rate (weighted)
 
-    public override int GetUpdateInterval(SystemUpdatePhase phase)
-    {
-        return 16;
-    }
-
-    public override int GetUpdateOffset(SystemUpdatePhase phase)
-    {
-        return 10;
-    }
+    // 240209 Set gameMode to avoid errors in the Editor
+    public override GameMode gameMode => GameMode.Game;
 
     /* not used
     public NativeArray<int> GetLowDensityDemandFactors(out JobHandle deps)

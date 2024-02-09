@@ -379,6 +379,9 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
     protected override bool Modified => !m_WorkplaceModifiedQuery.IsEmptyIgnoreFilter;
     */
 
+    // 240209 Set gameMode to avoid errors in the Editor
+    public override GameMode gameMode => GameMode.Game;
+
     [Preserve]
     protected override void OnCreate()
     {
