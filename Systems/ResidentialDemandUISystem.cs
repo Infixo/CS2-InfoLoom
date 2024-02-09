@@ -272,7 +272,7 @@ public class ResidentialDemandUISystem : UISystemBase
             // 240204 student ratio for new households, from HouseholdSpawnSystem
             int fact6 = math.max(0, m_LowDemandFactors[6] + m_MediumDemandFactors[6] + m_HighDemandFactors[6]); // unemployment
             int fact12 = math.max(0, m_LowDemandFactors[12] + m_MediumDemandFactors[12] + m_HighDemandFactors[12]); // students
-            m_Results[17] = Mathf.RoundToInt(100f * (float)fact12 / (float)(fact12 + fact6));
+            m_Results[17] = fact12 == 0 ? 0 : Mathf.RoundToInt(100f * (float)fact12 / (float)(fact12 + fact6));
         }
     }
 
