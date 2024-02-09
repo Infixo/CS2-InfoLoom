@@ -95,6 +95,10 @@ Currently:
 - Nothing atm.
 
 ### Changelog
+- v0.8.1 (2024-02-09)
+  - Fixed: null reference in Editor Mode.
+  - Fixed: student ratio in empty city.
+  - Fixed: demographics bars sometimes going beyond the window.
 - v0.8.0 (2024-02-04)
   - New feature: industrial and office data.
   - New feature: household demand and student chance.
