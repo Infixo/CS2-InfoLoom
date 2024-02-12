@@ -194,6 +194,12 @@ public class IndustrialDemandUISystem : UISystemBase
 
         public NativeValue<Resource> m_ExcludedResources; // InfoLoom
 
+        // resource demand for various consumers
+        public NativeArray<int> m_PopulationDemand;
+        public NativeArray<int> m_CityServicesDemand;
+        public NativeArray<int> m_SpawnablesDemand;
+        public NativeArray<int> m_IndustrialDemand;
+
         public void Execute()
         {
             DynamicBuffer<CityModifier> modifiers = m_CityModifiers[m_City];
@@ -205,6 +211,7 @@ public class IndustrialDemandUISystem : UISystemBase
             {
                 int resourceIndex = EconomyUtils.GetResourceIndex(iterator.resource);
                 int y = DemandUtils.EstimateResourceDemand(iterator.resource, ref m_EconomyParameters, (population.m_Population + population.m_PopulationWithMoveIn) / 2, tourism.m_AverageTourists, m_ResourcePrefabs, m_ResourceDatas, m_BaseConsumptionSum) / 4;
+                m_PopulationDemand[resourceIndex] = y; // InfoLoom
                 m_CachedDemands[resourceIndex] = math.max(m_Demands[resourceIndex], y);
                 m_FreeProperties[resourceIndex] = 0;
                 m_Storages[resourceIndex] = 0;
@@ -274,6 +281,11 @@ public class IndustrialDemandUISystem : UISystemBase
                     }
                 }
             }
+
+            // InfoLoom
+            for (int n = 0; n < m_CityServicesDemand.Length; n++)
+                m_CityServicesDemand[n] = m_CachedDemands[n] - math.max(m_Demands[n], m_PopulationDemand[n]);
+
             // Add spawnable buildings demand for Timber, Concrete, Petrochemicals and Wood
             float num2 = 0f;
             float num3 = 0f;
@@ -306,6 +318,13 @@ public class IndustrialDemandUISystem : UISystemBase
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Concrete)] += Mathf.RoundToInt(num3);
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Petrochemicals)] += Mathf.RoundToInt(num4);
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Wood)] += Mathf.RoundToInt(num5);
+
+            // InfoLoom
+            m_SpawnablesDemand[EconomyUtils.GetResourceIndex(Resource.Timber)] = Mathf.RoundToInt(num2);
+            m_SpawnablesDemand[EconomyUtils.GetResourceIndex(Resource.Concrete)] = Mathf.RoundToInt(num3);
+            m_SpawnablesDemand[EconomyUtils.GetResourceIndex(Resource.Petrochemicals)] = Mathf.RoundToInt(num4);
+            m_SpawnablesDemand[EconomyUtils.GetResourceIndex(Resource.Wood)] = Mathf.RoundToInt(num5);
+
             //Plugin.Log($"Spawnable demand: Timber {num2:F0} Concrete {num3:F0} Petrochem {num4:F0} Wood {num5:F0}");
             // Add industrial demand for some specific resources
             int num10 = 0;
@@ -333,6 +352,15 @@ public class IndustrialDemandUISystem : UISystemBase
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Software)] += num13 / 2000;
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Financial)] += num13 / 2000;
             m_CachedDemands[EconomyUtils.GetResourceIndex(Resource.Telecom)] += num13 / 2000;
+
+            // InfoLoom
+            m_IndustrialDemand[EconomyUtils.GetResourceIndex(Resource.Machinery)] = num10 / 2000;
+            m_IndustrialDemand[EconomyUtils.GetResourceIndex(Resource.Paper)] = num11 / 4000;
+            m_IndustrialDemand[EconomyUtils.GetResourceIndex(Resource.Furniture)] = num11 / 4000;
+            m_IndustrialDemand[EconomyUtils.GetResourceIndex(Resource.Software)] = num13 / 2000;
+            m_IndustrialDemand[EconomyUtils.GetResourceIndex(Resource.Financial)] = num13 / 2000;
+            m_IndustrialDemand[EconomyUtils.GetResourceIndex(Resource.Telecom)] = num13 / 2000;
+
             //Plugin.Log($"Industrial demand: Machinery {num10/2000} Paper {num11/4000} Furniture {num11/4000} Software {num13/2000} Financial {num13/2000} Telecom {num13/2000}");
             // Count storage capacities
             for (int num14 = 0; num14 < m_StorageCompanyChunks.Length; num14++)
@@ -889,8 +917,8 @@ public class IndustrialDemandUISystem : UISystemBase
 
     private NativeValue<int> m_OfficeBuildingDemand;
 
-    //[ResourceArray]
-    //[DebugWatchValue]
+    [ResourceArray]
+    [DebugWatchValue]
     private NativeArray<int> m_CachedDemands;
 
     //[EnumArray(typeof(DemandFactor))]
@@ -975,6 +1003,29 @@ public class IndustrialDemandUISystem : UISystemBase
     public int officeBuildingDemand => m_LastOfficeBuildingDemand;
 
     // InfoLoom
+
+    // resource demand for various consumers
+
+    [ResourceArray]
+    [DebugWatchValue]
+    public NativeArray<int> m_PopulationDemand;
+
+    [ResourceArray]
+    [DebugWatchValue]
+    public NativeArray<int> m_CityServicesDemand;
+
+    [ResourceArray]
+    [DebugWatchValue]
+    public NativeArray<int> m_SpawnablesDemand;
+
+    [ResourceArray]
+    [DebugWatchValue]
+    public NativeArray<int> m_IndustrialDemand;
+
+    [ResourceArray]
+    [DebugWatchValue]
+    public NativeArray<int> m_InputDemand;
+
 
     private RawValueBinding m_uiResults;
     private RawValueBinding m_uiExResources;
@@ -1091,6 +1142,12 @@ public class IndustrialDemandUISystem : UISystemBase
         RequireForUpdate(m_ProcessDataQuery);
 
         // InfoLoom
+        m_PopulationDemand = new NativeArray<int>(resourceCount, Allocator.Persistent);
+        m_CityServicesDemand = new NativeArray<int>(resourceCount, Allocator.Persistent);
+        m_SpawnablesDemand = new NativeArray<int>(resourceCount, Allocator.Persistent);
+        m_IndustrialDemand = new NativeArray<int>(resourceCount, Allocator.Persistent);
+        m_InputDemand = new NativeArray<int>(resourceCount, Allocator.Persistent);
+
         SetDefaults(); // there is no serialization, so init just for safety
         m_Results = new NativeArray<int>(16, Allocator.Persistent);
         m_ExcludedResources = new NativeValue<Resource>(Allocator.Persistent);
@@ -1139,6 +1196,12 @@ public class IndustrialDemandUISystem : UISystemBase
         m_Storages.Dispose();
         m_FreeStorages.Dispose();
         m_StorageCapacities.Dispose();
+        // InfoLoom
+        m_PopulationDemand.Dispose();
+        m_CityServicesDemand.Dispose();
+        m_SpawnablesDemand.Dispose();
+        m_IndustrialDemand.Dispose();
+        m_InputDemand.Dispose();
         base.OnDestroy();
     }
 
@@ -1166,108 +1229,114 @@ public class IndustrialDemandUISystem : UISystemBase
         m_LastStorageBuildingDemand = 0;
         m_LastOfficeCompanyDemand = 0;
         m_LastOfficeBuildingDemand = 0;
-    }
+        // InfoLoom
+        m_PopulationDemand.Fill(0);
+        m_CityServicesDemand.Fill(0);
+        m_SpawnablesDemand.Fill(0);
+        m_IndustrialDemand.Fill(0);
+        m_InputDemand.Fill(0);
+}
 
-    /* not used
-    public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
-    {
-        writer.Write(m_IndustrialCompanyDemand.value);
-        writer.Write(m_IndustrialBuildingDemand.value);
-        writer.Write(m_StorageCompanyDemand.value);
-        writer.Write(m_StorageBuildingDemand.value);
-        writer.Write(m_OfficeCompanyDemand.value);
-        writer.Write(m_OfficeBuildingDemand.value);
-        writer.Write(m_IndustrialDemandFactors.Length);
-        writer.Write(m_IndustrialDemandFactors);
-        writer.Write(m_OfficeDemandFactors);
-        writer.Write(m_ResourceDemands);
-        writer.Write(m_IndustrialZoningDemands);
-        writer.Write(m_IndustrialBuildingDemands);
-        writer.Write(m_StorageBuildingDemands);
-        writer.Write(m_StorageCompanyDemands);
-        writer.Write(m_FreeProperties);
-        writer.Write(m_Storages);
-        writer.Write(m_FreeStorages);
-        writer.Write(m_LastIndustrialCompanyDemand);
-        writer.Write(m_LastIndustrialBuildingDemand);
-        writer.Write(m_LastStorageCompanyDemand);
-        writer.Write(m_LastStorageBuildingDemand);
-        writer.Write(m_LastOfficeCompanyDemand);
-        writer.Write(m_LastOfficeBuildingDemand);
-    }
+/* not used
+public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
+{
+    writer.Write(m_IndustrialCompanyDemand.value);
+    writer.Write(m_IndustrialBuildingDemand.value);
+    writer.Write(m_StorageCompanyDemand.value);
+    writer.Write(m_StorageBuildingDemand.value);
+    writer.Write(m_OfficeCompanyDemand.value);
+    writer.Write(m_OfficeBuildingDemand.value);
+    writer.Write(m_IndustrialDemandFactors.Length);
+    writer.Write(m_IndustrialDemandFactors);
+    writer.Write(m_OfficeDemandFactors);
+    writer.Write(m_ResourceDemands);
+    writer.Write(m_IndustrialZoningDemands);
+    writer.Write(m_IndustrialBuildingDemands);
+    writer.Write(m_StorageBuildingDemands);
+    writer.Write(m_StorageCompanyDemands);
+    writer.Write(m_FreeProperties);
+    writer.Write(m_Storages);
+    writer.Write(m_FreeStorages);
+    writer.Write(m_LastIndustrialCompanyDemand);
+    writer.Write(m_LastIndustrialBuildingDemand);
+    writer.Write(m_LastStorageCompanyDemand);
+    writer.Write(m_LastStorageBuildingDemand);
+    writer.Write(m_LastOfficeCompanyDemand);
+    writer.Write(m_LastOfficeBuildingDemand);
+}
 
-    public void Deserialize<TReader>(TReader reader) where TReader : IReader
+public void Deserialize<TReader>(TReader reader) where TReader : IReader
+{
+    reader.Read(out int value);
+    m_IndustrialCompanyDemand.value = value;
+    reader.Read(out int value2);
+    m_IndustrialBuildingDemand.value = value2;
+    reader.Read(out int value3);
+    m_StorageCompanyDemand.value = value3;
+    reader.Read(out int value4);
+    m_StorageBuildingDemand.value = value4;
+    reader.Read(out int value5);
+    m_OfficeCompanyDemand.value = value5;
+    reader.Read(out int value6);
+    m_OfficeBuildingDemand.value = value6;
+    if (reader.context.version < Version.demandFactorCountSerialization)
     {
-        reader.Read(out int value);
-        m_IndustrialCompanyDemand.value = value;
-        reader.Read(out int value2);
-        m_IndustrialBuildingDemand.value = value2;
-        reader.Read(out int value3);
-        m_StorageCompanyDemand.value = value3;
-        reader.Read(out int value4);
-        m_StorageBuildingDemand.value = value4;
-        reader.Read(out int value5);
-        m_OfficeCompanyDemand.value = value5;
-        reader.Read(out int value6);
-        m_OfficeBuildingDemand.value = value6;
-        if (reader.context.version < Version.demandFactorCountSerialization)
+        NativeArray<int> nativeArray = new NativeArray<int>(13, Allocator.Temp);
+        reader.Read(nativeArray);
+        CollectionUtils.CopySafe(nativeArray, m_IndustrialDemandFactors);
+        reader.Read(nativeArray);
+        CollectionUtils.CopySafe(nativeArray, m_OfficeDemandFactors);
+        nativeArray.Dispose();
+    }
+    else
+    {
+        reader.Read(out int value7);
+        if (value7 == m_IndustrialDemandFactors.Length)
         {
-            NativeArray<int> nativeArray = new NativeArray<int>(13, Allocator.Temp);
-            reader.Read(nativeArray);
-            CollectionUtils.CopySafe(nativeArray, m_IndustrialDemandFactors);
-            reader.Read(nativeArray);
-            CollectionUtils.CopySafe(nativeArray, m_OfficeDemandFactors);
-            nativeArray.Dispose();
+            reader.Read(m_IndustrialDemandFactors);
+            reader.Read(m_OfficeDemandFactors);
         }
         else
         {
-            reader.Read(out int value7);
-            if (value7 == m_IndustrialDemandFactors.Length)
-            {
-                reader.Read(m_IndustrialDemandFactors);
-                reader.Read(m_OfficeDemandFactors);
-            }
-            else
-            {
-                NativeArray<int> nativeArray2 = new NativeArray<int>(value7, Allocator.Temp);
-                reader.Read(nativeArray2);
-                CollectionUtils.CopySafe(nativeArray2, m_IndustrialDemandFactors);
-                reader.Read(nativeArray2);
-                CollectionUtils.CopySafe(nativeArray2, m_OfficeDemandFactors);
-                nativeArray2.Dispose();
-            }
+            NativeArray<int> nativeArray2 = new NativeArray<int>(value7, Allocator.Temp);
+            reader.Read(nativeArray2);
+            CollectionUtils.CopySafe(nativeArray2, m_IndustrialDemandFactors);
+            reader.Read(nativeArray2);
+            CollectionUtils.CopySafe(nativeArray2, m_OfficeDemandFactors);
+            nativeArray2.Dispose();
         }
-        reader.Read(m_ResourceDemands);
-        reader.Read(m_IndustrialZoningDemands);
-        reader.Read(m_IndustrialBuildingDemands);
-        reader.Read(m_StorageBuildingDemands);
-        reader.Read(m_StorageCompanyDemands);
-        if (reader.context.version <= Version.companyDemandOptimization)
-        {
-            NativeArray<int> value8 = new NativeArray<int>(EconomyUtils.ResourceCount, Allocator.Temp);
-            reader.Read(value8);
-            reader.Read(value8);
-            if (reader.context.version <= Version.demandFactorCountSerialization)
-            {
-                reader.Read(value8);
-                reader.Read(value8);
-            }
-            reader.Read(value8);
-            reader.Read(value8);
-        }
-        reader.Read(m_FreeProperties);
-        reader.Read(m_Storages);
-        reader.Read(m_FreeStorages);
-        reader.Read(out m_LastIndustrialCompanyDemand);
-        reader.Read(out m_LastIndustrialBuildingDemand);
-        reader.Read(out m_LastStorageCompanyDemand);
-        reader.Read(out m_LastStorageBuildingDemand);
-        reader.Read(out m_LastOfficeCompanyDemand);
-        reader.Read(out m_LastOfficeBuildingDemand);
     }
-    */
+    reader.Read(m_ResourceDemands);
+    reader.Read(m_IndustrialZoningDemands);
+    reader.Read(m_IndustrialBuildingDemands);
+    reader.Read(m_StorageBuildingDemands);
+    reader.Read(m_StorageCompanyDemands);
+    if (reader.context.version <= Version.companyDemandOptimization)
+    {
+        NativeArray<int> value8 = new NativeArray<int>(EconomyUtils.ResourceCount, Allocator.Temp);
+        reader.Read(value8);
+        reader.Read(value8);
+        if (reader.context.version <= Version.demandFactorCountSerialization)
+        {
+            reader.Read(value8);
+            reader.Read(value8);
+        }
+        reader.Read(value8);
+        reader.Read(value8);
+    }
+    reader.Read(m_FreeProperties);
+    reader.Read(m_Storages);
+    reader.Read(m_FreeStorages);
+    reader.Read(out m_LastIndustrialCompanyDemand);
+    reader.Read(out m_LastIndustrialBuildingDemand);
+    reader.Read(out m_LastStorageCompanyDemand);
+    reader.Read(out m_LastStorageBuildingDemand);
+    reader.Read(out m_LastOfficeCompanyDemand);
+    reader.Read(out m_LastOfficeBuildingDemand);
+}
+*/
 
-    [Preserve]
+[Preserve]
     protected override void OnUpdate()
     {
         if (m_SimulationSystem.frameIndex % 128 != 66)
@@ -1370,10 +1439,15 @@ public class IndustrialDemandUISystem : UISystemBase
             updateIndustrialDemandJob.m_CachedDemands = m_CachedDemands;
             updateIndustrialDemandJob.m_Results = m_Results;
             updateIndustrialDemandJob.m_ExcludedResources = m_ExcludedResources;
+            updateIndustrialDemandJob.m_PopulationDemand = m_PopulationDemand;
+            updateIndustrialDemandJob.m_CityServicesDemand = m_CityServicesDemand;
+            updateIndustrialDemandJob.m_SpawnablesDemand = m_SpawnablesDemand;
+            updateIndustrialDemandJob.m_IndustrialDemand = m_IndustrialDemand;
             UpdateIndustrialDemandJob jobData = updateIndustrialDemandJob;
             base.Dependency = IJobExtensions.Schedule(jobData, JobUtils.CombineDependencies(base.Dependency, m_ReadDependencies, outJobHandle, deps, outJobHandle2, outJobHandle3, outJobHandle4, outJobHandle5, deps2, deps3));
             // since this is a copy of an actual simulation system but for UI purposes, then noone will read from us or wait for us
             base.Dependency.Complete();
+            m_InputDemand = industrialCompanyDatas.m_Demand; // InfoLoom
             //m_WriteDependencies = base.Dependency;
             //m_CountCompanyDataSystem.AddReader(base.Dependency);
             //m_ResourceSystem.AddPrefabsReader(base.Dependency);

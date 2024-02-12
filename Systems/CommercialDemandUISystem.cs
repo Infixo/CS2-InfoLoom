@@ -130,6 +130,10 @@ public class CommercialDemandUISystem : UISystemBase
 
         public NativeValue<Resource> m_ExcludedResources;
 
+        public NativeArray<float> m_EstimatedConsumptionPerCim;
+
+        public NativeArray<float> m_ActualConsumptionPerCim;
+
         public void Execute()
         {
             //Plugin.Log($"Execute: baseDem {m_DemandParameters.m_CommercialBaseDemand} freeRatio {m_DemandParameters.m_FreeCommercialProportion} baseConsSum {m_BaseConsumptionSum} resCons {m_EconomyParameters.m_ResourceConsumption} tourMult {m_EconomyParameters.m_TouristConsumptionMultiplier}");
@@ -147,9 +151,13 @@ public class CommercialDemandUISystem : UISystemBase
                 m_FreeProperties[resourceIndex] = 0;
                 // Infixo: uncomment to see consumption per citizen (useful for balancing purposes)
                 //if (estConsumption>0)
-                    //Plugin.Log($"Consumption per cim {iterator.resource}: est {(float)estConsumption/(float)population2:F2} act {(float)m_ActualConsumptions[resourceIndex]/(float)population2:F2}");
+                //Plugin.Log($"Consumption per cim {iterator.resource}: est {(float)estConsumption/(float)population2:F2} act {(float)m_ActualConsumptions[resourceIndex]/(float)population2:F2}");
+                // Calculate estimated and actual daily consumption per cim; for estimated, Tourists are excluded
+                m_EstimatedConsumptionPerCim[resourceIndex] = HouseholdBehaviorSystem.GetCitizenDailyConsumption(iterator.resource, ref m_EconomyParameters, m_ResourcePrefabs, ref m_ResourceDatas, m_BaseConsumptionSum);
+                m_ActualConsumptionPerCim[resourceIndex] = (float)m_ActualConsumptions[resourceIndex] / (float)(population2 + 1);
             }
             m_Consumptions[EconomyUtils.GetResourceIndex(Resource.Vehicles)] += DemandUtils.EstimateVehicleExtraDemand(population2);
+            m_EstimatedConsumptionPerCim[EconomyUtils.GetResourceIndex(Resource.Vehicles)] += DemandUtils.EstimateVehicleExtraDemand(1);
             for (int i = 0; i < m_DemandFactors.Length; i++)
             {
                 m_DemandFactors[i] = 0;
@@ -458,6 +466,17 @@ public class CommercialDemandUISystem : UISystemBase
 
     // InfoLoom
 
+    [DebugWatchValue]
+    public int BaseConsumptionSum => m_ResourceSystem.BaseConsumptionSum;
+
+    [ResourceArray]
+    [DebugWatchValue]
+    private NativeArray<float> m_EstimatedConsumptionPerCim;
+
+    [ResourceArray]
+    [DebugWatchValue]
+    private NativeArray<float> m_ActualConsumptionPerCim;
+
     private RawValueBinding m_uiResults;
     private RawValueBinding m_uiExResources;
 
@@ -539,6 +558,8 @@ public class CommercialDemandUISystem : UISystemBase
         RequireForUpdate(m_CommercialProcessDataQuery);
 
         // InfoLoom
+        m_EstimatedConsumptionPerCim = new NativeArray<float>(resourceCount, Allocator.Persistent);
+        m_ActualConsumptionPerCim = new NativeArray<float>(resourceCount, Allocator.Persistent);
         SetDefaults(); // there is no serialization, so init just for safety
         m_Results = new NativeArray<int>(10, Allocator.Persistent);
         m_ExcludedResources = new NativeValue<Resource>(Allocator.Persistent);
@@ -577,6 +598,8 @@ public class CommercialDemandUISystem : UISystemBase
         m_Consumption.Dispose();
         m_FreeProperties.Dispose();
         // InfoLoom
+        m_EstimatedConsumptionPerCim.Dispose();
+        m_ActualConsumptionPerCim.Dispose();
         m_Results.Dispose();
         m_ExcludedResources.Dispose();
         base.OnDestroy();
@@ -593,7 +616,10 @@ public class CommercialDemandUISystem : UISystemBase
         m_FreeProperties.Fill(0);
         //m_LastCompanyDemand = 0;
         //m_LastBuildingDemand = 0;
+        m_EstimatedConsumptionPerCim.Fill(0f);
+        m_ActualConsumptionPerCim.Fill(0f);
     }
+
     /* not used
     public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
     {
@@ -726,6 +752,8 @@ public class CommercialDemandUISystem : UISystemBase
             updateCommercialDemandJob.m_ActualConsumptions = m_CountConsumptionSystem.GetConsumptions(out var deps4);
             updateCommercialDemandJob.m_Results = m_Results;
             updateCommercialDemandJob.m_ExcludedResources = m_ExcludedResources;
+            updateCommercialDemandJob.m_EstimatedConsumptionPerCim = m_EstimatedConsumptionPerCim;
+            updateCommercialDemandJob.m_ActualConsumptionPerCim = m_ActualConsumptionPerCim;
             UpdateCommercialDemandJob jobData = updateCommercialDemandJob;
             IJobExtensions.Schedule(jobData, JobUtils.CombineDependencies(base.Dependency, m_ReadDependencies, deps4, outJobHandle, deps, outJobHandle2, deps2, deps3)).Complete();
             // since this is a copy of an actual simulation system but for UI purposes, then noone will read from us or wait for us
