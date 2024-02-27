@@ -86,8 +86,8 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         [ReadOnly]
         public BufferTypeHandle<Employee> m_EmployeeHandle;
 
-        [ReadOnly]
-        public BufferTypeHandle<Resources> m_ResourcesHandle;
+        //[ReadOnly]
+        //public BufferTypeHandle<Resources> m_ResourcesHandle;
 
         [ReadOnly]
         public ComponentTypeHandle<WorkProvider> m_WorkProviderHandle;
@@ -145,7 +145,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
             NativeArray<PropertyRenter> nativeArray3 = chunk.GetNativeArray(ref m_PropertyRenterHandle);
             NativeArray<WorkProvider> nativeArray4 = chunk.GetNativeArray(ref m_WorkProviderHandle);
             BufferAccessor<Employee> bufferAccessor = chunk.GetBufferAccessor(ref m_EmployeeHandle);
-            BufferAccessor<Resources> bufferResources = chunk.GetBufferAccessor(ref m_ResourcesHandle);
+            //BufferAccessor<Resources> bufferResources = chunk.GetBufferAccessor(ref m_ResourcesHandle);
             bool isExtractor = chunk.Has(ref m_ExtractorCompanyHandle);
             bool isIndustrial = chunk.Has(ref m_IndustrialCompanyHandle);
             bool isCommercial = chunk.Has(ref m_CommercialCompanyHandle);
@@ -389,7 +389,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
 
         m_SimulationSystem = base.World.GetOrCreateSystemManaged<SimulationSystem>(); // TODO: use UIUpdateState eventually
         //m_ResourceSystem = base.World.GetOrCreateSystemManaged<ResourceSystem>();
-        
+
         m_WorkplaceQuery = GetEntityQuery(new EntityQueryDesc
         {
             All = new ComponentType[3]
@@ -481,7 +481,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         CalculateWorkplaceDataJob jobData = default(CalculateWorkplaceDataJob);
         jobData.m_EntityHandle = __TypeHandle.__Unity_Entities_Entity_TypeHandle;
         jobData.m_EmployeeHandle = __TypeHandle.__Game_Companies_Employee_RO_BufferTypeHandle;
-        jobData.m_ResourcesHandle = __TypeHandle.__Game_Economy_Resources_RO_BufferTypeHandle; // Game.Economy.Resources
+        //jobData.m_ResourcesHandle = __TypeHandle.__Game_Economy_Resources_RO_BufferTypeHandle; // Game.Economy.Resources
         jobData.m_WorkProviderHandle = __TypeHandle.__Game_Companies_WorkProvider_RO_ComponentTypeHandle;
         jobData.m_PropertyRenterHandle = __TypeHandle.__Game_Buildings_PropertyRenter_RO_ComponentTypeHandle;
         jobData.m_ExtractorCompanyHandle = __TypeHandle.__Game_Companies_ExtractorCompany_RO_ComponentTypeHandle;
