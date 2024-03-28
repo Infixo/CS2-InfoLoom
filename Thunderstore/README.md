@@ -81,9 +81,9 @@ Currently:
 ## Technical
 
 ### Requirements and Compatibility
-- Cities Skylines II v1.0.19f1 or later; check GitHub or Discord if the mod is compatible with the latest game version.
+- Cities Skylines II v1.1.0f1 or later; check GitHub or Discord if the mod is compatible with the latest game version.
 - BepInEx 5.
-- HookUI v0.3.9 or later.
+- HookUI v1.1.0 or later.
 - The mod does NOT modify savefiles.
 - The mod does NOT modify any game systems.
 
@@ -95,6 +95,10 @@ Currently:
 - Nothing atm.
 
 ### Changelog
+- v0.8.3 (2024-03-21)
+  - Mod updated for v1.1 of the game.
+- v0.8.2 (2024-02-12)
+  - Debug Watches for demand and consumption.
 - v0.8.1 (2024-02-09)
   - Fixed: null reference in Editor Mode.
   - Fixed: student ratio in empty city.
