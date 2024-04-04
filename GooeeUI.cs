@@ -90,7 +90,7 @@ public partial class InfoLoomController : Controller<InfoLoomModel>
 public class InfoLoomGooeePluginWithControllers : IGooeePluginWithControllers, IGooeeStyleSheet
 {
     public string Name => "InfoLoom";
-    public string Version => "0.8.5";
+    public string Version => "0.9.0";
     public string ScriptResource => "InfoLoom.dist.ui.js";
     public string StyleResource => "InfoLoom.dist.ui.css";
 
