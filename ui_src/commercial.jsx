@@ -1,5 +1,5 @@
 import React from 'react'
-import {useDataUpdate} from 'hookui-framework'
+import useDataUpdate from './use-data-update.js'
 import $Panel from './panel'
   
 const DemandSection2 = ({title, value, factors }) => {
@@ -141,9 +141,13 @@ const $Commercial = ({ react }) => {
 	useDataUpdate(react, 'cityInfo.ilCommercialExRes', setExcludedResources)
 
 	const onClose = () => {
-		const data = { type: "toggle_visibility", id: 'infoloom.commercial' };
-		const event = new CustomEvent('hookui', { detail: data });
-		window.dispatchEvent(event);
+		// HookUI
+		//const data = { type: "toggle_visibility", id: 'infoloom.commercial' };
+		//const event = new CustomEvent('hookui', { detail: data });
+		//window.dispatchEvent(event);
+		// Gooee
+        engine.trigger("infoloom.infoloom.OnToggleVisibleCommercial");
+        engine.trigger("audio.playSound", "close-panel", 1);
 	};
 
 	return <$Panel react={react} title="Commercial Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.25, height: window.innerHeight * 0.26 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
@@ -158,10 +162,14 @@ const $Commercial = ({ react }) => {
 	</$Panel>
 };
 
+export default $Commercial
+
 // Registering the panel with HookUI so it shows up in the menu
+/*
 window._$hookui.registerPanel({
 	id: "infoloom.commercial",
 	name: "InfoLoom: Commercial Data",
 	icon: "Media/Game/Icons/ZoneCommercial.svg",
 	component: $Commercial
 });
+*/

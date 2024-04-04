@@ -36,9 +36,6 @@
 	<Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.props" />
 	<Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets" />
 	<ItemGroup>
-	  <Compile Remove="Patcher.cs" />
-	  <Compile Remove="Plugin.cs" />
-	  <Compile Remove="Utils.cs" />
 	  <Compile Remove="_not_used\Patcher.cs" />
 	  <Compile Remove="_not_used\Plugin.cs" />
 	  <Compile Remove="_not_used\Utils.cs" />
@@ -137,6 +134,8 @@
 	-->
 	<ItemGroup>
 	  <EmbeddedResource Include="ui_src/gooee-menu.json" />
+	  <EmbeddedResource Include="dist/ui.js" />
+	  <!-- No longer needed, will be all included in ui.js
 	  <EmbeddedResource Include="dist/demographics.js" />
 	  <EmbeddedResource Include="dist/workforce.js" />
 	  <EmbeddedResource Include="dist/workplaces.js" />
@@ -144,6 +143,7 @@
 	  <EmbeddedResource Include="dist/commercial.js" />
 	  <EmbeddedResource Include="dist/residential.js" />
 	  <EmbeddedResource Include="dist/industrial.js" />
+	  -->
 	</ItemGroup>
 
 	<!--

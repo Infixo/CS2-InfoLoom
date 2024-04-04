@@ -1,5 +1,5 @@
 import React from 'react'
-import {useDataUpdate} from 'hookui-framework'
+import useDataUpdate from './use-data-update.js'
 import $Panel from './panel'
 
 const AlignedParagraph = ({ left, right }) => {
@@ -86,9 +86,13 @@ const $Workforce = ({react}) => {
 	useDataUpdate(react, 'populationInfo.ilWorkforce', setWorkforce)
 	
 	const onClose = () => {
-		const data = { type: "toggle_visibility", id: 'infoloom.workforce' };
-		const event = new CustomEvent('hookui', { detail: data });
-		window.dispatchEvent(event);
+		// HookUI
+		//const data = { type: "toggle_visibility", id: 'infoloom.workforce' };
+		//const event = new CustomEvent('hookui', { detail: data });
+		//window.dispatchEvent(event);
+		// Gooee
+        engine.trigger("infoloom.infoloom.OnToggleVisibleWorkforce");
+        engine.trigger("audio.playSound", "close-panel", 1);
 	};
 
     const headers = {
@@ -129,10 +133,14 @@ const $Workforce = ({react}) => {
 
 }
 
+export default $Workforce
+
 // Registering the panel with HookUI so it shows up in the menu
+/*
 window._$hookui.registerPanel({
     id: "infoloom.workforce",
     name: "InfoLoom: Workforce",
 	icon: "Media/Game/Icons/Workers.svg",
     component: $Workforce
 })
+*/

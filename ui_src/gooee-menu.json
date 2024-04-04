@@ -1,0 +1,58 @@
+{
+	"Icon": "Media/Game/Icons/ZoningDemand.svg",
+	"IsFAIcon": false,
+	"Label": "InfoLoom",
+	"OnClick": "OnToggleVisible",
+	"OnClickKey": "Default",
+	"Children": [
+		{
+			"Icon": "Media/Game/Icons/Population.svg",
+			"IsFAIcon": false,
+			"Label": "Demographics",
+			"OnClick": "OnToggleVisibleDemographics",
+			"OnClickKey": "Default"
+		},
+		{
+			"Icon": "Media/Game/Icons/Workers.svg",
+			"IsFAIcon": false,
+			"Label": "Workforce",
+			"OnClick": "OnToggleVisibleWorkforce",
+			"OnClickKey": "Default"
+		},
+		{
+			"Icon": "Media/Game/Icons/Workers.svg",
+			"IsFAIcon": false,
+			"Label": "Workplaces",
+			"OnClick": "OnToggleVisibleWorkplaces",
+			"OnClickKey": "Default"
+		},
+		{
+			"Icon": "Media/Game/Icons/ZoningDemand.svg",
+			"IsFAIcon": false,
+			"Label": "Demand Factors",
+			"OnClick": "OnToggleVisibleDemand",
+			"OnClickKey": "Default"
+		},
+		{
+			"Icon": "Media/Game/Icons/ZoneResidential.svg",
+			"IsFAIcon": false,
+			"Label": "Residential Data",
+			"OnClick": "OnToggleVisibleResidential",
+			"OnClickKey": "Default"
+		},
+		{
+			"Icon": "Media/Game/Icons/ZoneCommercial.svg",
+			"IsFAIcon": false,
+			"Label": "Commercial Data",
+			"OnClick": "OnToggleVisibleCommercial",
+			"OnClickKey": "Default"
+		},
+		{
+			"Icon": "Media/Game/Icons/ZoneIndustrial.svg",
+			"IsFAIcon": false,
+			"Label": "Industrial and Office Data",
+			"OnClick": "OnToggleVisibleIndustrial",
+			"OnClickKey": "Default"
+		}
+	]
+}

@@ -1,5 +1,5 @@
 import React from 'react'
-import {useDataUpdate} from 'hookui-framework'
+import useDataUpdate from './use-data-update.js'
 import $Panel from './panel'
 
 const RowWithTwoColumns = ({left, right}) => {
@@ -152,9 +152,13 @@ const $Industrial = ({ react }) => {
 	useDataUpdate(react, 'cityInfo.ilIndustrialExRes', setExcludedResources)
 
 	const onClose = () => {
-		const data = { type: "toggle_visibility", id: 'infoloom.industrial' };
-		const event = new CustomEvent('hookui', { detail: data });
-		window.dispatchEvent(event);
+		// HookUI
+		//const data = { type: "toggle_visibility", id: 'infoloom.industrial' };
+		//const event = new CustomEvent('hookui', { detail: data });
+		//window.dispatchEvent(event);
+		// Gooee
+        engine.trigger("infoloom.infoloom.OnToggleVisibleIndustrial");
+        engine.trigger("audio.playSound", "close-panel", 1);
 	};
 
 	return <$Panel react={react} title="Industrial and Office Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.30, height: window.innerHeight * 0.32 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
@@ -169,10 +173,14 @@ const $Industrial = ({ react }) => {
 	</$Panel>
 };
 
+export default $Industrial
+
 // Registering the panel with HookUI so it shows up in the menu
+/*
 window._$hookui.registerPanel({
 	id: "infoloom.industrial",
 	name: "InfoLoom: Industrial and Office Data",
 	icon: "Media/Game/Icons/ZoneIndustrial.svg",
 	component: $Industrial
 });
+*/

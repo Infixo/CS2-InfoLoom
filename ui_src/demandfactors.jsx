@@ -1,5 +1,5 @@
 import React from 'react'
-import {useDataUpdate} from 'hookui-framework'
+import useDataUpdate from './use-data-update.js'
 import $Panel from './panel'
 
 const AlignedParagraph = ({ left, right }) => {
@@ -126,9 +126,13 @@ const $DemandFactors = ({ react }) => {
 	const buildingDemandFactors = titles.map((factor, index) => ({ factor, weight: buildingDemand[index] }));
 
 	const onClose = () => {
-		const data = { type: "toggle_visibility", id: 'infoloom.demandfactors' };
-		const event = new CustomEvent('hookui', { detail: data });
-		window.dispatchEvent(event);
+		// HookUI
+		//const data = { type: "toggle_visibility", id: 'infoloom.demandfactors' };
+		//const event = new CustomEvent('hookui', { detail: data });
+		//window.dispatchEvent(event);
+		// Gooee
+        engine.trigger("infoloom.infoloom.OnToggleVisibleDemand");
+        engine.trigger("audio.playSound", "close-panel", 1);
 	};
 
 	return <$Panel react={react} title="Demand" onClose={onClose} initialSize={{ width: window.innerWidth * 0.1, height: window.innerHeight * 0.83 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>
@@ -142,10 +146,14 @@ const $DemandFactors = ({ react }) => {
 	</$Panel>
 };
 
+export default $DemandFactors
+
 // Registering the panel with HookUI so it shows up in the menu
+/*
 window._$hookui.registerPanel({
 	id: "infoloom.demandfactors",
 	name: "InfoLoom: Demand Factors",
 	icon: "Media/Game/Icons/ZoningDemand.svg",
 	component: $DemandFactors
 });
+*/

@@ -1,5 +1,5 @@
 import React from 'react'
-import {useDataUpdate} from 'hookui-framework'
+import useDataUpdate from './use-data-update.js'
 import $Panel from './panel'
 
 const RowWithTwoColumns = ({left, right}) => {
@@ -129,9 +129,13 @@ const $Residential = ({ react }) => {
 	useDataUpdate(react, 'cityInfo.ilResidential', setResidentialData)
 
 	const onClose = () => {
-		const data = { type: "toggle_visibility", id: 'infoloom.residential' };
-		const event = new CustomEvent('hookui', { detail: data });
-		window.dispatchEvent(event);
+		// HookUI
+		//const data = { type: "toggle_visibility", id: 'infoloom.residential' };
+		//const event = new CustomEvent('hookui', { detail: data });
+		//window.dispatchEvent(event);
+		// Gooee
+        engine.trigger("infoloom.infoloom.OnToggleVisibleResidential");
+        engine.trigger("audio.playSound", "close-panel", 1);
 	};
 	
 	const homelessThreshold = Math.round(residentialData[12] * residentialData[13] / 1000);
@@ -172,10 +176,14 @@ const $Residential = ({ react }) => {
 	</$Panel>
 };
 
+export default $Residential
+
 // Registering the panel with HookUI so it shows up in the menu
+/*
 window._$hookui.registerPanel({
 	id: "infoloom.residential",
 	name: "InfoLoom: Residential Data",
 	icon: "Media/Game/Icons/ZoneResidential.svg",
 	component: $Residential
 });
+*/
