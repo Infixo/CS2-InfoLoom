@@ -8,112 +8,50 @@
 	-->
 
 	<PropertyGroup>
-		<OutputType>Library</OutputType>
-		<TargetFramework>net472</TargetFramework>
-		<Configurations>Debug;Release</Configurations>
-		<Version>0.9.0</Version>
-		<LangVersion>10.0</LangVersion>
-		
-		<!--The folder where Game.dll is located. Set it only if the game is not installed in the default location, otherwise keep it empty-->
-		<CustomManagedPath>C:\Steam\steamapps\common\Cities Skylines II\Cities2_Data\Managed</CustomManagedPath>
-		
-		<!--Path to the text file where PDX account data is stored which is required to publish the mod-->
-		<!--Keep it outside of project in order to not commit it or share accidentally-->
-		<!--The file should contain 2 lines:-->
-		<!--Your.PDX@Account.login-->
-		<!--Your-PDX-Account-Pa$$word-->
-		<PDXAccountDataPath>$(USERPROFILE)\Desktop\pdx_account.txt</PDXAccountDataPath>
-		
-		<!--The file where mod information which is required for publishing mod on PDX mods are stored-->
-		<PublishConfigurationPath>Properties\PublishConfiguration.xml</PublishConfigurationPath>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<AssemblyName>InfoLoom</AssemblyName>
+		<RootNamespace>InfoLoom</RootNamespace>
+		<Description>Extra City information and demographics data (population, education and workforce structure).</Description>
+		<Version>0.8.5</Version>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>latest</LangVersion>
+		<RestoreAdditionalProjectSources>
+			https://api.nuget.org/v3/index.json;
+			https://nuget.bepinex.dev/v3/index.json;
+			https://nuget.samboy.dev/v3/index.json
+		</RestoreAdditionalProjectSources>
+		<!-- Copies references we make to 3rd party library for distributions -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<!-- Suppress the version conflict warnings for System.Net.Http and System.IO.Compression -->
+		<NoWarn>MSB3277</NoWarn>
 	</PropertyGroup>
-	
-	<!--Imports must be after PropertyGroup block-->
-	<Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.props" />
-	<Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets" />
 
 	<!--
 		Uncomment this PropertyGroup to let the C# project read DLLs directory from your game directory,
 		and also allow the build to move the mod DLLs into the plugins directory for you
 	-->
-	<!--
 	<PropertyGroup>
 		<Cities2_Location>C:\Steam\steamapps\common\Cities Skylines II</Cities2_Location>
 	</PropertyGroup>
-	-->
 
 	<!--
 		This is all the references to the DLLs directly from your game directory. The Cities2_Location property
 		above needs to be uncommented for this to work
 	-->
-	<!--
 	<ItemGroup>
         <Reference Include="$(Cities2_Location)\Cities2_Data\Managed\Colossal.*.dll" Private="False" />
         <Reference Include="$(Cities2_Location)\Cities2_Data\Managed\Game.dll" Private="False" />
         <Reference Include="$(Cities2_Location)\Cities2_Data\Managed\Unity.*.dll" Private="False" />
-	</ItemGroup>
-	-->
-	
-	<ItemGroup>
-		<Reference Include="Game">
-			<Private>false</Private>
+		<Reference Include="Gooee">
+		  <HintPath>$(Cities2_Location)\BepInEx\plugins\Gooee\Gooee.dll</HintPath>
 		</Reference>
-		<Reference Include="Colossal.Core">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Colossal.Logging">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Colossal.IO.AssetDatabase">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Colossal.UI">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Colossal.UI.Binding">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Colossal.Localization">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="UnityEngine.CoreModule">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Unity.Burst">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Unity.Collections">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Unity.Entities">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Unity.Mathematics">
-			<Private>false</Private>
-		</Reference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Reference Update="System">
-			<Private>false</Private>
-		</Reference>
-		<Reference Update="System.Core">
-			<Private>false</Private>
-		</Reference>
-		<Reference Update="System.Data">
-			<Private>false</Private>
-		</Reference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="$(ModPropsFile)" Link="Properties\Mod.props" />
-		<None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
 	</ItemGroup>
 
 	<!--
 		If you want to embed things directly into your mod, instead of shipping multiple files
 	-->
 	<ItemGroup>
+	  <EmbeddedResource Include="ui_src/gooee-menu.json" />
 	  <EmbeddedResource Include="dist/demographics.js" />
 	  <EmbeddedResource Include="dist/workforce.js" />
 	  <EmbeddedResource Include="dist/workplaces.js" />
@@ -135,33 +73,27 @@
 		<Reference Include="libcs2/Unity.*.dll" Private="False" />
 	</ItemGroup>
 	-->
-
+	
 	<!--
 		Everything related to BepInEx and Harmony
 	-->
 	<ItemGroup>
-		<!---
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.0.0" />
 		<PackageReference Include="HarmonyX" Version="2.10.2"></PackageReference>
 		<PackageReference Include="UnityEngine.Modules" Version="2022.3.7" IncludeAssets="compile" />
-		-->
-		<PackageReference Include="Lib.Harmony" Version="2.2.2" />
-		<PackageReference Include="HookUILib" Version="0.1.0" />
+		<!--<PackageReference Include="HookUILib" Version="0.1.0" />-->
 	</ItemGroup>
 
 	<!-- Set the default value for BepInExVersion -->
-	<!--
 	<PropertyGroup>
 		<BepInExVersion Condition="'$(BepInExVersion)' == ''">5</BepInExVersion>
 	</PropertyGroup>
-	-->
 
 	<!--
 		These ItemGroups and PropertyGroups gives you compatibility with both BepInEx 5 and 6.
 		Mainly for the purposes of being able to distribute your mods on Thunderstore, and
 		making it easy to upgrade in the future to proper versions.
 	-->
-	<!--
 	<ItemGroup Condition="'$(BepInExVersion)' == '6'">
 		<PackageReference Include="BepInEx.Unity.Mono" Version="6.0.0-be.*" />
 	</ItemGroup>
@@ -177,15 +109,12 @@
 	<ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
 		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
 	</ItemGroup>
-	-->
-	
+
 	<!--
 		This will try to copy the resulting DLLs from builds directly into your game directory,
 		as long as we're not in CI
 	-->
-	<!--
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(CI)' != 'true'">
 		<Exec Command="if not exist &quot;$(Cities2_Location)\BepInEx\plugins\$(ProjectName)&quot; mkdir &quot;$(Cities2_Location)\BepInEx\plugins\$(ProjectName)&quot;&#xD;&#xA;copy /Y &quot;$(TargetDir)0Harmony.dll&quot; &quot;$(Cities2_Location)\BepInEx\plugins\$(ProjectName)\0Harmony.dll&quot;&#xD;&#xA;copy /Y &quot;$(TargetDir)$(ProjectName).dll&quot; &quot;$(Cities2_Location)\BepInEx\plugins\$(ProjectName)\$(ProjectName).dll&quot;" />
 	</Target>
-	-->
 </Project>
