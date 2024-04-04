@@ -18,11 +18,11 @@ using System;
 using Game.Buildings;
 using Game;
 
-namespace InfoLoom;
+namespace InfoLoom.Systems;
 
 // This System is based on PopulationInfoviewUISystem by CO
 [CompilerGenerated]
-public class PopulationStructureUISystem : UISystemBase
+public partial class PopulationStructureUISystem : UISystemBase
 {
     /// <summary>
     /// Holds info about population at Age
@@ -62,7 +62,7 @@ public class PopulationStructureUISystem : UISystemBase
         writer.TypeEnd();
     }
 
-    [BurstCompile]
+    //[BurstCompile]
     private struct PopulationStructureJob : IJobChunk
     {
         [ReadOnly]
@@ -232,7 +232,9 @@ public class PopulationStructureUISystem : UISystemBase
                         case 3: info.School3++; break;
                         case 4: info.School4++; break;
                         default:
-                            Plugin.Log($"WARNING: incorrect school level, {studentArray[i].m_Level}");
+#if DEBUG
+                            Mod.log.Info($"WARNING: incorrect school level, {studentArray[i].m_Level}");
+#endif
                             break;
                     }
                 }
@@ -365,7 +367,7 @@ public class PopulationStructureUISystem : UISystemBase
     // 240209 Set gameMode to avoid errors in the Editor
     public override GameMode gameMode => GameMode.Game;
 
-    [Preserve]
+    //[Preserve]
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -408,10 +410,10 @@ public class PopulationStructureUISystem : UISystemBase
         // allocate memory for results
         m_Totals = new NativeArray<int>(10, Allocator.Persistent);
         m_Results = new NativeArray<PopulationAtAgeInfo>(110, Allocator.Persistent); // INFIXO: TODO
-        Plugin.Log("PopulationStructureUISystem created.");
+        Mod.log.Info("PopulationStructureUISystem created.");
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnDestroy()
     {
         m_Totals.Dispose();
@@ -585,7 +587,7 @@ public class PopulationStructureUISystem : UISystemBase
         __TypeHandle.__AssignHandles(ref base.CheckedStateRef);
     }
 
-    [Preserve]
+    //[Preserve]
     public PopulationStructureUISystem()
     {
     }
@@ -593,7 +595,7 @@ public class PopulationStructureUISystem : UISystemBase
     public static void LogChunk(in ArchetypeChunk chunk)
     {
         var componentTypes = chunk.Archetype.GetComponentTypes();
-        Plugin.Log($"chunk: {chunk.Count}, {string.Join(", ", componentTypes.Select(ct => ct.GetType().GetTypeInfo().FullName        ))}");
+        Mod.log.Info($"chunk: {chunk.Count}, {string.Join(", ", componentTypes.Select(ct => ct.GetType().GetTypeInfo().FullName        ))}");
     }
 
     public string[] ListEntityComponents(Entity entity)
@@ -635,10 +637,10 @@ public class PopulationStructureUISystem : UISystemBase
         }
         entities.Dispose();
         // show the dictionary
-        Plugin.Log("=== Components in selected chunks ===");
+        Mod.log.Info("=== Components in selected chunks ===");
         foreach (var pair in CompDict)
         {
-            Plugin.Log($"{pair.Key} {pair.Value}");
+            Mod.log.Info($"{pair.Key} {pair.Value}");
         }
     }
 }

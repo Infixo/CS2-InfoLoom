@@ -10,10 +10,10 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine.Scripting;
 
-namespace InfoLoom;
+namespace InfoLoom.Systems;
 
 [CompilerGenerated]
-public class BuildingDemandUISystem : UISystemBase
+public partial class BuildingDemandUISystem : UISystemBase
 {
     // systems to get the data from
     private SimulationSystem m_SimulationSystem;
@@ -50,7 +50,7 @@ public class BuildingDemandUISystem : UISystemBase
     // 240209 Set gameMode to avoid errors in the Editor
     public override GameMode gameMode => GameMode.Game;
 
-    [Preserve]
+    //[Preserve]
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -71,6 +71,7 @@ public class BuildingDemandUISystem : UISystemBase
 
         // allocate storage
         m_BuildingDemand = new NativeArray<int>(7, Allocator.Persistent);
+        Mod.log.Info("BuildingDemandUISystem created.");
     }
 
     protected override void OnUpdate()
@@ -92,7 +93,7 @@ public class BuildingDemandUISystem : UISystemBase
         m_uiBuildingDemand.Update();
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnDestroy()
     {
         m_BuildingDemand.Dispose();

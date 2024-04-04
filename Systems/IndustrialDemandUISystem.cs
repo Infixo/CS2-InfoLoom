@@ -25,12 +25,12 @@ using Game.UI;
 using Colossal.UI.Binding;
 using System.Collections.Generic;
 
-namespace InfoLoom;
+namespace InfoLoom.Systems;
 
 [CompilerGenerated]
-public class IndustrialDemandUISystem : UISystemBase
+public partial class IndustrialDemandUISystem : UISystemBase
 {
-    [BurstCompile]
+    //[BurstCompile]
     private struct UpdateIndustrialDemandJob : IJob
     {
         [ReadOnly]
@@ -1099,7 +1099,7 @@ public class IndustrialDemandUISystem : UISystemBase
         m_ReadDependencies = JobHandle.CombineDependencies(m_ReadDependencies, reader);
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -1172,10 +1172,10 @@ public class IndustrialDemandUISystem : UISystemBase
             binder.ArrayEnd();
         }));
 
-        Plugin.Log("IndustrialDemandUISystem created.");
+        Mod.log.Info("IndustrialDemandUISystem created.");
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnDestroy()
     {
         m_IndustrialCompanyDemand.Dispose();
@@ -1336,7 +1336,7 @@ public void Deserialize<TReader>(TReader reader) where TReader : IReader
 }
 */
 
-[Preserve]
+    //[Preserve]
     protected override void OnUpdate()
     {
         if (m_SimulationSystem.frameIndex % 128 != 66)
@@ -1479,7 +1479,7 @@ public void Deserialize<TReader>(TReader reader) where TReader : IReader
         __TypeHandle.__AssignHandles(ref base.CheckedStateRef);
     }
 
-    [Preserve]
+    //[Preserve]
     public IndustrialDemandUISystem()
     {
     }

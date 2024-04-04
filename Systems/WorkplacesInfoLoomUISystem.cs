@@ -17,12 +17,12 @@ using Game.UI.InGame; // EmploymentData TODO: remove when not used
 using Game.Economy; // Resources
 using Game.Citizens;
 
-namespace InfoLoom;
+namespace InfoLoom.Systems;
 
 // This system is based on game's WorkplacesInfoviewUISystem
 
 [CompilerGenerated]
-public class WorkplacesInfoLoomUISystem : UISystemBase
+public partial class WorkplacesInfoLoomUISystem : UISystemBase
 {
     private struct WorkplacesAtLevelInfo
     {
@@ -77,7 +77,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
     }
     */
 
-    [BurstCompile]
+    //[BurstCompile]
     private struct CalculateWorkplaceDataJob : IJobChunk
     {
         [ReadOnly]
@@ -382,7 +382,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
     // 240209 Set gameMode to avoid errors in the Editor
     public override GameMode gameMode => GameMode.Game;
 
-    [Preserve]
+    //[Preserve]
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -442,10 +442,10 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
             binder.ArrayEnd();
         }));
 
-        Plugin.Log("WorkplacesInfoLoomUISystem created.");
+        Mod.log.Info("WorkplacesInfoLoomUISystem created.");
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnDestroy()
     {
         //m_IntResults.Dispose();
@@ -591,7 +591,7 @@ public class WorkplacesInfoLoomUISystem : UISystemBase
         __TypeHandle.__AssignHandles(ref base.CheckedStateRef);
     }
 
-    [Preserve]
+    //[Preserve]
     public WorkplacesInfoLoomUISystem()
     {
     }

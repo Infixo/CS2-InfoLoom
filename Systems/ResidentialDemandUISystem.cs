@@ -24,12 +24,12 @@ using Game.Simulation;
 using Game.UI;
 using Colossal.UI.Binding;
 
-namespace InfoLoom;
+namespace InfoLoom.Systems;
 
 [CompilerGenerated]
-public class ResidentialDemandUISystem : UISystemBase
+public partial class ResidentialDemandUISystem : UISystemBase
 {
-    [BurstCompile]
+    //[BurstCompile]
     private struct UpdateResidentialDemandJob : IJob
     {
         [ReadOnly]
@@ -415,7 +415,7 @@ public class ResidentialDemandUISystem : UISystemBase
         m_ReadDependencies = JobHandle.CombineDependencies(m_ReadDependencies, reader);
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -447,10 +447,10 @@ public class ResidentialDemandUISystem : UISystemBase
             binder.ArrayEnd();
         }));
 
-        Plugin.Log("ResidentialDemandUISystem created.");
+        Mod.log.Info("ResidentialDemandUISystem created.");
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnDestroy()
     {
         m_HouseholdDemand.Dispose();
@@ -544,7 +544,7 @@ public class ResidentialDemandUISystem : UISystemBase
     }
     */
 
-    [Preserve]
+    //[Preserve]
     protected override void OnUpdate()
     {
         if (m_SimulationSystem.frameIndex % 128 != 11)
@@ -619,7 +619,7 @@ public class ResidentialDemandUISystem : UISystemBase
         __TypeHandle.__AssignHandles(ref base.CheckedStateRef);
     }
 
-    [Preserve]
+    //[Preserve]
     public ResidentialDemandUISystem()
     {
     }

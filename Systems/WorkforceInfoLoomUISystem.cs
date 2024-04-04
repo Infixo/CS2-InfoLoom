@@ -21,10 +21,10 @@ using Game;
 using Game.UI;
 using Game.Simulation; // TODO: use UIUpdateState and Advance() eventully...
 
-namespace InfoLoom;
+namespace InfoLoom.Systems;
 
 [CompilerGenerated]
-public class WorkforceInfoLoomUISystem : UISystemBase
+public partial class WorkforceInfoLoomUISystem : UISystemBase
 {
     private struct WorkforceAtLevelInfo
     {
@@ -62,7 +62,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
     }
 
 
-    [BurstCompile]
+    //[BurstCompile]
     private struct CountEmploymentJob : IJobChunk
     {
         [ReadOnly]
@@ -538,7 +538,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
     }
     */
 
-    [Preserve]
+    //[Preserve]
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -592,10 +592,10 @@ public class WorkforceInfoLoomUISystem : UISystemBase
             binder.ArrayEnd();
         }));
 
-        Plugin.Log("WorkplacesInfoLoomUISystem created.");
+        Mod.log.Info("WorkplacesInfoLoomUISystem created.");
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnDestroy()
     {
         m_Workers.Dispose();
@@ -655,7 +655,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
     }
     */
 
-    [Preserve]
+    //[Preserve]
     protected override void OnUpdate()
     {
         if (m_SimulationSystem.frameIndex % 128 != 33)
@@ -786,7 +786,7 @@ public class WorkforceInfoLoomUISystem : UISystemBase
         __TypeHandle.__AssignHandles(ref base.CheckedStateRef);
     }
 
-    [Preserve]
+    //[Preserve]
     public WorkforceInfoLoomUISystem()
     {
     }

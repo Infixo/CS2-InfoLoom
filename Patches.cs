@@ -13,6 +13,7 @@ namespace InfoLoom;
 [HarmonyPatch]
 static class GamePatches
 {
+    /* not used
     [HarmonyPatch(typeof(Game.Common.SystemOrder), "Initialize")]
     [HarmonyPostfix]
     public static void Initialize_Postfix(UpdateSystem updateSystem)
@@ -25,6 +26,7 @@ static class GamePatches
         updateSystem.UpdateAt<InfoLoom.ResidentialDemandUISystem>(SystemUpdatePhase.UIUpdate);
         updateSystem.UpdateAt<InfoLoom.IndustrialDemandUISystem>(SystemUpdatePhase.UIUpdate);
     }
+    */
 
     [HarmonyPatch(typeof(Game.UI.InGame.CityInfoUISystem), "WriteDemandFactors")]
     [HarmonyPrefix]

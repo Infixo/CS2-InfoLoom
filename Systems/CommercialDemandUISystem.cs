@@ -25,12 +25,12 @@ using Colossal.UI.Binding;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace InfoLoom;
+namespace InfoLoom.Systems;
 
 [CompilerGenerated]
-public class CommercialDemandUISystem : UISystemBase
+public partial class CommercialDemandUISystem : UISystemBase
 {
-    [BurstCompile]
+    //[BurstCompile]
     private struct UpdateCommercialDemandJob : IJob
     {
         [ReadOnly]
@@ -529,7 +529,7 @@ public class CommercialDemandUISystem : UISystemBase
         m_ReadDependencies = JobHandle.CombineDependencies(m_ReadDependencies, reader);
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -584,10 +584,10 @@ public class CommercialDemandUISystem : UISystemBase
             binder.ArrayEnd();
         }));
 
-        Plugin.Log("CommercialDemandUISystem created.");
+        Mod.log.Info("CommercialDemandUISystem created.");
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnDestroy()
     {
         //m_CompanyDemand.Dispose();
@@ -689,7 +689,8 @@ public class CommercialDemandUISystem : UISystemBase
         reader.Read(out m_LastBuildingDemand);
     }
     */
-    [Preserve]
+
+    //[Preserve]
     protected override void OnUpdate()
     {
         if (m_SimulationSystem.frameIndex % 128 != 55)
@@ -792,7 +793,7 @@ public class CommercialDemandUISystem : UISystemBase
         __TypeHandle.__AssignHandles(ref base.CheckedStateRef);
     }
 
-    [Preserve]
+    //[Preserve]
     public CommercialDemandUISystem()
     {
     }
