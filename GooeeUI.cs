@@ -28,55 +28,55 @@ public partial class InfoLoomController : Controller<InfoLoomModel>
     }
 
     [OnTrigger]
-    private void OnToggleVisible()
+    private void OnToggleVisible(string key)
     {
         // stub method to avoid errors
     }
 
     [OnTrigger]
-    private void OnToggleVisibleDemographics()
+    private void OnToggleVisibleDemographics(string key)
     {
         base.Model.IsVisibleDemographics = !Model.IsVisibleDemographics;
         base.TriggerUpdate();
     }
 
     [OnTrigger]
-    private void OnToggleVisibleWorkforce()
+    private void OnToggleVisibleWorkforce(string key)
     {
         base.Model.IsVisibleWorkforce = !Model.IsVisibleWorkforce;
         base.TriggerUpdate();
     }
 
     [OnTrigger]
-    private void OnToggleVisibleWorkplaces()
+    private void OnToggleVisibleWorkplaces(string key)
     {
         base.Model.IsVisibleWorkplaces = !Model.IsVisibleWorkplaces;
         base.TriggerUpdate();
     }
 
     [OnTrigger]
-    private void OnToggleVisibleDemand()
+    private void OnToggleVisibleDemand(string key)
     {
         base.Model.IsVisibleDemand = !Model.IsVisibleDemand;
         base.TriggerUpdate();
     }
 
     [OnTrigger]
-    private void OnToggleVisibleResidential()
+    private void OnToggleVisibleResidential(string key)
     {
         base.Model.IsVisibleResidential = !Model.IsVisibleResidential;
         base.TriggerUpdate();
     }
 
     [OnTrigger]
-    private void OnToggleVisibleCommercial()
+    private void OnToggleVisibleCommercial(string key)
     {
         base.Model.IsVisibleCommercial = !Model.IsVisibleCommercial;
         base.TriggerUpdate();
     }
 
     [OnTrigger]
-    private void OnToggleVisibleIndustrial()
+    private void OnToggleVisibleIndustrial(string key)
     {
         base.Model.IsVisibleIndustrial = !Model.IsVisibleIndustrial;
         base.TriggerUpdate();
@@ -87,13 +87,15 @@ public partial class InfoLoomController : Controller<InfoLoomModel>
 [ControllerTypes(typeof(InfoLoomController))]
 //[PluginToolbar(typeof(InfoLoom_Controller), "OnToggleVisible", "InfoLoom", "Media/Game/Icons/Workers.svg")] // generic hook version
 [PluginToolbar(typeof(InfoLoomController), "InfoLoom.ui_src.gooee-menu.json")]
-public class InfoLoomGooeePluginWithControllers : IGooeePluginWithControllers
+public class InfoLoomGooeePluginWithControllers : IGooeePluginWithControllers, IGooeeStyleSheet
 {
     public string Name => "InfoLoom";
     public string Version => "0.8.5";
     public string ScriptResource => "InfoLoom.dist.ui.js";
+    public string StyleResource => "InfoLoom.dist.ui.css";
 
     public IController[] Controllers { get; set; }
+
 }
 
 // MENU

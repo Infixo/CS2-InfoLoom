@@ -32,6 +32,7 @@ build: clean restore build-ui
 	
 dev-ui:
 	@npx esbuild ui_src/ui.jsx --bundle --outfile=dist/ui.js
+	copy dist\ui.js "C:\Users\Grzegorz\AppData\LocalLow\Colossal Order\Cities Skylines II\Mods\Gooee\Plugins\InfoLoom.js"
 
 dev-demand:
 	@npx esbuild ui_src/demandfactors.jsx --bundle --outfile=dist/demandfactors.js

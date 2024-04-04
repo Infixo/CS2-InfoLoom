@@ -134,7 +134,7 @@ const $Residential = ({ react }) => {
 		//const event = new CustomEvent('hookui', { detail: data });
 		//window.dispatchEvent(event);
 		// Gooee
-        engine.trigger("infoloom.infoloom.OnToggleVisibleResidential");
+        engine.trigger("infoloom.infoloom.OnToggleVisibleResidential", "Residential");
         engine.trigger("audio.playSound", "close-panel", 1);
 	};
 	

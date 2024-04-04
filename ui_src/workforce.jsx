@@ -65,7 +65,7 @@ const WorkforceLevel = ({levelColor, levelName, levelValues, total}) => {
     <div class="labels_L7Q row_S2v" style={{width: '99%', paddingTop: '1rem', paddingBottom: '1rem'}}>
 		<div style={{width: '1%'}}></div>
 		<div style={{ display: 'flex', alignItems: 'center', width: '22%' }}>
-			<div class="symbol_aAH" style={{backgroundColor: levelColor }}></div>
+			<div class="symbol_aAH" style={{backgroundColor: levelColor, width: '1.2em' }}></div>
 			<div>{levelName}</div>
 		</div>
 		  <div class="row_S2v"           style={{width: '11%', justifyContent: 'center'}}>{levelValues["total"]}</div>
@@ -91,7 +91,7 @@ const $Workforce = ({react}) => {
 		//const event = new CustomEvent('hookui', { detail: data });
 		//window.dispatchEvent(event);
 		// Gooee
-        engine.trigger("infoloom.infoloom.OnToggleVisibleWorkforce");
+        engine.trigger("infoloom.infoloom.OnToggleVisibleWorkforce", "Workforce");
         engine.trigger("audio.playSound", "close-panel", 1);
 	};
 

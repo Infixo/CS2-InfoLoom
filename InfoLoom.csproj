@@ -134,6 +134,7 @@
 	-->
 	<ItemGroup>
 	  <EmbeddedResource Include="ui_src/gooee-menu.json" />
+	  <EmbeddedResource Include="dist/ui.css" />
 	  <EmbeddedResource Include="dist/ui.js" />
 	  <!-- No longer needed, will be all included in ui.js
 	  <EmbeddedResource Include="dist/demographics.js" />

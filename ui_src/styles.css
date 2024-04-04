@@ -1,0 +1,4 @@
+/* Simple fix to make old version of InfoLoom compatible with Gooee */
+.gooee .fixdiv div {
+  width: initial;
+}

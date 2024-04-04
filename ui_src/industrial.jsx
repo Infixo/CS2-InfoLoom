@@ -157,7 +157,7 @@ const $Industrial = ({ react }) => {
 		//const event = new CustomEvent('hookui', { detail: data });
 		//window.dispatchEvent(event);
 		// Gooee
-        engine.trigger("infoloom.infoloom.OnToggleVisibleIndustrial");
+        engine.trigger("infoloom.infoloom.OnToggleVisibleIndustrial", "Industrial");
         engine.trigger("audio.playSound", "close-panel", 1);
 	};
 

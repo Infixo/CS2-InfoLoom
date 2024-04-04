@@ -33,7 +33,7 @@ const Resizer = ({ onMouseDown }) => {
 
 const $CloseButton = ({onClick}) => {
     return <button className="button_bvQ button_bvQ close-button_wKK" onClick={onClick}>
-        <div className="tinted-icon_iKo icon_PhD" style={{maskImage: 'url(Media/Glyphs/Close.svg)'}}></div>
+        <div className="tinted-icon_iKo" style={{maskImage: 'url(Media/Glyphs/Close.svg)', width: 'var(--iconWidth)', height: 'var(--iconHeight)' }}></div>
     </button>
 }
 

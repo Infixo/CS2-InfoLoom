@@ -146,7 +146,7 @@ const $Commercial = ({ react }) => {
 		//const event = new CustomEvent('hookui', { detail: data });
 		//window.dispatchEvent(event);
 		// Gooee
-        engine.trigger("infoloom.infoloom.OnToggleVisibleCommercial");
+        engine.trigger("infoloom.infoloom.OnToggleVisibleCommercial", "Commercial");
         engine.trigger("audio.playSound", "close-panel", 1);
 	};
 
