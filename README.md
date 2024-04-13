@@ -82,51 +82,15 @@ Currently:
 
 ### Requirements and Compatibility
 - Cities Skylines II v1.1.0f1 or later; check GitHub or Discord if the mod is compatible with the latest game version.
-- BepInEx 5.
-- HookUI v1.1.0 or later.
+- Gooee framework by Cities2Modding.
 - The mod does NOT modify savefiles.
 - The mod does NOT modify any game systems.
-
-### Installation
-1. Place the `InfoLoom.dll` file in your BepInEx `Plugins` folder.
-2. The config file is automatically created in BepInEx/config folder when the game is run once.
 
 ### Known Issues
 - Nothing atm.
 
-### Changelog
-- v0.8.3 (2024-03-21)
-  - Mod updated for v1.1 of the game.
-- v0.8.2 (2024-02-12)
-  - Debug Watches for demand and consumption.
-- v0.8.1 (2024-02-09)
-  - Fixed: null reference in Editor Mode.
-  - Fixed: student ratio in empty city.
-  - Fixed: demographics bars sometimes going beyond the window.
-- v0.8.0 (2024-02-04)
-  - New feature: industrial and office data.
-  - New feature: household demand and student chance.
-  - Fixed: demographics proper scaling.
-- v0.7.0 (2024-01-14)
-  - New features: number of commuters as employees, unemployment and structures as percentages, number of companies.
-  - Fixed: Incorrect counting of Office and Leisure jobs.
-  - Fixed: Issue with Asset Editor.
-- v0.6.0 (2024-01-04)
-  - New feature: residential data.
-- v0.5.0 (2024-01-02)
-  - New feature: commercial data, homeless count.
-  - Population bars in Demographics window are scalable now.
-  - Fixed: Demographics now correctly shows Tourists and Commuters.
-- v0.4.1 (2023-12-22)
-  - New feature: demographics.
-- v0.3.0 (2023-12-20)
-  - New features: worforce structure and workplaces distribution.
-- v0.2.2 (2023-12-17)
-  - Demand factors window is reformatted, to be more aligned with game's visual style.
-  - New features: shows all factors, building demand and resources consumption.
-- v0.1.0 (2023-12-16)
-  - Initial build, includes Demand Factors.
+### [Changelog](./CHANGELOG.md)
 
 ### Support
 - Please report bugs and issues on [GitHub](https://github.com/Infixo/CS2-InfoLoom).
-- You may also leave comments on [Discord1](https://discord.com/channels/1169011184557637825/1198627819475976263) or [Discord2](https://discord.com/channels/1024242828114673724/1185672922212347944).
+- You may also leave comments on [Discord](https://discord.com/channels/1169011184557637825/1198627819475976263).
