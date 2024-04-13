@@ -166,7 +166,7 @@ public partial class WorkplacesInfoLoomUISystem : UISystemBase
                            && this.m_SpawnableBuildingFromEntity.TryGetComponent((Entity)prefabRef2, out SpawnableBuildingData componentData2) ? (int)componentData2.m_Level : 1;
                 }
                 // this holds workplaces for each level
-                EmploymentData workplacesData = EmploymentData.GetWorkplacesData(workProvider.m_MaxWorkers, buildingLevel, workplaceData.m_Complexity);\
+                EmploymentData workplacesData = EmploymentData.GetWorkplacesData(workProvider.m_MaxWorkers, buildingLevel, workplaceData.m_Complexity);
                 // this holds employees for each level
                 EmploymentData employeesData = EmploymentData.GetEmployeesData(employees, workplacesData.total - employees.Length);
  
