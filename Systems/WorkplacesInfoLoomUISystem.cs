@@ -145,6 +145,7 @@ public partial class WorkplacesInfoLoomUISystem : UISystemBase
             NativeArray<PropertyRenter> nativeArray3 = chunk.GetNativeArray(ref m_PropertyRenterHandle);
             NativeArray<WorkProvider> nativeArray4 = chunk.GetNativeArray(ref m_WorkProviderHandle);
             BufferAccessor<Employee> bufferAccessor = chunk.GetBufferAccessor(ref m_EmployeeHandle);
+
             //BufferAccessor<Resources> bufferResources = chunk.GetBufferAccessor(ref m_ResourcesHandle);
             bool isExtractor = chunk.Has(ref m_ExtractorCompanyHandle);
             bool isIndustrial = chunk.Has(ref m_IndustrialCompanyHandle);
@@ -158,40 +159,28 @@ public partial class WorkplacesInfoLoomUISystem : UISystemBase
                 DynamicBuffer<Employee> employees = bufferAccessor[i];
                 PrefabRef prefabRef = nativeArray2[i];
                 WorkplaceData workplaceData = m_WorkplaceDataFromEntity[prefabRef.m_Prefab];
+
                 if (chunk.Has(ref m_PropertyRenterHandle))
                 {
-                    PropertyRenter propertyRenter = nativeArray3[i];
-                    PrefabRef prefabRef2 = m_PrefabRefFromEntity[propertyRenter.m_Property];
-                    if (m_SpawnableBuildingFromEntity.HasComponent(prefabRef2.m_Prefab))
-                    {
-                        buildingLevel = m_SpawnableBuildingFromEntity[prefabRef2.m_Prefab].m_Level;
-                    }
+                    buildingLevel = this.m_PrefabRefFromEntity.TryGetComponent(nativeArray3[i].m_Property, out PrefabRef prefabRef2)
+                           && this.m_SpawnableBuildingFromEntity.TryGetComponent((Entity)prefabRef2, out SpawnableBuildingData componentData2) ? (int)componentData2.m_Level : 1;
                 }
                 // this holds workplaces for each level
-                EmploymentData workplacesData = EmploymentData.GetWorkplacesData(workProvider.m_MaxWorkers, buildingLevel, workplaceData.m_Complexity);
+                EmploymentData workplacesData = EmploymentData.GetWorkplacesData(workProvider.m_MaxWorkers, buildingLevel, workplaceData.m_Complexity);\
                 // this holds employees for each level
                 EmploymentData employeesData = EmploymentData.GetEmployeesData(employees, workplacesData.total - employees.Length);
-                //m_IntResults[0] += workplacesData.total;
-                //m_IntResults[1] += employees.Length;
-                //m_EmploymentDataResults[0] += workplacesData;
-                //m_EmploymentDataResults[1] += employeesData;
-
-                //Plugin.Log($"company {isCommercial}/{isMoney}/{isIndustrial}/{isExtractor}/{isOffice}:{lastRes} " +
-                //    $"{workplacesData.uneducated} {workplacesData.poorlyEducated} {workplacesData.educated} {workplacesData.wellEducated} {workplacesData.highlyEducated}");
-
+ 
                 // 240112, fix for incorrect counting of Leisure and Offices
                 // Previous version with resource analysis was incorrect - last resource could also be an Upkeep resource like Timber or Petrochemicals
                 // This approach uses IndustrialProcessData and checks Output resource
                 bool isOffice = false;
                 bool isLeisure = false;
-                //string processTxt = ""; // debug
                 if (m_IndustrialProcessDataFromEntity.HasComponent(prefabRef.m_Prefab))
                 {
                     IndustrialProcessData process = m_IndustrialProcessDataFromEntity[prefabRef.m_Prefab];
                     Resource outputRes = process.m_Output.m_Resource;
                     isLeisure = (outputRes & (Resource.Meals | Resource.Entertainment | Resource.Recreation | Resource.Lodging)) != Resource.NoResource;
                     isOffice = (outputRes & (Resource.Software | Resource.Telecom | Resource.Financial | Resource.Media)) != Resource.NoResource;
-                    //processTxt = $"{process.m_Input1.m_Resource}+{process.m_Input2.m_Resource}={process.m_Output.m_Resource}"; // debug
                 }
 
                 // 240113 Count Commuters among Employees
@@ -206,12 +195,6 @@ public partial class WorkplacesInfoLoomUISystem : UISystemBase
                             commuters[employees[k].m_Level]++;
                     }
                 }
-
-                // debug
-                //string resTxt = "";
-                //for (int r = 0; r < resources.Length; r++)
-                //resTxt += resources[r].m_Resource + "|";
-                //Plugin.Log($"[{processTxt}] {resTxt} off {isOffice} lei {isLeisure}");
 
                 // Work with a local variable to avoid CS0206 error
                 WorkplacesAtLevelInfo ProcessLevel(WorkplacesAtLevelInfo info, int workplaces, int employees, int commuters)
