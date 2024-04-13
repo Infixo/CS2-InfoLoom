@@ -1,6 +1,6 @@
 ## Changelog
 
-- v0.9.1
+- v0.9.1 (2024-04-13)
   - Residential Data now calculates totals for buildings and free ratio.
   - Fix for null-refererence-crash in WorkplacesInfoLoomUISystem courtesy of khallmark. Thank you.
 

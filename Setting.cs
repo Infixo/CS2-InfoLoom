@@ -48,7 +48,7 @@ public class LocaleEN : IDictionarySource
     {
         Dictionary<string, string> dict = new Dictionary<string, string>()
         {
-            { m_Setting.GetSettingsLocaleID(), "InfoLoom v0.9" },
+            { m_Setting.GetSettingsLocaleID(), $"InfoLoom {Mod.modAsset.version}" },
             { m_Setting.GetOptionTabLocaleID(Setting.kSection), "Main" },
 
             { m_Setting.GetOptionGroupLocaleID(Setting.kToggleGroup), "Options" },

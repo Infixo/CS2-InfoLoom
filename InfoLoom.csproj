@@ -11,7 +11,7 @@
 		<OutputType>Library</OutputType>
 		<TargetFramework>net472</TargetFramework>
 		<Configurations>Debug;Release</Configurations>
-		<Version>0.9.0</Version>
+		<Version>0.9.1</Version>
 		<LangVersion>11.0</LangVersion>
 		
 		<!--The folder where Game.dll is located. Set it only if the game is not installed in the default location, otherwise keep it empty-->
@@ -65,7 +65,7 @@
 	
 	<ItemGroup>
 		<Reference Include="Gooee">
-			<HintPath>$(PDXModsPath)\77225_5\Gooee.dll</HintPath> 
+			<HintPath>$(PDXModsPath)\77225_8\Gooee.dll</HintPath> 
 			<Private>false</Private>
 		</Reference>
 		<Reference Include="Game">

@@ -21,6 +21,13 @@ Currently:
 * Resources consumption (optional)
 
 Please see GitHub page for **full mod description** and more **details about each window**.
+
+## Technical
+
+* The options are applied only once, during the mod initialization. For new setting to take effect, you need to **restart the game**.
+* The mod does **not** modify savefiles.
+* The mod does **not** modify any game systems.
+* The mod uses **Gooee** framework by **Cities2Modding**. Thank you for creating it and helping with the integration.
 	</LongDescription>
 	<!--Thumbnail-->
 	<Thumbnail Value="Properties/Thumbnail.png" />
@@ -37,16 +44,14 @@ Please see GitHub page for **full mod description** and more **details about eac
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/infoloom.1658107/" />
 	<!--Version of the mod-->
-	<ModVersion Value="0.9.0" />
+	<ModVersion Value="0.9.1" />
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.1.*" />
 	<!--Dependency for the mod, can be set multiple times-->
 	<Dependency Id="77225" />
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
-	<ChangeLog>
-v0.9.0 (2024-04-04)
-* Mod migrated to PDXMods platform.
-	</ChangeLog>
+	<ChangeLog>- Residential Data now calculates totals for buildings and free ratio.
+- Fix for null-refererence-crash in WorkplacesInfoLoomUISystem courtesy of khallmark. Thank you.</ChangeLog>
 	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon-->
 	<ExternalLink Type="github" Url="https://github.com/Infixo/CS2-InfoLoom" />
 	<ExternalLink Type="discord" Url="https://discord.com/channels/1169011184557637825/1198627819475976263" />

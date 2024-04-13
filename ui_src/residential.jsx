@@ -49,7 +49,7 @@ const DataDivider = () => {
 const SingleValue = ({ value, flag, width, small }) => {
 	const rowClass = ( small ? "row_S2v small_ExK" : "row_S2v");
 	const centerStyle = {
-		width: width === undefined ? '20%' : width,
+		width: width === undefined ? '16%' : width,
 		justifyContent: 'center',
 	};
 	return (
@@ -74,48 +74,59 @@ const BuildingDemandSection = ({ data }) => {
 	const demandL = Math.floor((1 - freeL / needL) * 100);
 	const demandM = Math.floor((1 - freeM / needM) * 100);
 	const demandH = Math.floor((1 - freeH / needH) * 100);
+	// calculate totals and free ratio
+	const totalRes = data[0] + data[1] + data[2];
+	const totalOcc = data[3] + data[4] + data[5];
+	const totalFree = totalRes - totalOcc;
+	const freeRatio = (totalRes > 0 ? Math.round(1000*totalFree/totalRes)/10 : 0);
 	return (
 	<div style={{boxSizing: 'border-box', border: '1px solid gray'}}>
 		<div class="labels_L7Q row_S2v">
-			<div class="row_S2v" style={{width: '40%'}}></div>
+			<div class="row_S2v" style={{width: '36%'}}></div>
 			<SingleValue value="LOW" />
 			<SingleValue value="MEDIUM" />
 			<SingleValue value="HIGH" />
+			<SingleValue value="TOTAL" />
 		</div>
 		<div class="labels_L7Q row_S2v">
 			<div class="row_S2v" style={{width: '2%'}}></div>
-			<div class="row_S2v" style={{width: '38%'}}>Total properties</div>
+			<div class="row_S2v" style={{width: '34%'}}>Total properties</div>
 			<SingleValue value={data[0]} />
 			<SingleValue value={data[1]} />
 			<SingleValue value={data[2]} />
+			<SingleValue value={totalRes} />
 		</div>
 		<div class="labels_L7Q row_S2v">
 			<div class="row_S2v small_ExK" style={{width: '2%'}}></div>
-			<div class="row_S2v small_ExK" style={{width: '38%'}}>- Occupied properties</div>
+			<div class="row_S2v small_ExK" style={{width: '34%'}}>- Occupied properties</div>
 			<SingleValue value={data[3]} small={true} />
 			<SingleValue value={data[4]} small={true} />
 			<SingleValue value={data[5]} small={true} />
+			<SingleValue value={totalOcc} small={true} />
 		</div>
 		<div class="labels_L7Q row_S2v">
 			<div class="row_S2v" style={{width: '2%'}}></div>
-			<div class="row_S2v" style={{width: '38%'}}>= Empty properties</div>
+			<div class="row_S2v" style={{width: '34%'}}>= Empty properties</div>
 			<SingleValue value={freeL} flag={freeL>needL} />
 			<SingleValue value={freeM} flag={freeM>needM} />
 			<SingleValue value={freeH} flag={freeH>needH} />
+			<SingleValue value={totalFree} />
 		</div>
 		<div class="labels_L7Q row_S2v">
 			<div class="row_S2v small_ExK" style={{width: '2%'}}></div>
-			<div class="row_S2v small_ExK" style={{width: '38%'}}>{"No demand at " + ratio + "%"}</div>
+			<div class="row_S2v small_ExK" style={{width: '34%'}}>{"No demand at " + ratio + "%"}</div>
 			<SingleValue value={needL} small={true} />
 			<SingleValue value={needM} small={true} />
 			<SingleValue value={needH} small={true} />
+			<div class="row_S2v" style={{width: '16%'}}></div>
 		</div>
 		<div class="labels_L7Q row_S2v">
 			<div class="row_S2v" style={{width: '2%'}}></div>
-			<div class="row_S2v" style={{width: '38%'}}>BUILDING DEMAND</div>
+			<div class="row_S2v" style={{width: '34%'}}>BUILDING DEMAND</div>
 			<SingleValue value={demandL} flag={demandL<0} />
 			<SingleValue value={demandM} flag={demandM<0} />
 			<SingleValue value={demandH} flag={demandH<0} />
+			<SingleValue value={`${freeRatio}%`} />
 		</div>
 	    <div class="space_uKL" style={{height: '3rem'}}></div>
 	</div>
@@ -140,7 +151,7 @@ const $Residential = ({ react }) => {
 	
 	const homelessThreshold = Math.round(residentialData[12] * residentialData[13] / 1000);
 
-	return <$Panel react={react} title="Residential Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.22, height: window.innerHeight * 0.26 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
+	return <$Panel react={react} title="Residential Data" onClose={onClose} initialSize={{ width: window.innerWidth * 0.25, height: window.innerHeight * 0.26 }} initialPosition={{ top: window.innerHeight * 0.05, left: window.innerWidth * 0.005 }}>	
 		{residentialData.length === 0 ? (
 			<p>Waiting...</p>
 		) : (
